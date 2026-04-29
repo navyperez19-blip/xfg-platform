@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter, useParams } from 'next/navigation'
 import Notes from '../../components/Notes'
+import { getCurrentUser, canMoveStage, canLockAgent } from '../../lib/auth'
 
 const STAGES = [
   { key: 'new_lead', label: 'New Lead' },
@@ -25,6 +26,7 @@ export default function AgentDetailPage() {
   const [saving, setSaving] = useState(false)
   const [checklistItems, setChecklistItems] = useState<any[]>([])
   const [checklistProgress, setChecklistProgress] = useState<any[]>([])
+  const [currentUser, setCurrentUser] = useState<any>(null)
 
   useEffect(() => {
     const getAgent = async () => {
@@ -38,6 +40,8 @@ export default function AgentDetailPage() {
       if (data) {
         setAgent(data)
         loadChecklist(data.current_stage, params.id as string)
+        const user = await getCurrentUser()
+        setCurrentUser(user)
       }
       setLoading(false)
     }
@@ -167,13 +171,13 @@ export default function AgentDetailPage() {
             ))}
           </div>
           <div className="flex gap-3">
-            <button onClick={() => moveStage('backward')} disabled={saving || currentStageIndex === 0} className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-xl text-sm transition disabled:opacity-30">
+            <button onClick={() => moveStage('backward')} disabled={saving || currentStageIndex === 0 || !canMoveStage(currentUser?.role || '', agent.current_stage)} className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-xl text-sm transition disabled:opacity-30">
               Move Back
             </button>
-            <button onClick={() => moveStage('forward')} disabled={saving || currentStageIndex === STAGES.length - 1 || agent.is_locked} className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-sm transition disabled:opacity-30">
+            <button onClick={() => moveStage('forward')} disabled={saving || currentStageIndex === STAGES.length - 1 || agent.is_locked || !canMoveStage(currentUser?.role || '', agent.current_stage)} className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-sm transition disabled:opacity-30">
               Move Forward
             </button>
-            <button onClick={toggleLock} disabled={saving} className={`px-4 py-2 rounded-xl text-sm transition ${agent.is_locked ? 'bg-yellow-700 hover:bg-yellow-600' : 'bg-gray-700 hover:bg-gray-600'}`}>
+            <button onClick={toggleLock} disabled={saving || !canLockAgent(currentUser?.role || '')} className={`px-4 py-2 rounded-xl text-sm transition ${agent.is_locked ? 'bg-yellow-700 hover:bg-yellow-600' : 'bg-gray-700 hover:bg-gray-600'}`}>
               {agent.is_locked ? 'Unlock' : 'Lock'}
             </button>
           </div>
