@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter, useParams } from 'next/navigation'
+import Notes from '../../components/Notes'
 
 const STAGES = [
   { key: 'new_lead', label: 'New Lead' },
@@ -208,6 +209,10 @@ export default function AgentDetailPage() {
               })}
             </div>
           )}
+        </div>
+
+        <div className="bg-gray-900 rounded-2xl p-6 mb-6">
+          <Notes agentId={agent.id} />
         </div>
 
         <div className="bg-gray-900 rounded-2xl p-6">
