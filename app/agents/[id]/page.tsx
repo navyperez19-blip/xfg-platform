@@ -228,6 +228,76 @@ export default function AgentDetailPage() {
           </div>
         )}
 
+        {['executive', 'superadmin'].includes(currentUser?.role || '') && (
+          <div className="bg-gray-900 rounded-2xl p-6 mb-6 border border-red-900">
+            <h2 className="text-lg font-semibold mb-2 text-red-400">Executive Override</h2>
+            <p className="text-gray-400 text-xs mb-4">Force move this agent to any stage. A reason is required and permanently logged.</p>
+            <div className="flex gap-3 flex-wrap">
+              <select
+                id="override-stage"
+                className="bg-gray-800 text-white px-4 py-2 rounded-xl border border-gray-700 focus:outline-none focus:border-red-500 text-sm flex-1"
+              >
+                <option value="">Select target stage...</option>
+                <option value="new_lead">New Lead</option>
+                <option value="contacted">Contacted</option>
+                <option value="licensing">Licensing</option>
+                <option value="onboarding">Onboarding</option>
+                <option value="contracting">Contracting</option>
+                <option value="system_setup">System Setup</option>
+                <option value="training">Training</option>
+                <option value="activation">Activation</option>
+                <option value="active">Active</option>
+              </select>
+            </div>
+            <input
+              id="override-reason"
+              type="text"
+              placeholder="Reason for override (required)..."
+              className="w-full mt-3 bg-gray-800 text-white px-4 py-2 rounded-xl border border-gray-700 focus:outline-none focus:border-red-500 text-sm"
+            />
+            <button
+              onClick={async () => {
+                const stageEl = document.getElementById('override-stage') as HTMLSelectElement
+                const reasonEl = document.getElementById('override-reason') as HTMLInputElement
+                const newStage = stageEl.value
+                const reason = reasonEl.value.trim()
+                if (!newStage) { alert('Please select a target stage.'); return }
+                if (!reason) { alert('A reason is required for overrides.'); return }
+                const { error } = await supabase
+                  .from('agents')
+                  .update({ current_stage: newStage, updated_at: new Date().toISOString() })
+                  .eq('id', agent.id)
+                if (!error) {
+                  await supabase.from('overrides').insert({
+                    agent_id: agent.id,
+                    performed_by: currentUser.id,
+                    override_type: 'stage_skip',
+                    previous_value: agent.current_stage,
+                    new_value: newStage,
+                    reason: reason
+                  })
+                  await supabase.from('stage_history').insert({
+                    agent_id: agent.id,
+                    from_stage: agent.current_stage,
+                    to_stage: newStage,
+                    changed_by: currentUser.id,
+                    is_override: true,
+                    override_reason: reason
+                  })
+                  setAgent({ ...agent, current_stage: newStage })
+                  loadChecklist(newStage, agent.id)
+                  stageEl.value = ''
+                  reasonEl.value = ''
+                  alert('Override applied and logged.')
+                }
+              }}
+              className="w-full mt-3 bg-red-700 hover:bg-red-600 text-white font-semibold py-2 rounded-xl text-sm transition"
+            >
+              Apply Override
+            </button>
+          </div>
+        )}
+
         <div className="bg-gray-900 rounded-2xl p-6 mb-6">
           <h2 className="text-lg font-semibold mb-4">Stage Progress</h2>
           <div className="flex flex-wrap gap-2 mb-6">
