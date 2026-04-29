@@ -27,6 +27,7 @@ export default function AgentDetailPage() {
   const [checklistItems, setChecklistItems] = useState<any[]>([])
   const [checklistProgress, setChecklistProgress] = useState<any[]>([])
   const [currentUser, setCurrentUser] = useState<any>(null)
+  const [stageHistory, setStageHistory] = useState<any[]>([])
 
   useEffect(() => {
     const getAgent = async () => {
@@ -42,6 +43,7 @@ export default function AgentDetailPage() {
         loadChecklist(data.current_stage, params.id as string)
         const user = await getCurrentUser()
         setCurrentUser(user)
+        console.log('Current user role:', user?.role)
       }
       setLoading(false)
     }
@@ -60,6 +62,13 @@ export default function AgentDetailPage() {
       .eq('agent_id', agentId)
     setChecklistItems(items || [])
     setChecklistProgress(progress || [])
+
+    const { data: history } = await supabase
+      .from('stage_history')
+      .select('*')
+      .eq('agent_id', agentId)
+      .order('created_at', { ascending: false })
+    setStageHistory(history || [])
   }
 
   const getStatus = (itemId: string) => {
@@ -217,6 +226,27 @@ export default function AgentDetailPage() {
 
         <div className="bg-gray-900 rounded-2xl p-6 mb-6">
           <Notes agentId={agent.id} />
+        </div>
+
+        <div className="bg-gray-900 rounded-2xl p-6 mb-6">
+          <h2 className="text-lg font-semibold mb-4">Stage History</h2>
+          {stageHistory.length === 0 ? (
+            <p className="text-gray-400 text-sm">No stage changes yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {stageHistory.map((h) => (
+                <div key={h.id} className="flex items-center justify-between bg-gray-800 px-4 py-3 rounded-xl">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-gray-400">{h.from_stage?.replace('_', ' ')}</span>
+                    <span className="text-gray-600">→</span>
+                    <span className="text-white font-medium">{h.to_stage?.replace('_', ' ')}</span>
+                    {h.is_override && <span className="text-xs bg-red-900 text-red-300 px-2 py-0.5 rounded-full">Override</span>}
+                  </div>
+                  <span className="text-xs text-gray-500">{new Date(h.created_at).toLocaleDateString()}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="bg-gray-900 rounded-2xl p-6">
