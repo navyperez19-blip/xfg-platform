@@ -20,20 +20,35 @@ export default function PipelinePage() {
   const router = useRouter()
   const [agents, setAgents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [filterState, setFilterState] = useState('')
+  const [filterModel, setFilterModel] = useState('')
 
   useEffect(() => {
     const getAgents = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-      const { data } = await supabase.from('agents').select('*')
+      const { data } = await supabase.from('agents').select('*').order('created_at', { ascending: false })
       setAgents(data || [])
       setLoading(false)
     }
     getAgents()
   }, [router])
 
+  const filteredAgents = agents.filter(a => {
+    const matchesSearch = search === '' ||
+      a.full_name.toLowerCase().includes(search.toLowerCase()) ||
+      a.email.toLowerCase().includes(search.toLowerCase()) ||
+      a.xfg_id.toLowerCase().includes(search.toLowerCase())
+    const matchesState = filterState === '' || a.state === filterState
+    const matchesModel = filterModel === '' || a.agent_model === filterModel
+    return matchesSearch && matchesState && matchesModel
+  })
+
   const agentsByStage = (stageKey: string) =>
-    agents.filter((a) => a.current_stage === stageKey)
+    filteredAgents.filter((a) => a.current_stage === stageKey)
+
+  const uniqueStates = [...new Set(agents.map(a => a.state))].sort()
 
   if (loading) return (
     <main className="min-h-screen bg-gray-950 flex items-center justify-center">
@@ -43,7 +58,7 @@ export default function PipelinePage() {
 
   return (
     <main className="min-h-screen bg-gray-950 text-white p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Agent Pipeline</h1>
         <div className="flex gap-3">
           <button
@@ -59,6 +74,46 @@ export default function PipelinePage() {
             + New Agent
           </button>
         </div>
+      </div>
+
+      <div className="flex gap-3 mb-6 flex-wrap">
+        <input
+          type="text"
+          placeholder="Search by name, email, or XFG ID..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="bg-gray-800 text-white px-4 py-2 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500 text-sm w-72"
+        />
+        <select
+          value={filterState}
+          onChange={(e) => setFilterState(e.target.value)}
+          className="bg-gray-800 text-white px-4 py-2 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500 text-sm"
+        >
+          <option value="">All States</option>
+          {uniqueStates.map(s => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+        <select
+          value={filterModel}
+          onChange={(e) => setFilterModel(e.target.value)}
+          className="bg-gray-800 text-white px-4 py-2 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500 text-sm"
+        >
+          <option value="">All Models</option>
+          <option value="supported">Supported</option>
+          <option value="independent">Independent</option>
+        </select>
+        {(search || filterState || filterModel) && (
+          <button
+            onClick={() => { setSearch(''); setFilterState(''); setFilterModel('') }}
+            className="bg-red-900 hover:bg-red-800 px-4 py-2 rounded-xl text-sm transition text-red-300"
+          >
+            Clear Filters
+          </button>
+        )}
+        <span className="text-gray-400 text-sm self-center">
+          {filteredAgents.length} of {agents.length} agents
+        </span>
       </div>
 
       <div className="flex gap-4 overflow-x-auto pb-4">
@@ -80,6 +135,11 @@ export default function PipelinePage() {
                   <p className="font-semibold text-sm">{agent.full_name}</p>
                   <p className="text-xs text-gray-400">{agent.xfg_id}</p>
                   <p className="text-xs text-gray-500 mt-1">{agent.state}</p>
+                  {agent.agent_model && (
+                    <span className={`text-xs mt-1 block ${agent.agent_model === 'supported' ? 'text-purple-400' : 'text-teal-400'}`}>
+                      {agent.agent_model}
+                    </span>
+                  )}
                   {agent.is_locked && (
                     <span className="text-xs text-yellow-400 mt-1 block">🔒 Locked</span>
                   )}
