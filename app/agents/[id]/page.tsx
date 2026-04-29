@@ -250,12 +250,45 @@ export default function AgentDetailPage() {
         </div>
 
         <div className="bg-gray-900 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold mb-2">Agent Details</h2>
-          <div className="space-y-2 text-sm text-gray-400">
-            <p>Created: {new Date(agent.created_at).toLocaleDateString()}</p>
-            <p>Last Updated: {new Date(agent.updated_at).toLocaleDateString()}</p>
-            <p>Model: {agent.agent_model || 'Not assigned'}</p>
-            <p>Locked: {agent.is_locked ? 'Yes' : 'No'}</p>
+          <h2 className="text-lg font-semibold mb-4">Agent Details</h2>
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Created</span>
+              <span className="text-white">{new Date(agent.created_at).toLocaleDateString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Last Updated</span>
+              <span className="text-white">{new Date(agent.updated_at).toLocaleDateString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Locked</span>
+              <span className={agent.is_locked ? 'text-yellow-400' : 'text-green-400'}>{agent.is_locked ? 'Yes' : 'No'}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-400">Agent Model</span>
+              {['executive', 'superadmin'].includes(currentUser?.role || '') ? (
+                <select
+                  value={agent.agent_model || ''}
+                  onChange={async (e) => {
+                    const newModel = e.target.value
+                    const { error } = await supabase
+                      .from('agents')
+                      .update({ agent_model: newModel || null, updated_at: new Date().toISOString() })
+                      .eq('id', agent.id)
+                    if (!error) setAgent({ ...agent, agent_model: newModel })
+                  }}
+                  className="bg-gray-800 text-white px-3 py-1 rounded-lg border border-gray-700 focus:outline-none focus:border-blue-500 text-sm"
+                >
+                  <option value="">Not assigned</option>
+                  <option value="supported">Supported</option>
+                  <option value="independent">Independent</option>
+                </select>
+              ) : (
+                <span className={agent.agent_model ? 'text-blue-400 font-semibold' : 'text-gray-500'}>
+                  {agent.agent_model || 'Not assigned'}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
