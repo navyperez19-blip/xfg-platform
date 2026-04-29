@@ -80,6 +80,14 @@ export default function DashboardPage() {
           >
             View Pipeline
           </button>
+          {['executive', 'superadmin'].includes(profile.role) && (
+            <button
+              onClick={() => router.push('/analytics')}
+              className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-xl text-sm transition"
+            >
+              Analytics
+            </button>
+          )}
           {['finley', 'executive', 'superadmin'].includes(profile.role) && (
             <button
               onClick={() => router.push('/agents/new')}
