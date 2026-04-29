@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { getCurrentUser } from '../lib/auth'
 import { useRouter } from 'next/navigation'
+import NotificationBell from '../components/NotificationBell'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -65,12 +66,15 @@ export default function DashboardPage() {
               </span>
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-xl transition text-sm"
-          >
-            Sign Out
-          </button>
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+            <button
+              onClick={handleLogout}
+              className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-xl transition text-sm"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
 
         <div className="flex gap-3 mb-6">
