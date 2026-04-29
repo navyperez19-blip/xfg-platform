@@ -28,6 +28,7 @@ export default function AgentDetailPage() {
   const [checklistProgress, setChecklistProgress] = useState<any[]>([])
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [stageHistory, setStageHistory] = useState<any[]>([])
+  const [stateResources, setStateResources] = useState<any>(null)
 
   useEffect(() => {
     const getAgent = async () => {
@@ -40,6 +41,17 @@ export default function AgentDetailPage() {
         .single()
       if (data) {
         setAgent(data)
+        const { data: examLink } = await supabase
+          .from('state_exam_links')
+          .select('*')
+          .eq('state_code', data.state)
+          .single()
+        const { data: bgLink } = await supabase
+          .from('state_background_links')
+          .select('*')
+          .eq('state_code', data.state)
+          .single()
+        setStateResources({ exam: examLink, background: bgLink })
         loadChecklist(data.current_stage, params.id as string)
         const user = await getCurrentUser()
         setCurrentUser(user)
@@ -165,6 +177,56 @@ export default function AgentDetailPage() {
             </div>
           </div>
         </div>
+
+        {agent.current_stage === 'licensing' && stateResources && (
+          <div className="bg-gray-900 rounded-2xl p-6 mb-6">
+            <h2 className="text-lg font-semibold mb-4">State Resources — {agent.state}</h2>
+            <div className="space-y-3">
+              {stateResources.exam && (
+                <a
+                  href={stateResources.exam.exam_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between bg-blue-900 bg-opacity-40 hover:bg-opacity-60 p-4 rounded-xl transition"
+                >
+                  <div>
+                    <p className="text-blue-300 font-semibold text-sm">State Licensing Exam</p>
+                    <p className="text-gray-400 text-xs mt-0.5">Provider: {stateResources.exam.exam_provider}</p>
+                  </div>
+                  <span className="text-blue-400 text-sm">Book Now →</span>
+                </a>
+              )}
+              {stateResources.background && (
+                <a
+                  href={stateResources.background.background_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between bg-purple-900 bg-opacity-40 hover:bg-opacity-60 p-4 rounded-xl transition"
+                >
+                  <div>
+                    <p className="text-purple-300 font-semibold text-sm">Background Check</p>
+                    <p className="text-gray-400 text-xs mt-0.5">Provider: {stateResources.background.provider}</p>
+                  </div>
+                  <span className="text-purple-400 text-sm">Start Now →</span>
+                </a>
+              )}
+              {stateResources.background?.fingerprint_url && (
+                <a
+                  href={stateResources.background.fingerprint_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between bg-teal-900 bg-opacity-40 hover:bg-opacity-60 p-4 rounded-xl transition"
+                >
+                  <div>
+                    <p className="text-teal-300 font-semibold text-sm">Fingerprinting</p>
+                    <p className="text-gray-400 text-xs mt-0.5">Provider: {stateResources.background.provider}</p>
+                  </div>
+                  <span className="text-teal-400 text-sm">Schedule →</span>
+                </a>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="bg-gray-900 rounded-2xl p-6 mb-6">
           <h2 className="text-lg font-semibold mb-4">Stage Progress</h2>
