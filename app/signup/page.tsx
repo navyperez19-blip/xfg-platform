@@ -28,7 +28,7 @@ export default function SignupPage() {
     confirm_password: '',
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault()
     setLoading(true)
     setError('')
@@ -51,7 +51,7 @@ export default function SignupPage() {
       return
     }
 
-    const full_name = form.first_name + ' ' + form.last_name
+    const full_name = form.first_name.trim() + ' ' + form.last_name.trim()
 
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: form.email,
@@ -64,41 +64,58 @@ export default function SignupPage() {
       return
     }
 
-    if (authData.user) {
-      await supabase.from('users').insert({
-        id: authData.user.id,
-        email: form.email,
-        full_name,
-        role: 'agent'
-      })
-
-      const { data: counterData } = await supabase
-        .from('agents')
-        .select('xfg_id')
-        .order('created_at', { ascending: false })
-        .limit(1)
-
-      let nextNumber = 1
-      if (counterData && counterData.length > 0) {
-        const lastId = counterData[0].xfg_id
-        const lastNumber = parseInt(lastId.replace('XFG-', ''))
-        nextNumber = lastNumber + 1
-      }
-      const xfg_id = 'XFG-' + String(nextNumber).padStart(6, '0')
-
-      await supabase.from('agents').insert({
-        user_id: authData.user.id,
-        xfg_id,
-        full_name,
-        email: form.email,
-        phone: form.phone,
-        state: form.state,
-        current_stage: 'new_lead',
-        is_locked: false,
-      })
-
-      router.push('/agent-portal')
+    const userId = authData.user?.id
+    if (!userId) {
+      setError('Account creation failed. Please try again.')
+      setLoading(false)
+      return
     }
+
+    const { error: userError } = await supabase.from('users').insert({
+      id: userId,
+      email: form.email,
+      full_name,
+      role: 'agent'
+    })
+
+    if (userError) {
+      setError('Profile creation failed: ' + userError.message)
+      setLoading(false)
+      return
+    }
+
+    const { data: counterData } = await supabase
+      .from('agents')
+      .select('xfg_id')
+      .order('created_at', { ascending: false })
+      .limit(1)
+
+    let nextNumber = 1
+    if (counterData && counterData.length > 0) {
+      const lastId = counterData[0].xfg_id
+      const lastNumber = parseInt(lastId.replace('XFG-', ''))
+      nextNumber = lastNumber + 1
+    }
+    const xfg_id = 'XFG-' + String(nextNumber).padStart(6, '0')
+
+    const { error: agentError } = await supabase.from('agents').insert({
+      user_id: userId,
+      xfg_id,
+      full_name,
+      email: form.email,
+      phone: form.phone,
+      state: form.state,
+      current_stage: 'new_lead',
+      is_locked: false,
+    })
+
+    if (agentError) {
+      setError('Agent profile creation failed: ' + agentError.message)
+      setLoading(false)
+      return
+    }
+
+    router.push('/agent-portal')
     setLoading(false)
   }
 
@@ -115,122 +132,50 @@ export default function SignupPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-gray-400 text-sm mb-1 block">First Name</label>
-                <input
-                  type="text"
-                  value={form.first_name}
-                  onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-                  required
-                  className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500"
-                  placeholder="John"
-                />
+                <input type="text" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} required className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="John" />
               </div>
               <div>
                 <label className="text-gray-400 text-sm mb-1 block">Last Name</label>
-                <input
-                  type="text"
-                  value={form.last_name}
-                  onChange={(e) => setForm({ ...form, last_name: e.target.value })}
-                  required
-                  className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500"
-                  placeholder="Smith"
-                />
+                <input type="text" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} required className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="Smith" />
               </div>
             </div>
-
             <div>
               <label className="text-gray-400 text-sm mb-1 block">Email</label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                required
-                className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500"
-                placeholder="john@example.com"
-              />
+              <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="john@example.com" />
             </div>
-
             <div>
               <label className="text-gray-400 text-sm mb-1 block">Phone Number</label>
-              <input
-                type="tel"
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                required
-                className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500"
-                placeholder="555-555-5555"
-              />
+              <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="555-555-5555" />
             </div>
-
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-gray-400 text-sm mb-1 block">Age</label>
-                <input
-                  type="number"
-                  value={form.age}
-                  onChange={(e) => setForm({ ...form, age: e.target.value })}
-                  required
-                  min="18"
-                  max="100"
-                  className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500"
-                  placeholder="25"
-                />
+                <input type="number" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} required min="18" max="100" className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="25" />
               </div>
               <div>
                 <label className="text-gray-400 text-sm mb-1 block">State</label>
-                <select
-                  value={form.state}
-                  onChange={(e) => setForm({ ...form, state: e.target.value })}
-                  required
-                  className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500"
-                >
+                <select value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} required className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500">
                   <option value="">State...</option>
-                  {US_STATES.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
+                  {US_STATES.map((s) => (<option key={s} value={s}>{s}</option>))}
                 </select>
               </div>
             </div>
-
             <div>
               <label className="text-gray-400 text-sm mb-1 block">Password</label>
-              <input
-                type="password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                required
-                className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500"
-                placeholder="Min. 8 characters"
-              />
+              <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="Min. 8 characters" />
             </div>
-
             <div>
               <label className="text-gray-400 text-sm mb-1 block">Confirm Password</label>
-              <input
-                type="password"
-                value={form.confirm_password}
-                onChange={(e) => setForm({ ...form, confirm_password: e.target.value })}
-                required
-                className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500"
-                placeholder="Re-enter password"
-              />
+              <input type="password" value={form.confirm_password} onChange={(e) => setForm({ ...form, confirm_password: e.target.value })} required className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="Re-enter password" />
             </div>
-
             {error && <p className="text-red-400 text-sm">{error}</p>}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-50"
-            >
+            <button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-50">
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
-
           <p className="text-center text-gray-400 text-sm mt-4">
             Already have an account?{' '}
-            <Link href="/login" className="text-blue-400 hover:text-blue-300">
-              Sign in
-            </Link>
+            <Link href="/login" className="text-blue-400 hover:text-blue-300">Sign in</Link>
           </p>
         </div>
       </div>
