@@ -20,7 +20,12 @@ export default function LoginPage() {
       setError(error.message)
       setLoading(false)
     } else {
-      router.push('/dashboard')
+      const { data: profile } = await supabase.from('users').select('role').eq('id', (await supabase.auth.getUser()).data.user?.id || '').single()
+      if (profile?.role === 'agent') {
+        router.push('/agent-portal')
+      } else {
+        router.push('/dashboard')
+      }
     }
   }
 
