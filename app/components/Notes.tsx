@@ -76,7 +76,19 @@ export default function Notes({ agentId }: NotesProps) {
         <div className="space-y-3">
           {notes.map(note => (
             <div key={note.id} className="bg-gray-800 p-3 rounded-xl">
-              <p className="text-sm text-white">{note.content}</p>
+              <div className="flex justify-between items-start gap-2">
+                <p className="text-sm text-white flex-1">{note.content}</p>
+                <button
+                  onClick={async () => {
+                    if (!confirm('Delete this note?')) return
+                    await supabase.from('notes').delete().eq('id', note.id)
+                    setNotes(prev => prev.filter(n => n.id !== note.id))
+                  }}
+                  className="text-gray-600 hover:text-red-400 text-xs transition flex-shrink-0"
+                >
+                  ✕
+                </button>
+              </div>
               <p className="text-xs text-gray-500 mt-1">
                 {note.users?.full_name || 'Admin'} · {new Date(note.created_at).toLocaleDateString()}
               </p>

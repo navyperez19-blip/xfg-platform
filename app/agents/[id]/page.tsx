@@ -161,13 +161,10 @@ export default function AgentDetailPage() {
         </button>
 
         <div className="bg-gray-900 rounded-2xl p-6 mb-6">
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start mb-4">
             <div>
               <h1 className="text-2xl font-bold">{agent.full_name}</h1>
               <p className="text-blue-400 font-mono mt-1">{agent.xfg_id}</p>
-              <p className="text-gray-400 text-sm mt-1">{agent.email}</p>
-              {agent.phone && <p className="text-gray-400 text-sm">{agent.phone}</p>}
-              <p className="text-gray-400 text-sm">State: {agent.state}</p>
             </div>
             <div className="text-right">
               <span className="bg-blue-900 text-blue-200 px-3 py-1 rounded-full text-sm font-semibold">
@@ -176,6 +173,72 @@ export default function AgentDetailPage() {
               {agent.is_locked && <p className="text-yellow-400 text-sm mt-2">Locked</p>}
             </div>
           </div>
+          {['executive', 'superadmin', 'finley'].includes(currentUser?.role || '') && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-gray-400 text-xs mb-1 block">Full Name</label>
+                  <input
+                    type="text"
+                    defaultValue={agent.full_name}
+                    onBlur={async (e) => {
+                      if (e.target.value !== agent.full_name) {
+                        await supabase.from('agents').update({ full_name: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                        setAgent({ ...agent, full_name: e.target.value })
+                      }
+                    }}
+                    className="w-full bg-gray-800 text-white px-3 py-2 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-400 text-xs mb-1 block">Phone</label>
+                  <input
+                    type="tel"
+                    defaultValue={agent.phone || ''}
+                    onBlur={async (e) => {
+                      if (e.target.value !== agent.phone) {
+                        await supabase.from('agents').update({ phone: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                        setAgent({ ...agent, phone: e.target.value })
+                      }
+                    }}
+                    className="w-full bg-gray-800 text-white px-3 py-2 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500 text-sm"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-gray-400 text-xs mb-1 block">Email</label>
+                  <input
+                    type="email"
+                    defaultValue={agent.email}
+                    onBlur={async (e) => {
+                      if (e.target.value !== agent.email) {
+                        await supabase.from('agents').update({ email: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                        setAgent({ ...agent, email: e.target.value })
+                      }
+                    }}
+                    className="w-full bg-gray-800 text-white px-3 py-2 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-400 text-xs mb-1 block">State</label>
+                  <select
+                    defaultValue={agent.state}
+                    onChange={async (e) => {
+                      await supabase.from('agents').update({ state: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                      setAgent({ ...agent, state: e.target.value })
+                    }}
+                    className="w-full bg-gray-800 text-white px-3 py-2 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500 text-sm"
+                  >
+                    {['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'].map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <p className="text-gray-600 text-xs">Changes save automatically when you click out of a field.</p>
+            </div>
+          )}
         </div>
 
         {agent.current_stage === 'licensing' && stateResources && (
