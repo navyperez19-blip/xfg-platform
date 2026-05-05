@@ -259,6 +259,18 @@ export default function AgentDetailPage() {
                   <span className="text-blue-400 text-sm">Book Now →</span>
                 </a>
               )}
+              <a
+                href="https://www.xcelsolutions.com/?utm_campaign=WS%20-%20National%20-%20Brand&utm_content=Brand&utm_source=google&utm_medium=g&utm_term=xcel%20solutions&utm_id=19187571241&matchtype=e&network=g&device=m&gad_source=1&gad_campaignid=19187571241&gbraid=0AAAAACtEPw98wx-TExb3HTBj-R65yeHBx&gclid=Cj0KCQjwoP_FBhDFARIsANPG24OM9RqW_MI_ankj6xHTBMcE8WhHzsrWkpBGq46gXlwDCf9fPlVxXnwaAjjNEALw_wcB"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between bg-indigo-900 bg-opacity-40 hover:bg-opacity-60 p-4 rounded-xl transition"
+              >
+                <div>
+                  <p className="text-indigo-300 font-semibold text-sm">Life Insurance Pre-Licensing Course</p>
+                  <p className="text-gray-400 text-xs mt-0.5">Xcel Solutions · Partner code: <span className="text-indigo-300 font-bold">karmakore</span></p>
+                </div>
+                <span className="text-indigo-400 text-sm">Start Course →</span>
+              </a>
               {stateResources.background && (
                 <a
                   href={stateResources.background.background_url}
