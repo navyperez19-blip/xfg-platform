@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: { preventDefault: () => void }) => {
     e.preventDefault()
     setLoading(true)
     setError('')
@@ -42,6 +42,9 @@ export default function LoginPage() {
           <div>
             <label className="text-gray-400 text-sm mb-1 block">Password</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="••••••••" />
+          </div>
+          <div className="text-right">
+            <a href="/forgot-password" className="text-blue-400 hover:text-blue-300 text-sm">Forgot password?</a>
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-50">
