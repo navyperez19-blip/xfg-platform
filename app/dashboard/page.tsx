@@ -77,6 +77,7 @@ export default function DashboardPage() {
           </div>
           <div style={S.headerRight}>
             <NotificationBell />
+            <button onClick={() => router.push('/change-password')} style={{ ...S.signout, marginRight: '0.5rem' }}>Change Password</button>
             <button onClick={handleLogout} style={S.signout}>Sign Out</button>
           </div>
         </div>
@@ -89,6 +90,7 @@ export default function DashboardPage() {
           {['executive', 'superadmin'].includes(profile.role) && (
             <button onClick={() => router.push('/analytics')} style={S.navBtn}>Analytics</button>
           )}
+          <button onClick={() => router.push('/search')} style={S.navBtn}>Search Agents</button>
         </div>
 
         <div style={S.statsGrid}>

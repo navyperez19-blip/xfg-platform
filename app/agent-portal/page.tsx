@@ -114,9 +114,14 @@ export default function AgentPortalPage() {
             <h1 style={{ color: '#F5F2ED', fontSize: '1.5rem', fontWeight: '400', marginBottom: '0.2rem' }}>My Portal</h1>
             <p style={{ color: '#9A9890', fontSize: '0.85rem' }}>Welcome, {agent.full_name}</p>
           </div>
-          <button onClick={handleLogout} style={{ background: 'transparent', border: '1px solid #2E2C29', color: '#9A9890', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }}>
-            Sign Out
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button onClick={() => router.push('/change-password')} style={{ background: 'transparent', border: '1px solid #2E2C29', color: '#9A9890', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }}>
+              Change Password
+            </button>
+            <button onClick={handleLogout} style={{ background: 'transparent', border: '1px solid #2E2C29', color: '#9A9890', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }}>
+              Sign Out
+            </button>
+          </div>
         </div>
 
         <div style={card}>
