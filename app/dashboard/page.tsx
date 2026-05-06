@@ -6,6 +6,28 @@ import { getCurrentUser } from '../lib/auth'
 import { useRouter } from 'next/navigation'
 import NotificationBell from '../components/NotificationBell'
 
+const S = {
+  page: { minHeight: '100vh', background: '#0F0F0E', color: '#F5F2ED', fontFamily: 'Georgia, serif' },
+  inner: { maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' },
+  brand: { color: '#C9A96E', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase' as const, marginBottom: '0.5rem' },
+  title: { color: '#F5F2ED', fontSize: '1.6rem', fontWeight: '400', marginBottom: '0.25rem' },
+  subtitle: { color: '#9A9890', fontSize: '0.85rem' },
+  badge: { display: 'inline-block', background: '#242220', border: '1px solid #C9A96E', color: '#C9A96E', fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase' as const, padding: '0.2rem 0.6rem', borderRadius: '4px', marginLeft: '0.5rem' },
+  headerRight: { display: 'flex', alignItems: 'center', gap: '0.75rem' },
+  signout: { background: 'transparent', border: '1px solid #2E2C29', color: '#9A9890', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif' },
+  navRow: { display: 'flex', gap: '0.75rem', marginBottom: '2rem', flexWrap: 'wrap' as const },
+  navBtn: { background: 'transparent', border: '1px solid #2E2C29', color: '#F5F2ED', padding: '0.6rem 1.25rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif', textDecoration: 'none', display: 'inline-block' },
+  navBtnGold: { background: '#C9A96E', border: '1px solid #C9A96E', color: '#0F0F0E', padding: '0.6rem 1.25rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif', textDecoration: 'none', display: 'inline-block', fontWeight: '600' },
+  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' },
+  statCard: { background: '#1A1917', border: '1px solid #2E2C29', borderRadius: '10px', padding: '1.25rem', textAlign: 'center' as const },
+  statLabel: { color: '#9A9890', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginBottom: '0.5rem' },
+  statNum: { fontSize: '2rem', fontWeight: '400' },
+  card: { background: '#1A1917', border: '1px solid #2E2C29', borderRadius: '10px', padding: '1.5rem' },
+  cardTitle: { color: '#C9A96E', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase' as const, marginBottom: '1rem' },
+  permItem: { color: '#9A9890', fontSize: '0.9rem', marginBottom: '0.5rem' },
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const [profile, setProfile] = useState<any>(null)
@@ -33,125 +55,92 @@ export default function DashboardPage() {
     router.push('/login')
   }
 
-  const getRoleBadgeColor = (role: string) => {
-    const colors: Record<string, string> = {
-      superadmin: 'bg-red-900 text-red-300',
-      executive: 'bg-purple-900 text-purple-300',
-      finley: 'bg-blue-900 text-blue-300',
-      joe: 'bg-yellow-900 text-yellow-300',
-      jesse: 'bg-teal-900 text-teal-300',
-      noah: 'bg-green-900 text-green-300',
-      agent: 'bg-gray-800 text-gray-300',
-    }
-    return colors[role] || 'bg-gray-800 text-gray-300'
-  }
-
   if (!profile) return (
-    <main className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <p className="text-white">Loading...</p>
+    <main style={S.page}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <p style={{ color: '#9A9890', fontFamily: 'Georgia, serif' }}>Loading...</p>
+      </div>
     </main>
   )
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white">
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-6">
+    <main style={S.page}>
+      <div style={S.inner}>
+        <div style={S.header}>
           <div>
-            <h1 className="text-2xl font-bold">XFG Platform</h1>
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
-              <p className="text-gray-400 text-sm">Welcome, {profile.full_name}</p>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${getRoleBadgeColor(profile.role)}`}>
-                {profile.role}
-              </span>
-            </div>
+            <p style={S.brand}>XFG · X Financial Group</p>
+            <h1 style={S.title}>
+              {profile.full_name}
+              <span style={S.badge}>{profile.role}</span>
+            </h1>
+            <p style={S.subtitle}>Agent Operations Platform</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div style={S.headerRight}>
             <NotificationBell />
-            <button
-              onClick={handleLogout}
-              className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-xl transition text-sm"
-            >
-              Sign Out
-            </button>
+            <button onClick={handleLogout} style={S.signout}>Sign Out</button>
           </div>
         </div>
 
-        <div className="flex gap-2 mb-6 flex-wrap">
-          <button
-            onClick={() => router.push('/pipeline')}
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-sm transition"
-          >
-            Pipeline
-          </button>
+        <div style={S.navRow}>
+          <button onClick={() => router.push('/pipeline')} style={S.navBtnGold}>Pipeline</button>
           {['finley', 'executive', 'superadmin'].includes(profile.role) && (
-            <button
-              onClick={() => router.push('/agents/new')}
-              className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-xl text-sm transition"
-            >
-              + New Agent
-            </button>
+            <button onClick={() => router.push('/agents/new')} style={S.navBtn}>+ New Agent</button>
           )}
           {['executive', 'superadmin'].includes(profile.role) && (
-            <button
-              onClick={() => router.push('/analytics')}
-              className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-xl text-sm transition"
-            >
-              Analytics
-            </button>
+            <button onClick={() => router.push('/analytics')} style={S.navBtn}>Analytics</button>
           )}
         </div>
 
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-gray-900 p-4 rounded-2xl text-center">
-            <p className="text-gray-400 text-xs mb-1">Total</p>
-            <p className="text-2xl font-bold text-blue-400">{stats.total}</p>
+        <div style={S.statsGrid}>
+          <div style={S.statCard}>
+            <p style={S.statLabel}>Total Agents</p>
+            <p style={{ ...S.statNum, color: '#C9A96E' }}>{stats.total}</p>
           </div>
-          <div className="bg-gray-900 p-4 rounded-2xl text-center">
-            <p className="text-gray-400 text-xs mb-1">Pipeline</p>
-            <p className="text-2xl font-bold text-yellow-400">{stats.pipeline}</p>
+          <div style={S.statCard}>
+            <p style={S.statLabel}>In Pipeline</p>
+            <p style={{ ...S.statNum, color: '#F5F2ED' }}>{stats.pipeline}</p>
           </div>
-          <div className="bg-gray-900 p-4 rounded-2xl text-center">
-            <p className="text-gray-400 text-xs mb-1">Active</p>
-            <p className="text-2xl font-bold text-green-400">{stats.active}</p>
+          <div style={S.statCard}>
+            <p style={S.statLabel}>Active</p>
+            <p style={{ ...S.statNum, color: '#C9A96E' }}>{stats.active}</p>
           </div>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-4">
-          <h2 className="text-base font-semibold mb-3">Your Permissions</h2>
-          <div className="space-y-1 text-sm text-gray-400">
-            {profile.role === 'finley' && (
-              <>
-                <p>✅ Create and manage new agents</p>
-                <p>✅ Track licensing and exam progress</p>
-                <p>✅ Schedule onboarding calls</p>
-              </>
-            )}
-            {profile.role === 'joe' && (
-              <>
-                <p>✅ Verify contracts and agreements</p>
-                <p>✅ Confirm dialer and CRM setup</p>
-              </>
-            )}
-            {profile.role === 'jesse' && (
-              <>
-                <p>✅ Verify all training completions</p>
-                <p>✅ Move agents through training</p>
-              </>
-            )}
-            {profile.role === 'noah' && (
-              <>
-                <p>✅ Conduct activation calls</p>
-                <p>✅ Mark agents as Active</p>
-              </>
-            )}
-            {['executive', 'superadmin'].includes(profile.role) && (
-              <>
-                <p>✅ Full access to all stages</p>
-                <p>✅ Override any stage</p>
-                <p>✅ View all analytics</p>
-              </>
-            )}
-          </div>
+        <div style={S.card}>
+          <p style={S.cardTitle}>Your Access</p>
+          {profile.role === 'finley' && (
+            <>
+              <p style={S.permItem}>· Create and manage new agents</p>
+              <p style={S.permItem}>· Track licensing and exam progress</p>
+              <p style={S.permItem}>· Schedule onboarding calls</p>
+            </>
+          )}
+          {profile.role === 'joe' && (
+            <>
+              <p style={S.permItem}>· Verify contracts and agreements</p>
+              <p style={S.permItem}>· Confirm dialer and CRM setup</p>
+            </>
+          )}
+          {profile.role === 'jesse' && (
+            <>
+              <p style={S.permItem}>· Verify all training completions</p>
+              <p style={S.permItem}>· Move agents through training</p>
+            </>
+          )}
+          {profile.role === 'noah' && (
+            <>
+              <p style={S.permItem}>· Conduct activation calls</p>
+              <p style={S.permItem}>· Mark agents as Active</p>
+            </>
+          )}
+          {['executive', 'superadmin'].includes(profile.role) && (
+            <>
+              <p style={S.permItem}>· Full access to all pipeline stages</p>
+              <p style={S.permItem}>· Override any stage with audit log</p>
+              <p style={S.permItem}>· Assign agent models</p>
+              <p style={S.permItem}>· Executive analytics and reporting</p>
+            </>
+          )}
         </div>
       </div>
     </main>

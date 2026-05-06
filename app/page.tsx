@@ -2,23 +2,37 @@ import Link from 'next/link'
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-950">
-      <div className="bg-gray-900 p-10 rounded-2xl shadow-xl w-full max-w-md text-center">
-        <h1 className="text-3xl font-bold text-white mb-2">XFG Platform</h1>
-        <p className="text-gray-400 mb-8">Agent Onboarding & Activation System</p>
-        <div className="space-y-3">
-          <Link
-            href="/login"
-            className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/signup"
-            className="block w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-xl transition"
-          >
-            Create Account
-          </Link>
+    <main style={{ minHeight: '100vh', background: '#0F0F0E', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+      <div style={{ width: '100%', maxWidth: '440px', textAlign: 'center' }}>
+        <div style={{ marginBottom: '2rem' }}>
+          <p style={{ color: '#C9A96E', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>XFG · X Financial Group</p>
+          <h1 style={{ color: '#F5F2ED', fontSize: '2.2rem', fontFamily: 'Georgia, serif', fontWeight: '400', lineHeight: '1.2', marginBottom: '0.75rem' }}>Agent Platform</h1>
+          <p style={{ color: '#9A9890', fontSize: '0.9rem', fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>Built for producers who refuse to be average.</p>
+        </div>
+
+        <div style={{ background: '#1A1917', border: '1px solid #2E2C29', borderRadius: '12px', padding: '2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <Link href="/login" style={{
+              display: 'block', width: '100%', background: '#C9A96E', color: '#0F0F0E',
+              fontFamily: 'Georgia, serif', fontWeight: '600', fontSize: '0.95rem',
+              padding: '0.875rem', borderRadius: '8px', textDecoration: 'none',
+              letterSpacing: '0.03em', transition: 'background 0.2s'
+            }}>
+              Sign In
+            </Link>
+            <Link href="/signup" style={{
+              display: 'block', width: '100%', background: 'transparent',
+              color: '#F5F2ED', border: '1px solid #2E2C29',
+              fontFamily: 'Georgia, serif', fontSize: '0.95rem',
+              padding: '0.875rem', borderRadius: '8px', textDecoration: 'none',
+              letterSpacing: '0.03em'
+            }}>
+              Create Account
+            </Link>
+          </div>
+          <p style={{ color: '#5C5A56', fontSize: '0.75rem', marginTop: '1.5rem', fontFamily: 'Georgia, serif' }}>
+            All 50 States · Licensed Producers & Applicants
+          </p>
         </div>
       </div>
     </main>

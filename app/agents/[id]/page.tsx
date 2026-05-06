@@ -18,6 +18,13 @@ const STAGES = [
   { key: 'active', label: 'Active' },
 ]
 
+const card = { background: '#1A1917', border: '1px solid #2E2C29', borderRadius: '10px', padding: '1.5rem', marginBottom: '1.25rem' }
+const label = { color: '#9A9890', fontSize: '0.72rem', letterSpacing: '0.08em', textTransform: 'uppercase' as const, display: 'block', marginBottom: '0.35rem', fontFamily: 'Georgia, serif' }
+const input = { width: '100%', background: '#242220', color: '#F5F2ED', border: '1px solid #2E2C29', borderRadius: '6px', padding: '0.5rem 0.75rem', fontSize: '0.85rem', fontFamily: 'Georgia, serif', outline: 'none' }
+const sectionTitle = { color: '#C9A96E', fontSize: '0.72rem', letterSpacing: '0.1em', textTransform: 'uppercase' as const, marginBottom: '1rem', fontFamily: 'Georgia, serif' }
+const ghostBtn = { background: 'transparent', border: '1px solid #2E2C29', color: '#F5F2ED', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }
+const goldBtn = { background: '#C9A96E', border: 'none', color: '#0F0F0E', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif', fontWeight: '600' }
+
 export default function AgentDetailPage() {
   const router = useRouter()
   const params = useParams()
@@ -139,14 +146,14 @@ export default function AgentDetailPage() {
   }
 
   if (loading) return (
-    <main className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <p className="text-white">Loading agent...</p>
+    <main style={{ minHeight: '100vh', background: '#0F0F0E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p style={{ color: '#9A9890', fontFamily: 'Georgia, serif' }}>Loading agent...</p>
     </main>
   )
 
   if (!agent) return (
-    <main className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <p className="text-white">Agent not found.</p>
+    <main style={{ minHeight: '100vh', background: '#0F0F0E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p style={{ color: '#9A9890', fontFamily: 'Georgia, serif' }}>Agent not found.</p>
     </main>
   )
 
@@ -154,183 +161,138 @@ export default function AgentDetailPage() {
   const allComplete = checklistItems.filter(i => i.is_required).every(i => getStatus(i.id) === 'approved')
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white p-8">
-      <div className="max-w-3xl mx-auto">
-        <button onClick={() => router.push('/pipeline')} className="text-gray-400 hover:text-white text-sm mb-6 block transition">
+    <main style={{ minHeight: '100vh', background: '#0F0F0E', color: '#F5F2ED', fontFamily: 'Georgia, serif', padding: '1.5rem' }}>
+      <div style={{ maxWidth: '760px', margin: '0 auto' }}>
+        <button onClick={() => router.push('/pipeline')} style={{ background: 'none', border: 'none', color: '#9A9890', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif', marginBottom: '1.5rem', display: 'block' }}>
           ← Back to Pipeline
         </button>
 
-        <div className="bg-gray-900 rounded-2xl p-6 mb-6">
-          <div className="flex justify-between items-start mb-4">
+        {/* Agent Header */}
+        <div style={card}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
             <div>
-              <h1 className="text-2xl font-bold">{agent.full_name}</h1>
-              <p className="text-blue-400 font-mono mt-1">{agent.xfg_id}</p>
+              <h1 style={{ color: '#F5F2ED', fontSize: '1.5rem', fontWeight: '400', marginBottom: '0.25rem' }}>{agent.full_name}</h1>
+              <p style={{ color: '#C9A96E', fontFamily: 'monospace', fontSize: '0.85rem' }}>{agent.xfg_id}</p>
             </div>
-            <div className="text-right">
-              <span className="bg-blue-900 text-blue-200 px-3 py-1 rounded-full text-sm font-semibold">
+            <div style={{ textAlign: 'right' }}>
+              <span style={{ background: '#242220', border: '1px solid #C9A96E', color: '#C9A96E', fontSize: '0.72rem', letterSpacing: '0.06em', textTransform: 'uppercase', padding: '0.25rem 0.6rem', borderRadius: '4px' }}>
                 {STAGES.find(s => s.key === agent.current_stage)?.label}
               </span>
-              {agent.is_locked && <p className="text-yellow-400 text-sm mt-2">Locked</p>}
+              {agent.is_locked && <p style={{ color: '#C9A96E', fontSize: '0.8rem', marginTop: '0.5rem' }}>🔒 Locked</p>}
             </div>
           </div>
           {['executive', 'superadmin', 'finley'].includes(currentUser?.role || '') && (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+            <div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                 <div>
-                  <label className="text-gray-400 text-xs mb-1 block">Full Name</label>
-                  <input
-                    type="text"
-                    defaultValue={agent.full_name}
-                    onBlur={async (e) => {
-                      if (e.target.value !== agent.full_name) {
-                        await supabase.from('agents').update({ full_name: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                        setAgent({ ...agent, full_name: e.target.value })
-                      }
-                    }}
-                    className="w-full bg-gray-800 text-white px-3 py-2 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500 text-sm"
-                  />
+                  <label style={label}>Full Name</label>
+                  <input type="text" defaultValue={agent.full_name} style={input} onBlur={async (e) => {
+                    if (e.target.value !== agent.full_name) {
+                      await supabase.from('agents').update({ full_name: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                      setAgent({ ...agent, full_name: e.target.value })
+                    }
+                  }} />
                 </div>
                 <div>
-                  <label className="text-gray-400 text-xs mb-1 block">Phone</label>
-                  <input
-                    type="tel"
-                    defaultValue={agent.phone || ''}
-                    onBlur={async (e) => {
-                      if (e.target.value !== agent.phone) {
-                        await supabase.from('agents').update({ phone: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                        setAgent({ ...agent, phone: e.target.value })
-                      }
-                    }}
-                    className="w-full bg-gray-800 text-white px-3 py-2 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500 text-sm"
-                  />
+                  <label style={label}>Phone</label>
+                  <input type="tel" defaultValue={agent.phone || ''} style={input} onBlur={async (e) => {
+                    if (e.target.value !== agent.phone) {
+                      await supabase.from('agents').update({ phone: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                      setAgent({ ...agent, phone: e.target.value })
+                    }
+                  }} />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.5rem' }}>
                 <div>
-                  <label className="text-gray-400 text-xs mb-1 block">Email</label>
-                  <input
-                    type="email"
-                    defaultValue={agent.email}
-                    onBlur={async (e) => {
-                      if (e.target.value !== agent.email) {
-                        await supabase.from('agents').update({ email: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                        setAgent({ ...agent, email: e.target.value })
-                      }
-                    }}
-                    className="w-full bg-gray-800 text-white px-3 py-2 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500 text-sm"
-                  />
+                  <label style={label}>Email</label>
+                  <input type="email" defaultValue={agent.email} style={input} onBlur={async (e) => {
+                    if (e.target.value !== agent.email) {
+                      await supabase.from('agents').update({ email: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                      setAgent({ ...agent, email: e.target.value })
+                    }
+                  }} />
                 </div>
                 <div>
-                  <label className="text-gray-400 text-xs mb-1 block">State</label>
-                  <select
-                    defaultValue={agent.state}
-                    onChange={async (e) => {
-                      await supabase.from('agents').update({ state: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                      setAgent({ ...agent, state: e.target.value })
-                    }}
-                    className="w-full bg-gray-800 text-white px-3 py-2 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500 text-sm"
-                  >
+                  <label style={label}>State</label>
+                  <select defaultValue={agent.state} style={input} onChange={async (e) => {
+                    await supabase.from('agents').update({ state: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                    setAgent({ ...agent, state: e.target.value })
+                  }}>
                     {['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'].map(s => (
                       <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
                 </div>
               </div>
-              <p className="text-gray-600 text-xs">Changes save automatically when you click out of a field.</p>
+              <p style={{ color: '#5C5A56', fontSize: '0.72rem' }}>Changes save automatically when you click out of a field.</p>
             </div>
           )}
         </div>
 
+        {/* State Resources */}
         {agent.current_stage === 'licensing' && stateResources && (
-          <div className="bg-gray-900 rounded-2xl p-6 mb-6">
-            <h2 className="text-lg font-semibold mb-4">State Resources — {agent.state}</h2>
-            <div className="space-y-3">
+          <div style={card}>
+            <p style={sectionTitle}>State Resources — {agent.state}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {stateResources.exam && (
-                <a
-                  href={stateResources.exam.exam_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between bg-blue-900 bg-opacity-40 hover:bg-opacity-60 p-4 rounded-xl transition"
-                >
+                <a href={stateResources.exam.exam_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#242220', border: '1px solid #2E2C29', borderRadius: '8px', padding: '1rem', textDecoration: 'none' }}>
                   <div>
-                    <p className="text-blue-300 font-semibold text-sm">State Licensing Exam</p>
-                    <p className="text-gray-400 text-xs mt-0.5">Provider: {stateResources.exam.exam_provider}</p>
+                    <p style={{ color: '#F5F2ED', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.2rem' }}>State Licensing Exam</p>
+                    <p style={{ color: '#9A9890', fontSize: '0.75rem' }}>Provider: {stateResources.exam.exam_provider}</p>
                   </div>
-                  <span className="text-blue-400 text-sm">Book Now →</span>
+                  <span style={{ color: '#C9A96E', fontSize: '0.85rem' }}>Book Now →</span>
                 </a>
               )}
-              <a
-                href="https://www.xcelsolutions.com/?utm_campaign=WS%20-%20National%20-%20Brand&utm_content=Brand&utm_source=google&utm_medium=g&utm_term=xcel%20solutions&utm_id=19187571241&matchtype=e&network=g&device=m&gad_source=1&gad_campaignid=19187571241&gbraid=0AAAAACtEPw98wx-TExb3HTBj-R65yeHBx&gclid=Cj0KCQjwoP_FBhDFARIsANPG24OM9RqW_MI_ankj6xHTBMcE8WhHzsrWkpBGq46gXlwDCf9fPlVxXnwaAjjNEALw_wcB"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between bg-indigo-900 bg-opacity-40 hover:bg-opacity-60 p-4 rounded-xl transition"
-              >
+              <a href="https://www.xcelsolutions.com/?utm_campaign=WS%20-%20National%20-%20Brand&utm_content=Brand&utm_source=google&utm_medium=g&utm_term=xcel%20solutions&utm_id=19187571241&matchtype=e&network=g&device=m&gad_source=1&gad_campaignid=19187571241&gbraid=0AAAAACtEPw98wx-TExb3HTBj-R65yeHBx&gclid=Cj0KCQjwoP_FBhDFARIsANPG24OM9RqW_MI_ankj6xHTBMcE8WhHzsrWkpBGq46gXlwDCf9fPlVxXnwaAjjNEALw_wcB" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#242220', border: '1px solid #2E2C29', borderRadius: '8px', padding: '1rem', textDecoration: 'none' }}>
                 <div>
-                  <p className="text-indigo-300 font-semibold text-sm">Life Insurance Pre-Licensing Course</p>
-                  <p className="text-gray-400 text-xs mt-0.5">Xcel Solutions · Partner code: <span className="text-indigo-300 font-bold">karmakore</span></p>
+                  <p style={{ color: '#F5F2ED', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.2rem' }}>Life Insurance Pre-Licensing Course</p>
+                  <p style={{ color: '#9A9890', fontSize: '0.75rem' }}>Xcel Solutions · Partner code: <span style={{ color: '#C9A96E', fontWeight: '600' }}>karmakore</span></p>
                 </div>
-                <span className="text-indigo-400 text-sm">Start Course →</span>
+                <span style={{ color: '#C9A96E', fontSize: '0.85rem' }}>Start Course →</span>
               </a>
               {stateResources.background && (
-                <a
-                  href={stateResources.background.background_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between bg-purple-900 bg-opacity-40 hover:bg-opacity-60 p-4 rounded-xl transition"
-                >
+                <a href={stateResources.background.background_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#242220', border: '1px solid #2E2C29', borderRadius: '8px', padding: '1rem', textDecoration: 'none' }}>
                   <div>
-                    <p className="text-purple-300 font-semibold text-sm">Background Check</p>
-                    <p className="text-gray-400 text-xs mt-0.5">Provider: {stateResources.background.provider}</p>
+                    <p style={{ color: '#F5F2ED', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.2rem' }}>Background Check</p>
+                    <p style={{ color: '#9A9890', fontSize: '0.75rem' }}>Provider: {stateResources.background.provider}</p>
                   </div>
-                  <span className="text-purple-400 text-sm">Start Now →</span>
+                  <span style={{ color: '#C9A96E', fontSize: '0.85rem' }}>Start Now →</span>
                 </a>
               )}
               {stateResources.background?.fingerprint_url && (
-                <a
-                  href={stateResources.background.fingerprint_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between bg-teal-900 bg-opacity-40 hover:bg-opacity-60 p-4 rounded-xl transition"
-                >
+                <a href={stateResources.background.fingerprint_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#242220', border: '1px solid #2E2C29', borderRadius: '8px', padding: '1rem', textDecoration: 'none' }}>
                   <div>
-                    <p className="text-teal-300 font-semibold text-sm">Fingerprinting</p>
-                    <p className="text-gray-400 text-xs mt-0.5">Provider: {stateResources.background.provider}</p>
+                    <p style={{ color: '#F5F2ED', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.2rem' }}>Fingerprinting</p>
+                    <p style={{ color: '#9A9890', fontSize: '0.75rem' }}>Provider: {stateResources.background.provider}</p>
                   </div>
-                  <span className="text-teal-400 text-sm">Schedule →</span>
+                  <span style={{ color: '#C9A96E', fontSize: '0.85rem' }}>Schedule →</span>
                 </a>
               )}
             </div>
           </div>
         )}
 
+        {/* Executive Override */}
         {['executive', 'superadmin'].includes(currentUser?.role || '') && (
-          <div className="bg-gray-900 rounded-2xl p-6 mb-6 border border-red-900">
-            <h2 className="text-lg font-semibold mb-2 text-red-400">Executive Override</h2>
-            <p className="text-gray-400 text-xs mb-4">Force move this agent to any stage. A reason is required and permanently logged.</p>
-            <div className="flex gap-3 flex-wrap">
-              <select
-                id="override-stage"
-                className="bg-gray-800 text-white px-4 py-2 rounded-xl border border-gray-700 focus:outline-none focus:border-red-500 text-sm flex-1"
-              >
-                <option value="">Select target stage...</option>
-                <option value="new_lead">New Lead</option>
-                <option value="contacted">Contacted</option>
-                <option value="licensing">Licensing</option>
-                <option value="onboarding">Onboarding</option>
-                <option value="contracting">Contracting</option>
-                <option value="system_setup">System Setup</option>
-                <option value="training">Training</option>
-                <option value="activation">Activation</option>
-                <option value="active">Active</option>
-              </select>
-            </div>
-            <input
-              id="override-reason"
-              type="text"
-              placeholder="Reason for override (required)..."
-              className="w-full mt-3 bg-gray-800 text-white px-4 py-2 rounded-xl border border-gray-700 focus:outline-none focus:border-red-500 text-sm"
-            />
+          <div style={{ ...card, border: '1px solid #5C2020' }}>
+            <p style={{ ...sectionTitle, color: '#E07070' }}>Executive Override</p>
+            <p style={{ color: '#9A9890', fontSize: '0.8rem', marginBottom: '1rem' }}>Force move this agent to any stage. A reason is required and permanently logged.</p>
+            <select id="override-stage" style={{ ...input, marginBottom: '0.75rem' }}>
+              <option value="">Select target stage...</option>
+              <option value="new_lead">New Lead</option>
+              <option value="contacted">Contacted</option>
+              <option value="licensing">Licensing</option>
+              <option value="onboarding">Onboarding</option>
+              <option value="contracting">Contracting</option>
+              <option value="system_setup">System Setup</option>
+              <option value="training">Training</option>
+              <option value="activation">Activation</option>
+              <option value="active">Active</option>
+            </select>
+            <input id="override-reason" type="text" placeholder="Reason for override (required)..." style={{ ...input, marginBottom: '0.75rem' }} />
             <button
+              style={{ width: '100%', background: '#8B2635', border: 'none', color: '#F5F2ED', padding: '0.6rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif', fontWeight: '600' }}
               onClick={async () => {
                 const stageEl = document.getElementById('override-stage') as HTMLSelectElement
                 const reasonEl = document.getElementById('override-reason') as HTMLInputElement
@@ -338,27 +300,10 @@ export default function AgentDetailPage() {
                 const reason = reasonEl.value.trim()
                 if (!newStage) { alert('Please select a target stage.'); return }
                 if (!reason) { alert('A reason is required for overrides.'); return }
-                const { error } = await supabase
-                  .from('agents')
-                  .update({ current_stage: newStage, updated_at: new Date().toISOString() })
-                  .eq('id', agent.id)
+                const { error } = await supabase.from('agents').update({ current_stage: newStage, updated_at: new Date().toISOString() }).eq('id', agent.id)
                 if (!error) {
-                  await supabase.from('overrides').insert({
-                    agent_id: agent.id,
-                    performed_by: currentUser.id,
-                    override_type: 'stage_skip',
-                    previous_value: agent.current_stage,
-                    new_value: newStage,
-                    reason: reason
-                  })
-                  await supabase.from('stage_history').insert({
-                    agent_id: agent.id,
-                    from_stage: agent.current_stage,
-                    to_stage: newStage,
-                    changed_by: currentUser.id,
-                    is_override: true,
-                    override_reason: reason
-                  })
+                  await supabase.from('overrides').insert({ agent_id: agent.id, performed_by: currentUser.id, override_type: 'stage_skip', previous_value: agent.current_stage, new_value: newStage, reason })
+                  await supabase.from('stage_history').insert({ agent_id: agent.id, from_stage: agent.current_stage, to_stage: newStage, changed_by: currentUser.id, is_override: true, override_reason: reason })
                   setAgent({ ...agent, current_stage: newStage })
                   loadChecklist(newStage, agent.id)
                   stageEl.value = ''
@@ -366,64 +311,69 @@ export default function AgentDetailPage() {
                   alert('Override applied and logged.')
                 }
               }}
-              className="w-full mt-3 bg-red-700 hover:bg-red-600 text-white font-semibold py-2 rounded-xl text-sm transition"
             >
               Apply Override
             </button>
           </div>
         )}
 
-        <div className="bg-gray-900 rounded-2xl p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Stage Progress</h2>
-          <div className="flex flex-wrap gap-2 mb-6">
+        {/* Stage Progress */}
+        <div style={card}>
+          <p style={sectionTitle}>Stage Progress</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1.25rem' }}>
             {STAGES.map((stage, index) => (
-              <div key={stage.key} className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                index < currentStageIndex ? 'bg-green-900 text-green-300' :
-                index === currentStageIndex ? 'bg-blue-600 text-white' :
-                'bg-gray-800 text-gray-500'
-              }`}>
+              <span key={stage.key} style={{
+                padding: '0.2rem 0.6rem',
+                borderRadius: '4px',
+                fontSize: '0.72rem',
+                fontFamily: 'Georgia, serif',
+                background: index < currentStageIndex ? '#1C3A2A' : index === currentStageIndex ? '#C9A96E' : '#242220',
+                color: index < currentStageIndex ? '#6FCF97' : index === currentStageIndex ? '#0F0F0E' : '#5C5A56',
+                fontWeight: index === currentStageIndex ? '600' : '400',
+              }}>
                 {stage.label}
-              </div>
+              </span>
             ))}
           </div>
-          <div className="flex gap-3">
-            <button onClick={() => moveStage('backward')} disabled={saving || currentStageIndex === 0 || !canMoveStage(currentUser?.role || '', agent.current_stage)} className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-xl text-sm transition disabled:opacity-30">
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button onClick={() => moveStage('backward')} disabled={saving || currentStageIndex === 0 || !canMoveStage(currentUser?.role || '', agent.current_stage)} style={{ ...ghostBtn, opacity: (saving || currentStageIndex === 0 || !canMoveStage(currentUser?.role || '', agent.current_stage)) ? 0.3 : 1 }}>
               Move Back
             </button>
-            <button onClick={() => moveStage('forward')} disabled={saving || currentStageIndex === STAGES.length - 1 || agent.is_locked || !canMoveStage(currentUser?.role || '', agent.current_stage)} className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-sm transition disabled:opacity-30">
+            <button onClick={() => moveStage('forward')} disabled={saving || currentStageIndex === STAGES.length - 1 || agent.is_locked || !canMoveStage(currentUser?.role || '', agent.current_stage)} style={{ ...goldBtn, opacity: (saving || currentStageIndex === STAGES.length - 1 || agent.is_locked || !canMoveStage(currentUser?.role || '', agent.current_stage)) ? 0.3 : 1 }}>
               Move Forward
             </button>
-            <button onClick={toggleLock} disabled={saving || !canLockAgent(currentUser?.role || '')} className={`px-4 py-2 rounded-xl text-sm transition ${agent.is_locked ? 'bg-yellow-700 hover:bg-yellow-600' : 'bg-gray-700 hover:bg-gray-600'}`}>
+            <button onClick={toggleLock} disabled={saving || !canLockAgent(currentUser?.role || '')} style={{ ...ghostBtn, color: agent.is_locked ? '#C9A96E' : '#F5F2ED', opacity: (saving || !canLockAgent(currentUser?.role || '')) ? 0.3 : 1 }}>
               {agent.is_locked ? 'Unlock' : 'Lock'}
             </button>
           </div>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-6 mb-6">
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-semibold">Stage Checklist</h2>
+        {/* Checklist */}
+        <div style={card}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <p style={sectionTitle}>Stage Checklist</p>
             {checklistItems.length > 0 && (
               allComplete
-                ? <span className="text-xs bg-green-900 text-green-300 px-2 py-1 rounded-full">All Complete</span>
-                : <span className="text-xs bg-yellow-900 text-yellow-300 px-2 py-1 rounded-full">Incomplete</span>
+                ? <span style={{ background: '#1C3A2A', color: '#6FCF97', fontSize: '0.72rem', padding: '0.2rem 0.6rem', borderRadius: '4px' }}>All Complete</span>
+                : <span style={{ background: '#3A2A1C', color: '#C9A96E', fontSize: '0.72rem', padding: '0.2rem 0.6rem', borderRadius: '4px' }}>Incomplete</span>
             )}
           </div>
           {checklistItems.length === 0 ? (
-            <p className="text-gray-400 text-sm">No checklist items for this stage.</p>
+            <p style={{ color: '#9A9890', fontSize: '0.85rem' }}>No checklist items for this stage.</p>
           ) : (
-            <div className="space-y-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {checklistItems.map(item => {
                 const isApproved = getStatus(item.id) === 'approved'
                 return (
-                  <div key={item.id} onClick={() => toggleItem(item.id)} className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition ${isApproved ? 'bg-green-900 bg-opacity-40' : 'bg-gray-800 hover:bg-gray-700'}`}>
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isApproved ? 'bg-green-500 border-green-500' : 'border-gray-500'}`}>
-                      {isApproved && <span className="text-white text-xs">✓</span>}
+                  <div key={item.id} onClick={() => toggleItem(item.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '6px', cursor: 'pointer', background: isApproved ? '#1C3A2A' : '#242220', border: '1px solid #2E2C29' }}>
+                    <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: `2px solid ${isApproved ? '#6FCF97' : '#5C5A56'}`, background: isApproved ? '#6FCF97' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {isApproved && <span style={{ color: '#0F0F0E', fontSize: '0.65rem', fontWeight: '700' }}>✓</span>}
                     </div>
-                    <div>
-                      <p className={`text-sm font-medium ${isApproved ? 'text-green-300 line-through' : 'text-white'}`}>{item.title}</p>
-                      {item.description && <p className="text-xs text-gray-400">{item.description}</p>}
+                    <div style={{ flex: 1 }}>
+                      <p style={{ color: isApproved ? '#6FCF97' : '#F5F2ED', fontSize: '0.85rem', textDecoration: isApproved ? 'line-through' : 'none' }}>{item.title}</p>
+                      {item.description && <p style={{ color: '#9A9890', fontSize: '0.75rem', marginTop: '0.1rem' }}>{item.description}</p>}
                     </div>
-                    {item.is_required && <span className="ml-auto text-xs text-gray-500">Required</span>}
+                    {item.is_required && <span style={{ color: '#5C5A56', fontSize: '0.7rem' }}>Required</span>}
                   </div>
                 )
               })}
@@ -431,73 +381,68 @@ export default function AgentDetailPage() {
           )}
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-6 mb-6">
+        {/* Notes */}
+        <div style={card}>
           <Notes agentId={agent.id} />
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Stage History</h2>
+        {/* Stage History */}
+        <div style={card}>
+          <p style={sectionTitle}>Stage History</p>
           {stageHistory.length === 0 ? (
-            <p className="text-gray-400 text-sm">No stage changes yet.</p>
+            <p style={{ color: '#9A9890', fontSize: '0.85rem' }}>No stage changes yet.</p>
           ) : (
-            <div className="space-y-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {stageHistory.map((h) => (
-                <div key={h.id} className="flex items-center justify-between bg-gray-800 px-4 py-3 rounded-xl">
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-gray-400">{h.from_stage?.replace('_', ' ')}</span>
-                    <span className="text-gray-600">→</span>
-                    <span className="text-white font-medium">{h.to_stage?.replace('_', ' ')}</span>
-                    {h.is_override && <span className="text-xs bg-red-900 text-red-300 px-2 py-0.5 rounded-full">Override</span>}
+                <div key={h.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#242220', border: '1px solid #2E2C29', borderRadius: '6px', padding: '0.75rem 1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                    <span style={{ color: '#9A9890' }}>{h.from_stage?.replace('_', ' ')}</span>
+                    <span style={{ color: '#5C5A56' }}>→</span>
+                    <span style={{ color: '#F5F2ED' }}>{h.to_stage?.replace('_', ' ')}</span>
+                    {h.is_override && <span style={{ background: '#5C2020', color: '#E07070', fontSize: '0.65rem', padding: '0.1rem 0.4rem', borderRadius: '3px' }}>Override</span>}
                   </div>
-                  <span className="text-xs text-gray-500">{new Date(h.created_at).toLocaleDateString()}</span>
+                  <span style={{ color: '#5C5A56', fontSize: '0.75rem' }}>{new Date(h.created_at).toLocaleDateString()}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold mb-4">Agent Details</h2>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-400">Created</span>
-              <span className="text-white">{new Date(agent.created_at).toLocaleDateString()}</span>
+        {/* Agent Details */}
+        <div style={{ ...card, marginBottom: 0 }}>
+          <p style={sectionTitle}>Agent Details</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.85rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#9A9890' }}>Created</span>
+              <span style={{ color: '#F5F2ED' }}>{new Date(agent.created_at).toLocaleDateString()}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Last Updated</span>
-              <span className="text-white">{new Date(agent.updated_at).toLocaleDateString()}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#9A9890' }}>Last Updated</span>
+              <span style={{ color: '#F5F2ED' }}>{new Date(agent.updated_at).toLocaleDateString()}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Locked</span>
-              <span className={agent.is_locked ? 'text-yellow-400' : 'text-green-400'}>{agent.is_locked ? 'Yes' : 'No'}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#9A9890' }}>Locked</span>
+              <span style={{ color: agent.is_locked ? '#C9A96E' : '#6FCF97' }}>{agent.is_locked ? 'Yes' : 'No'}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-400">Agent Model</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: '#9A9890' }}>Agent Model</span>
               {['executive', 'superadmin'].includes(currentUser?.role || '') ? (
-                <select
-                  value={agent.agent_model || ''}
-                  onChange={async (e) => {
-                    const newModel = e.target.value
-                    const { error } = await supabase
-                      .from('agents')
-                      .update({ agent_model: newModel || null, updated_at: new Date().toISOString() })
-                      .eq('id', agent.id)
-                    if (!error) setAgent({ ...agent, agent_model: newModel })
-                  }}
-                  className="bg-gray-800 text-white px-3 py-1 rounded-lg border border-gray-700 focus:outline-none focus:border-blue-500 text-sm"
-                >
+                <select value={agent.agent_model || ''} style={{ background: '#242220', color: '#F5F2ED', border: '1px solid #2E2C29', borderRadius: '6px', padding: '0.3rem 0.6rem', fontSize: '0.8rem', fontFamily: 'Georgia, serif', outline: 'none' }} onChange={async (e) => {
+                  const newModel = e.target.value
+                  const { error } = await supabase.from('agents').update({ agent_model: newModel || null, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                  if (!error) setAgent({ ...agent, agent_model: newModel })
+                }}>
                   <option value="">Not assigned</option>
                   <option value="supported">Supported</option>
                   <option value="independent">Independent</option>
                 </select>
               ) : (
-                <span className={agent.agent_model ? 'text-blue-400 font-semibold' : 'text-gray-500'}>
-                  {agent.agent_model || 'Not assigned'}
-                </span>
+                <span style={{ color: agent.agent_model ? '#C9A96E' : '#5C5A56' }}>{agent.agent_model || 'Not assigned'}</span>
               )}
             </div>
           </div>
         </div>
+
       </div>
     </main>
   )
