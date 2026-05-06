@@ -115,6 +115,17 @@ export default function SignupPage() {
       return
     }
 
+    await fetch('/api/send-welcome', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        full_name,
+        email: form.email,
+        xfg_id,
+        state: form.state,
+      })
+    })
+
     router.push('/agent-portal')
     setLoading(false)
   }
