@@ -45,8 +45,8 @@ export default function AnalyticsPage() {
   }, [router])
 
   if (loading) return (
-    <main className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <p className="text-white">Loading analytics...</p>
+    <main style={{ minHeight: '100vh', background: '#0F0F0E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p style={{ color: '#9A9890', fontFamily: 'Georgia, serif' }}>Loading analytics...</p>
     </main>
   )
 
@@ -57,65 +57,68 @@ export default function AnalyticsPage() {
   const supported = agents.filter(a => a.agent_model === 'supported').length
   const independent = agents.filter(a => a.agent_model === 'independent').length
 
+  const card = { background: '#1A1917', border: '1px solid #2E2C29', borderRadius: '10px', padding: '1.25rem' }
+
   return (
-    <main className="min-h-screen bg-gray-950 text-white p-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+    <main style={{ minHeight: '100vh', background: '#0F0F0E', color: '#F5F2ED', fontFamily: 'Georgia, serif', padding: '2rem 1.5rem' }}>
+      <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
           <div>
-            <h1 className="text-2xl font-bold">Analytics</h1>
-            <p className="text-gray-400 text-sm mt-1">Executive overview</p>
+            <p style={{ color: '#C9A96E', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '0.25rem' }}>XFG · X Financial Group</p>
+            <h1 style={{ color: '#F5F2ED', fontSize: '1.6rem', fontWeight: '400', marginBottom: '0.2rem' }}>Analytics</h1>
+            <p style={{ color: '#9A9890', fontSize: '0.85rem' }}>Executive overview</p>
           </div>
           <button
             onClick={() => router.push('/dashboard')}
-            className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-xl text-sm transition"
+            style={{ background: 'transparent', border: '1px solid #2E2C29', color: '#9A9890', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }}
           >
             ← Dashboard
           </button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-gray-900 p-5 rounded-2xl">
-            <p className="text-gray-400 text-sm mb-1">Total Agents</p>
-            <p className="text-3xl font-bold text-blue-400">{total}</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+          <div style={card}>
+            <p style={{ color: '#9A9890', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Total Agents</p>
+            <p style={{ fontSize: '2rem', fontWeight: '400', color: '#C9A96E' }}>{total}</p>
           </div>
-          <div className="bg-gray-900 p-5 rounded-2xl">
-            <p className="text-gray-400 text-sm mb-1">Active Agents</p>
-            <p className="text-3xl font-bold text-green-400">{active}</p>
+          <div style={card}>
+            <p style={{ color: '#9A9890', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Active Agents</p>
+            <p style={{ fontSize: '2rem', fontWeight: '400', color: '#F5F2ED' }}>{active}</p>
           </div>
-          <div className="bg-gray-900 p-5 rounded-2xl">
-            <p className="text-gray-400 text-sm mb-1">In Pipeline</p>
-            <p className="text-3xl font-bold text-yellow-400">{pipeline}</p>
+          <div style={card}>
+            <p style={{ color: '#9A9890', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>In Pipeline</p>
+            <p style={{ fontSize: '2rem', fontWeight: '400', color: '#F5F2ED' }}>{pipeline}</p>
           </div>
-          <div className="bg-gray-900 p-5 rounded-2xl">
-            <p className="text-gray-400 text-sm mb-1">Locked Agents</p>
-            <p className="text-3xl font-bold text-orange-400">{locked}</p>
+          <div style={card}>
+            <p style={{ color: '#9A9890', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Locked Agents</p>
+            <p style={{ fontSize: '2rem', fontWeight: '400', color: '#C9A96E' }}>{locked}</p>
           </div>
-          <div className="bg-gray-900 p-5 rounded-2xl">
-            <p className="text-gray-400 text-sm mb-1">Supported Model</p>
-            <p className="text-3xl font-bold text-purple-400">{supported}</p>
+          <div style={card}>
+            <p style={{ color: '#9A9890', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Supported Model</p>
+            <p style={{ fontSize: '2rem', fontWeight: '400', color: '#F5F2ED' }}>{supported}</p>
           </div>
-          <div className="bg-gray-900 p-5 rounded-2xl">
-            <p className="text-gray-400 text-sm mb-1">Independent Model</p>
-            <p className="text-3xl font-bold text-teal-400">{independent}</p>
+          <div style={card}>
+            <p style={{ color: '#9A9890', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Independent Model</p>
+            <p style={{ fontSize: '2rem', fontWeight: '400', color: '#F5F2ED' }}>{independent}</p>
           </div>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Agents by Stage</h2>
-          <div className="space-y-3">
+        <div style={{ ...card, marginBottom: '1.25rem' }}>
+          <p style={{ color: '#C9A96E', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Agents by Stage</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
             {STAGES.map(stage => {
               const count = agents.filter(a => a.current_stage === stage.key).length
               const pct = total > 0 ? Math.round((count / total) * 100) : 0
               return (
                 <div key={stage.key}>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-300">{stage.label}</span>
-                    <span className="text-gray-400">{count} agents</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+                    <span style={{ color: '#F5F2ED', fontSize: '0.85rem' }}>{stage.label}</span>
+                    <span style={{ color: '#9A9890', fontSize: '0.8rem' }}>{count} agents</span>
                   </div>
-                  <div className="bg-gray-800 rounded-full h-2">
+                  <div style={{ background: '#242220', borderRadius: '4px', height: '6px', overflow: 'hidden' }}>
                     <div
-                      className="bg-blue-600 h-2 rounded-full transition-all"
-                      style={{ width: `${pct}%` }}
+                      style={{ background: '#C9A96E', height: '6px', borderRadius: '4px', width: `${pct}%`, transition: 'width 0.3s ease' }}
                     />
                   </div>
                 </div>
@@ -124,26 +127,29 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold mb-4">Recent Stage Changes</h2>
+        <div style={card}>
+          <p style={{ color: '#C9A96E', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Recent Stage Changes</p>
           {history.length === 0 ? (
-            <p className="text-gray-400 text-sm">No stage changes yet.</p>
+            <p style={{ color: '#5C5A56', fontSize: '0.85rem' }}>No stage changes yet.</p>
           ) : (
-            <div className="space-y-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {history.map(h => (
-                <div key={h.id} className="flex items-center justify-between bg-gray-800 px-4 py-3 rounded-xl">
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-gray-400">{h.from_stage?.replace(/_/g, ' ')}</span>
-                    <span className="text-gray-600">→</span>
-                    <span className="text-white font-medium">{h.to_stage?.replace(/_/g, ' ')}</span>
-                    {h.is_override && <span className="text-xs bg-red-900 text-red-300 px-2 py-0.5 rounded-full">Override</span>}
+                <div key={h.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#242220', border: '1px solid #2E2C29', borderRadius: '6px', padding: '0.6rem 0.875rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                    <span style={{ color: '#9A9890' }}>{h.from_stage?.replace(/_/g, ' ')}</span>
+                    <span style={{ color: '#5C5A56' }}>→</span>
+                    <span style={{ color: '#F5F2ED' }}>{h.to_stage?.replace(/_/g, ' ')}</span>
+                    {h.is_override && (
+                      <span style={{ fontSize: '0.7rem', background: '#2E1A1A', color: '#C9A96E', border: '1px solid #4A2A2A', padding: '0.1rem 0.5rem', borderRadius: '4px' }}>Override</span>
+                    )}
                   </div>
-                  <span className="text-xs text-gray-500">{new Date(h.created_at).toLocaleDateString()}</span>
+                  <span style={{ color: '#5C5A56', fontSize: '0.75rem' }}>{new Date(h.created_at).toLocaleDateString()}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
+
       </div>
     </main>
   )
