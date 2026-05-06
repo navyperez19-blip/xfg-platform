@@ -119,63 +119,87 @@ export default function SignupPage() {
     setLoading(false)
   }
 
+  const fieldInput: React.CSSProperties = {
+    width: '100%',
+    background: '#242220',
+    color: '#F5F2ED',
+    border: '1px solid #2E2C29',
+    borderRadius: '8px',
+    padding: '0.75rem 1rem',
+    fontSize: '0.95rem',
+    fontFamily: 'Georgia, serif',
+    outline: 'none',
+    boxSizing: 'border-box',
+  }
+
+  const fieldLabel: React.CSSProperties = {
+    color: '#9A9890',
+    fontSize: '0.75rem',
+    letterSpacing: '0.08em',
+    textTransform: 'uppercase',
+    display: 'block',
+    marginBottom: '0.5rem',
+    fontFamily: 'Georgia, serif',
+  }
+
   return (
-    <main className="min-h-screen bg-gray-950 text-white flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold">Join XFG</h1>
-          <p className="text-gray-400 mt-2">Create your agent account</p>
+    <main style={{ minHeight: '100vh', background: '#0F0F0E', color: '#F5F2ED', fontFamily: 'Georgia, serif', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem 1rem' }}>
+      <div style={{ width: '100%', maxWidth: '460px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <p style={{ color: '#C9A96E', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>XFG · X Financial Group</p>
+          <h1 style={{ color: '#F5F2ED', fontSize: '1.8rem', fontWeight: '400', marginBottom: '0.25rem' }}>Join XFG</h1>
+          <p style={{ color: '#9A9890', fontSize: '0.85rem', fontStyle: 'italic' }}>Create your agent account</p>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+        <div style={{ background: '#1A1917', border: '1px solid #2E2C29', borderRadius: '12px', padding: '2rem' }}>
+          <form onSubmit={handleSubmit}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
               <div>
-                <label className="text-gray-400 text-sm mb-1 block">First Name</label>
-                <input type="text" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} required className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="John" />
+                <label style={fieldLabel}>First Name</label>
+                <input type="text" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} required placeholder="John" style={fieldInput} />
               </div>
               <div>
-                <label className="text-gray-400 text-sm mb-1 block">Last Name</label>
-                <input type="text" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} required className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="Smith" />
+                <label style={fieldLabel}>Last Name</label>
+                <input type="text" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} required placeholder="Smith" style={fieldInput} />
               </div>
             </div>
-            <div>
-              <label className="text-gray-400 text-sm mb-1 block">Email</label>
-              <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="john@example.com" />
+            <div style={{ marginBottom: '1.25rem' }}>
+              <label style={fieldLabel}>Email</label>
+              <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required placeholder="john@example.com" style={fieldInput} />
             </div>
-            <div>
-              <label className="text-gray-400 text-sm mb-1 block">Phone Number</label>
-              <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="555-555-5555" />
+            <div style={{ marginBottom: '1.25rem' }}>
+              <label style={fieldLabel}>Phone Number</label>
+              <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required placeholder="555-555-5555" style={fieldInput} />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
               <div>
-                <label className="text-gray-400 text-sm mb-1 block">Age</label>
-                <input type="number" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} required min="18" max="100" className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="25" />
+                <label style={fieldLabel}>Age</label>
+                <input type="number" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} required min="18" max="100" placeholder="25" style={fieldInput} />
               </div>
               <div>
-                <label className="text-gray-400 text-sm mb-1 block">State</label>
-                <select value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} required className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500">
+                <label style={fieldLabel}>State</label>
+                <select value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} required style={fieldInput}>
                   <option value="">State...</option>
                   {US_STATES.map((s) => (<option key={s} value={s}>{s}</option>))}
                 </select>
               </div>
             </div>
-            <div>
-              <label className="text-gray-400 text-sm mb-1 block">Password</label>
-              <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="Min. 8 characters" />
+            <div style={{ marginBottom: '1.25rem' }}>
+              <label style={fieldLabel}>Password</label>
+              <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required placeholder="Min. 8 characters" style={fieldInput} />
             </div>
-            <div>
-              <label className="text-gray-400 text-sm mb-1 block">Confirm Password</label>
-              <input type="password" value={form.confirm_password} onChange={(e) => setForm({ ...form, confirm_password: e.target.value })} required className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="Re-enter password" />
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={fieldLabel}>Confirm Password</label>
+              <input type="password" value={form.confirm_password} onChange={(e) => setForm({ ...form, confirm_password: e.target.value })} required placeholder="Re-enter password" style={fieldInput} />
             </div>
-            {error && <p className="text-red-400 text-sm">{error}</p>}
-            <button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-50">
+            {error && <p style={{ color: '#E07070', fontSize: '0.85rem', marginBottom: '1rem' }}>{error}</p>}
+            <button type="submit" disabled={loading} style={{ width: '100%', background: '#C9A96E', color: '#0F0F0E', border: 'none', borderRadius: '8px', padding: '0.875rem', fontSize: '0.95rem', fontFamily: 'Georgia, serif', fontWeight: '600', cursor: loading ? 'not-allowed' : 'pointer', letterSpacing: '0.03em', opacity: loading ? 0.6 : 1 }}>
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
-          <p className="text-center text-gray-400 text-sm mt-4">
+          <p style={{ textAlign: 'center', color: '#5C5A56', fontSize: '0.8rem', marginTop: '1.5rem' }}>
             Already have an account?{' '}
-            <Link href="/login" className="text-blue-400 hover:text-blue-300">Sign in</Link>
+            <Link href="/login" style={{ color: '#C9A96E', textDecoration: 'none' }}>Sign in</Link>
           </p>
         </div>
       </div>
