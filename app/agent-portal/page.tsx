@@ -16,10 +16,16 @@ const STAGES = [
   { key: 'active', label: 'Active Agent', order: 9 },
 ]
 
+const card = { background: '#1A1917', border: '1px solid #2E2C29', borderRadius: '10px', padding: '1.5rem', marginBottom: '1.25rem' }
+const sectionTitle = { color: '#C9A96E', fontSize: '0.72rem', letterSpacing: '0.1em', textTransform: 'uppercase' as const, marginBottom: '1rem', fontFamily: 'Georgia, serif' }
+
 export default function AgentPortalPage() {
   const router = useRouter()
   const [agent, setAgent] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [checklistItems, setChecklistItems] = useState<any[]>([])
+  const [checklistProgress, setChecklistProgress] = useState<any[]>([])
+  const [stateResources, setStateResources] = useState<any>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -32,7 +38,38 @@ export default function AgentPortalPage() {
         .eq('user_id', user.id)
         .single()
 
-      setAgent(agentData)
+      if (agentData) {
+        setAgent(agentData)
+
+        const { data: items } = await supabase
+          .from('checklist_items')
+          .select('*')
+          .eq('stage', agentData.current_stage)
+          .order('display_order')
+
+        const { data: progress } = await supabase
+          .from('agent_checklist_progress')
+          .select('*')
+          .eq('agent_id', agentData.id)
+
+        setChecklistItems(items || [])
+        setChecklistProgress(progress || [])
+
+        if (agentData.current_stage === 'licensing') {
+          const { data: examLink } = await supabase
+            .from('state_exam_links')
+            .select('*')
+            .eq('state_code', agentData.state)
+            .single()
+          const { data: bgLink } = await supabase
+            .from('state_background_links')
+            .select('*')
+            .eq('state_code', agentData.state)
+            .single()
+          setStateResources({ exam: examLink, background: bgLink })
+        }
+      }
+
       setLoading(false)
     }
     load()
@@ -43,132 +80,170 @@ export default function AgentPortalPage() {
     router.push('/')
   }
 
+  const getStatus = (itemId: string) => {
+    const p = checklistProgress.find(p => p.checklist_item_id === itemId)
+    return p ? p.status : 'not_started'
+  }
+
   if (loading) return (
-    <main className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <p className="text-white">Loading your portal...</p>
+    <main style={{ minHeight: '100vh', background: '#0F0F0E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p style={{ color: '#9A9890', fontFamily: 'Georgia, serif' }}>Loading your portal...</p>
     </main>
   )
 
   if (!agent) return (
-    <main className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
-      <div className="text-center">
-        <p className="text-white text-lg mb-2">No agent profile found.</p>
-        <p className="text-gray-400 text-sm">Please contact your administrator.</p>
+    <main style={{ minHeight: '100vh', background: '#0F0F0E', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+      <div style={{ textAlign: 'center' }}>
+        <p style={{ color: '#F5F2ED', fontFamily: 'Georgia, serif', marginBottom: '0.5rem' }}>No agent profile found.</p>
+        <p style={{ color: '#9A9890', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }}>Please contact your administrator.</p>
       </div>
     </main>
   )
 
   const currentStageIndex = STAGES.findIndex(s => s.key === agent.current_stage)
   const currentStage = STAGES[currentStageIndex]
+  const allComplete = checklistItems.filter(i => i.is_required).every(i => getStatus(i.id) === 'approved')
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white">
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-6">
+    <main style={{ minHeight: '100vh', background: '#0F0F0E', color: '#F5F2ED', fontFamily: 'Georgia, serif' }}>
+      <div style={{ maxWidth: '680px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
           <div>
-            <h1 className="text-2xl font-bold">My Portal</h1>
-            <p className="text-gray-400 text-sm mt-0.5">Welcome, {agent.full_name}</p>
+            <p style={{ color: '#C9A96E', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '0.25rem' }}>XFG · X Financial Group</p>
+            <h1 style={{ color: '#F5F2ED', fontSize: '1.5rem', fontWeight: '400', marginBottom: '0.2rem' }}>My Portal</h1>
+            <p style={{ color: '#9A9890', fontSize: '0.85rem' }}>Welcome, {agent.full_name}</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="bg-gray-800 hover:bg-gray-700 px-3 py-2 rounded-xl text-sm transition"
-          >
+          <button onClick={handleLogout} style={{ background: 'transparent', border: '1px solid #2E2C29', color: '#9A9890', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }}>
             Sign Out
           </button>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-5 mb-4">
-          <div className="flex justify-between items-start">
+        <div style={card}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <p className="text-blue-400 font-mono font-bold text-lg">{agent.xfg_id}</p>
-              <p className="text-gray-400 text-sm mt-1">{agent.email}</p>
-              {agent.phone && <p className="text-gray-400 text-sm">{agent.phone}</p>}
-              <p className="text-gray-400 text-sm">State: {agent.state}</p>
+              <p style={{ color: '#C9A96E', fontFamily: 'monospace', fontSize: '1rem', fontWeight: '600', marginBottom: '0.25rem' }}>{agent.xfg_id}</p>
+              <p style={{ color: '#9A9890', fontSize: '0.85rem', marginBottom: '0.15rem' }}>{agent.email}</p>
+              {agent.phone && <p style={{ color: '#9A9890', fontSize: '0.85rem', marginBottom: '0.15rem' }}>{agent.phone}</p>}
+              <p style={{ color: '#9A9890', fontSize: '0.85rem' }}>State: {agent.state}</p>
             </div>
-            <div className="text-right">
-              <span className="bg-blue-900 text-blue-200 px-3 py-1 rounded-full text-sm font-semibold">
+            <div style={{ textAlign: 'right' }}>
+              <span style={{ background: '#242220', border: '1px solid #C9A96E', color: '#C9A96E', fontSize: '0.72rem', letterSpacing: '0.06em', textTransform: 'uppercase', padding: '0.25rem 0.6rem', borderRadius: '4px' }}>
                 {currentStage?.label}
               </span>
-              {agent.is_locked && (
-                <p className="text-yellow-400 text-xs mt-1">🔒 Admin managing</p>
-              )}
-              {agent.agent_model && (
-                <p className="text-purple-400 text-xs mt-1 capitalize">{agent.agent_model} model</p>
-              )}
+              {agent.is_locked && <p style={{ color: '#C9A96E', fontSize: '0.75rem', marginTop: '0.5rem' }}>🔒 Admin managing</p>}
+              {agent.agent_model && <p style={{ color: '#9A9890', fontSize: '0.75rem', marginTop: '0.25rem', textTransform: 'capitalize' }}>{agent.agent_model} model</p>}
             </div>
           </div>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-5 mb-4">
-          <h2 className="text-base font-semibold mb-4">Your Progress</h2>
-          <div className="space-y-2">
+        <div style={card}>
+          <p style={sectionTitle}>Your Progress</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {STAGES.map((stage, index) => {
               const isComplete = index < currentStageIndex
               const isCurrent = index === currentStageIndex
               return (
-                <div key={stage.key} className={`flex items-center gap-3 p-3 rounded-xl ${
-                  isCurrent ? 'bg-blue-900 bg-opacity-40' :
-                  isComplete ? 'bg-green-900 bg-opacity-20' :
-                  'bg-gray-800 bg-opacity-40'
-                }`}>
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${
-                    isComplete ? 'bg-green-500 text-white' :
-                    isCurrent ? 'bg-blue-500 text-white' :
-                    'bg-gray-700 text-gray-500'
-                  }`}>
+                <div key={stage.key} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem', borderRadius: '6px', background: isCurrent ? '#242220' : 'transparent', border: isCurrent ? '1px solid #2E2C29' : '1px solid transparent' }}>
+                  <div style={{ width: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.7rem', fontWeight: '700', background: isComplete ? '#1C3A2A' : isCurrent ? '#C9A96E' : '#242220', color: isComplete ? '#6FCF97' : isCurrent ? '#0F0F0E' : '#5C5A56', border: isComplete ? '1px solid #2D6A4F' : isCurrent ? 'none' : '1px solid #2E2C29' }}>
                     {isComplete ? '✓' : stage.order}
                   </div>
-                  <span className={`text-sm font-medium ${
-                    isComplete ? 'text-green-300' :
-                    isCurrent ? 'text-white' :
-                    'text-gray-500'
-                  }`}>
+                  <span style={{ fontSize: '0.85rem', color: isComplete ? '#6FCF97' : isCurrent ? '#F5F2ED' : '#5C5A56', fontWeight: isCurrent ? '600' : '400' }}>
                     {stage.label}
                   </span>
-                  {isCurrent && (
-                    <span className="ml-auto text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">
-                      Current
-                    </span>
-                  )}
-                  {isComplete && (
-                    <span className="ml-auto text-xs text-green-400">Complete</span>
-                  )}
+                  {isCurrent && <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: '#C9A96E' }}>Current</span>}
+                  {isComplete && <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: '#6FCF97' }}>Done</span>}
                 </div>
               )
             })}
           </div>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-5">
-          <h2 className="text-base font-semibold mb-3">What happens next?</h2>
-          {agent.current_stage === 'new_lead' && (
-            <p className="text-gray-400 text-sm">Your application has been received. A member of our team will be in touch with you shortly to begin the licensing process.</p>
-          )}
-          {agent.current_stage === 'contacted' && (
-            <p className="text-gray-400 text-sm">Our team has reached out to you. Please check your email and respond as soon as possible to move forward with licensing.</p>
-          )}
-          {agent.current_stage === 'licensing' && (
-            <p className="text-gray-400 text-sm">You are in the licensing phase. Check your state exam and background check links — complete these steps to move forward.</p>
-          )}
-          {agent.current_stage === 'onboarding' && (
-            <p className="text-gray-400 text-sm">Your onboarding call is being scheduled. You will receive details shortly. Once locked, your admin team will guide you through next steps.</p>
-          )}
-          {agent.current_stage === 'contracting' && (
-            <p className="text-gray-400 text-sm">You are in the contracting phase. Please review and sign all required documents sent to you.</p>
-          )}
-          {agent.current_stage === 'system_setup' && (
-            <p className="text-gray-400 text-sm">Your dialer and CRM access are being configured. You will receive login credentials shortly.</p>
-          )}
-          {agent.current_stage === 'training' && (
-            <p className="text-gray-400 text-sm">You are in training. Complete all required carrier, product, and sales process certifications.</p>
-          )}
-          {agent.current_stage === 'activation' && (
-            <p className="text-gray-400 text-sm">Almost there! Your final activation call with Noah is being scheduled. This is the last step before you go active.</p>
-          )}
-          {agent.current_stage === 'active' && (
-            <p className="text-green-400 text-sm font-semibold">🎉 Congratulations! You are now an active XFG agent. Check your email for CRM, dialer, and Discord access.</p>
-          )}
+        {checklistItems.length > 0 && (
+          <div style={card}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <p style={sectionTitle}>Stage Checklist</p>
+              {allComplete
+                ? <span style={{ background: '#1C3A2A', color: '#6FCF97', fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>All Complete</span>
+                : <span style={{ background: '#3A2A1C', color: '#C9A96E', fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>In Progress</span>
+              }
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {checklistItems.map(item => {
+                const isApproved = getStatus(item.id) === 'approved'
+                return (
+                  <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '6px', background: isApproved ? '#1C3A2A' : '#242220', border: '1px solid #2E2C29' }}>
+                    <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: `2px solid ${isApproved ? '#6FCF97' : '#5C5A56'}`, background: isApproved ? '#6FCF97' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {isApproved && <span style={{ color: '#0F0F0E', fontSize: '0.65rem', fontWeight: '700' }}>✓</span>}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ color: isApproved ? '#6FCF97' : '#F5F2ED', fontSize: '0.85rem', textDecoration: isApproved ? 'line-through' : 'none' }}>{item.title}</p>
+                      {item.description && <p style={{ color: '#9A9890', fontSize: '0.75rem', marginTop: '0.15rem' }}>{item.description}</p>}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {agent.current_stage === 'licensing' && stateResources && (
+          <div style={card}>
+            <p style={sectionTitle}>State Resources — {agent.state}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {stateResources.exam && (
+                <a href={stateResources.exam.exam_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#242220', border: '1px solid #2E2C29', borderRadius: '8px', padding: '1rem', textDecoration: 'none' }}>
+                  <div>
+                    <p style={{ color: '#F5F2ED', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.2rem' }}>State Licensing Exam</p>
+                    <p style={{ color: '#9A9890', fontSize: '0.75rem' }}>Provider: {stateResources.exam.exam_provider}</p>
+                  </div>
+                  <span style={{ color: '#C9A96E', fontSize: '0.85rem' }}>Book Now →</span>
+                </a>
+              )}
+              <a href="https://www.xcelsolutions.com/?utm_campaign=WS%20-%20National%20-%20Brand&utm_content=Brand&utm_source=google&utm_medium=g&utm_term=xcel%20solutions&utm_id=19187571241&matchtype=e&network=g&device=m&gad_source=1&gad_campaignid=19187571241&gbraid=0AAAAACtEPw98wx-TExb3HTBj-R65yeHBx&gclid=Cj0KCQjwoP_FBhDFARIsANPG24OM9RqW_MI_ankj6xHTBMcE8WhHzsrWkpBGq46gXlwDCf9fPlVxXnwaAjjNEALw_wcB" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#242220', border: '1px solid #2E2C29', borderRadius: '8px', padding: '1rem', textDecoration: 'none' }}>
+                <div>
+                  <p style={{ color: '#F5F2ED', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.2rem' }}>Life Insurance Pre-Licensing Course</p>
+                  <p style={{ color: '#9A9890', fontSize: '0.75rem' }}>Xcel Solutions · Partner code: <span style={{ color: '#C9A96E', fontWeight: '600' }}>karmakore</span></p>
+                </div>
+                <span style={{ color: '#C9A96E', fontSize: '0.85rem' }}>Start Course →</span>
+              </a>
+              {stateResources.background && (
+                <a href={stateResources.background.background_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#242220', border: '1px solid #2E2C29', borderRadius: '8px', padding: '1rem', textDecoration: 'none' }}>
+                  <div>
+                    <p style={{ color: '#F5F2ED', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.2rem' }}>Background Check</p>
+                    <p style={{ color: '#9A9890', fontSize: '0.75rem' }}>Provider: {stateResources.background.provider}</p>
+                  </div>
+                  <span style={{ color: '#C9A96E', fontSize: '0.85rem' }}>Start Now →</span>
+                </a>
+              )}
+              {stateResources.background?.fingerprint_url && (
+                <a href={stateResources.background.fingerprint_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#242220', border: '1px solid #2E2C29', borderRadius: '8px', padding: '1rem', textDecoration: 'none' }}>
+                  <div>
+                    <p style={{ color: '#F5F2ED', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.2rem' }}>Fingerprinting</p>
+                    <p style={{ color: '#9A9890', fontSize: '0.75rem' }}>Provider: {stateResources.background.provider}</p>
+                  </div>
+                  <span style={{ color: '#C9A96E', fontSize: '0.85rem' }}>Schedule →</span>
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div style={card}>
+          <p style={sectionTitle}>What Happens Next</p>
+          <p style={{ color: '#9A9890', fontSize: '0.9rem', lineHeight: '1.6' }}>
+            {agent.current_stage === 'new_lead' && 'Your application has been received. A member of our team will be in touch with you shortly to begin the licensing process.'}
+            {agent.current_stage === 'contacted' && 'Our team has reached out to you. Please check your email and respond as soon as possible to move forward with licensing.'}
+            {agent.current_stage === 'licensing' && 'You are in the licensing phase. Use the state resources above to book your exam, complete your background check, and fingerprinting.'}
+            {agent.current_stage === 'onboarding' && 'Your onboarding call is being scheduled. You will receive details shortly. Once locked, your admin team will guide you through next steps.'}
+            {agent.current_stage === 'contracting' && 'You are in the contracting phase. Please review and sign all required documents sent to you.'}
+            {agent.current_stage === 'system_setup' && 'Your dialer and CRM access are being configured. You will receive login credentials shortly.'}
+            {agent.current_stage === 'training' && 'You are in training. Complete all required carrier, product, and sales process certifications.'}
+            {agent.current_stage === 'activation' && 'Almost there! Your final activation call is being scheduled. This is the last step before you go active.'}
+            {agent.current_stage === 'active' && '🎉 Congratulations — you are now an active XFG agent. Check your email for CRM, dialer, and Discord access.'}
+          </p>
         </div>
+
       </div>
     </main>
   )
