@@ -85,6 +85,27 @@ export default function AgentPortalPage() {
     return p ? p.status : 'not_started'
   }
 
+  const toggleItem = async (itemId: string) => {
+    if (!agent || agent.is_locked) return
+    const current = getStatus(itemId)
+    const newStatus = current === 'approved' ? 'not_started' : 'approved'
+    const existing = checklistProgress.find(p => p.checklist_item_id === itemId)
+    if (existing) {
+      await supabase
+        .from('agent_checklist_progress')
+        .update({ status: newStatus, completed_at: newStatus === 'approved' ? new Date().toISOString() : null })
+        .eq('id', existing.id)
+    } else {
+      await supabase
+        .from('agent_checklist_progress')
+        .insert({ agent_id: agent.id, checklist_item_id: itemId, status: newStatus, completed_at: newStatus === 'approved' ? new Date().toISOString() : null })
+    }
+    setChecklistProgress(prev => {
+      const updated = prev.filter(p => p.checklist_item_id !== itemId)
+      return [...updated, { checklist_item_id: itemId, status: newStatus }]
+    })
+  }
+
   if (loading) return (
     <main style={{ minHeight: '100vh', background: '#0F0F0E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <p style={{ color: '#9A9890', fontFamily: 'Georgia, serif' }}>Loading your portal...</p>
@@ -177,7 +198,7 @@ export default function AgentPortalPage() {
               {checklistItems.map(item => {
                 const isApproved = getStatus(item.id) === 'approved'
                 return (
-                  <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '6px', background: isApproved ? '#1C3A2A' : '#242220', border: '1px solid #2E2C29' }}>
+                  <div key={item.id} onClick={() => toggleItem(item.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '6px', background: isApproved ? '#1C3A2A' : '#242220', border: '1px solid #2E2C29', cursor: agent.is_locked ? 'default' : 'pointer' }}>
                     <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: `2px solid ${isApproved ? '#6FCF97' : '#5C5A56'}`, background: isApproved ? '#6FCF97' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       {isApproved && <span style={{ color: '#0F0F0E', fontSize: '0.65rem', fontWeight: '700' }}>✓</span>}
                     </div>
