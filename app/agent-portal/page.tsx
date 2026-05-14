@@ -238,12 +238,7 @@ export default function AgentPortalPage() {
                 : <span style={{ background: '#3A2A1C', color: '#C9A96E', fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>In Progress</span>
               }
             </div>
-            {!agent.is_locked && (
-              <div>
-                <p style={{ color: '#9A9890', fontSize: '0.75rem', marginBottom: '0.75rem' }}>Tap each item to mark it complete.</p>
-                <button onClick={() => alert('test works')} style={{ background: '#C9A96E', color: '#0F0F0E', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '0.8rem', marginBottom: '0.75rem' }}>Test Click</button>
-              </div>
-            )}
+            {!agent.is_locked && <p style={{ color: '#9A9890', fontSize: '0.75rem', marginBottom: '0.75rem' }}>Tap each item to mark it complete.</p>}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {checklistItems.map(item => {
                 const isApproved = getStatus(item.id) === 'approved'
