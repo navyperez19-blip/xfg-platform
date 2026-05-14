@@ -1,10 +1,10 @@
 import { Resend } from 'resend'
 import { NextResponse } from 'next/server'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 export async function POST(request: Request) {
   const { full_name, email, xfg_id, state } = await request.json()
+
+  const resend = new Resend(process.env.RESEND_API_KEY)
 
   const { error } = await resend.emails.send({
     from: process.env.FROM_EMAIL || 'noreply@xfg.software',
