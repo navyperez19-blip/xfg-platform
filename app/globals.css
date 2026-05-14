@@ -1,38 +1,9 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --bg-primary: #F5F2ED;
-  --bg-secondary: #EDEAE4;
-  --bg-card: #FFFFFF;
   --bg-dark: #0F0F0E;
-  --bg-dark-card: #1A1917;
-  --bg-dark-elevated: #242220;
-  --text-primary: #0F0F0E;
-  --text-secondary: #5C5A56;
-  --text-muted: #9A9890;
   --accent: #C9A96E;
-  --accent-hover: #B8944F;
-  --accent-light: #F5EDD9;
-  --border: #DDD9D2;
-  --border-dark: #2E2C29;
-  --success: #2D6A4F;
-  --warning: #B5652A;
-  --danger: #8B2635;
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: 'Georgia', 'Times New Roman', serif;
-  -webkit-font-smoothing: antialiased;
-}
-
-input, select, textarea, button {
-  font-family: inherit;
 }

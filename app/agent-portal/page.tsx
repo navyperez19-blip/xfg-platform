@@ -86,6 +86,8 @@ export default function AgentPortalPage() {
   }
 
   const toggleItem = async (itemId: string) => {
+    alert('clicked ' + itemId)
+    console.log('toggleItem called', itemId, 'agent:', agent?.id, 'locked:', agent?.is_locked)
     if (!agent || agent.is_locked) return
     const current = getStatus(itemId)
     const newStatus = current === 'approved' ? 'not_started' : 'approved'
@@ -194,19 +196,25 @@ export default function AgentPortalPage() {
                 : <span style={{ background: '#3A2A1C', color: '#C9A96E', fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>In Progress</span>
               }
             </div>
+            {!agent.is_locked && <p style={{ color: '#9A9890', fontSize: '0.75rem', marginBottom: '0.75rem' }}>Tap each item to mark it complete.</p>}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {checklistItems.map(item => {
                 const isApproved = getStatus(item.id) === 'approved'
                 return (
-                  <div key={item.id} onClick={() => toggleItem(item.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '6px', background: isApproved ? '#1C3A2A' : '#242220', border: '1px solid #2E2C29', cursor: agent.is_locked ? 'default' : 'pointer' }}>
+                  <button
+                    key={item.id}
+                    disabled={agent.is_locked}
+                    onClick={() => toggleItem(item.id)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '6px', background: isApproved ? '#1C3A2A' : '#242220', border: `1px solid ${isApproved ? '#2D6A4F' : '#2E2C29'}`, cursor: agent.is_locked ? 'default' : 'pointer', textAlign: 'left', width: '100%', fontFamily: 'Georgia, serif' }}
+                  >
                     <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: `2px solid ${isApproved ? '#6FCF97' : '#5C5A56'}`, background: isApproved ? '#6FCF97' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       {isApproved && <span style={{ color: '#0F0F0E', fontSize: '0.65rem', fontWeight: '700' }}>✓</span>}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <p style={{ color: isApproved ? '#6FCF97' : '#F5F2ED', fontSize: '0.85rem', textDecoration: isApproved ? 'line-through' : 'none' }}>{item.title}</p>
-                      {item.description && <p style={{ color: '#9A9890', fontSize: '0.75rem', marginTop: '0.15rem' }}>{item.description}</p>}
+                      <p style={{ color: isApproved ? '#6FCF97' : '#F5F2ED', fontSize: '0.85rem', textDecoration: isApproved ? 'line-through' : 'none', margin: 0 }}>{item.title}</p>
+                      {item.description && <p style={{ color: '#9A9890', fontSize: '0.75rem', marginTop: '0.15rem', margin: 0 }}>{item.description}</p>}
                     </div>
-                  </div>
+                  </button>
                 )
               })}
             </div>
