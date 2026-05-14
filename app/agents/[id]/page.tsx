@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter, useParams } from 'next/navigation'
 import Notes from '../../components/Notes'
-import { getCurrentUser, canMoveStage, canLockAgent } from '../../lib/auth'
+import { getCurrentUser, canLockAgent } from '../../lib/auth'
 
 const STAGES = [
   { key: 'new_lead', label: 'New Lead' },
@@ -336,10 +336,10 @@ export default function AgentDetailPage() {
             ))}
           </div>
           <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button onClick={() => moveStage('backward')} disabled={saving || currentStageIndex === 0 || !canMoveStage(currentUser?.role || '', agent.current_stage)} style={{ ...ghostBtn, opacity: (saving || currentStageIndex === 0 || !canMoveStage(currentUser?.role || '', agent.current_stage)) ? 0.3 : 1 }}>
+            <button onClick={() => moveStage('backward')} disabled={saving || currentStageIndex === 0} style={{ ...ghostBtn, opacity: (saving || currentStageIndex === 0) ? 0.3 : 1 }}>
               Move Back
             </button>
-            <button onClick={() => moveStage('forward')} disabled={saving || currentStageIndex === STAGES.length - 1 || agent.is_locked || !canMoveStage(currentUser?.role || '', agent.current_stage)} style={{ ...goldBtn, opacity: (saving || currentStageIndex === STAGES.length - 1 || agent.is_locked || !canMoveStage(currentUser?.role || '', agent.current_stage)) ? 0.3 : 1 }}>
+            <button onClick={() => moveStage('forward')} disabled={saving || currentStageIndex === STAGES.length - 1 || agent.is_locked} style={{ ...goldBtn, opacity: (saving || currentStageIndex === STAGES.length - 1 || agent.is_locked) ? 0.3 : 1 }}>
               Move Forward
             </button>
             <button onClick={toggleLock} disabled={saving || !canLockAgent(currentUser?.role || '')} style={{ ...ghostBtn, color: agent.is_locked ? '#C9A96E' : '#F5F2ED', opacity: (saving || !canLockAgent(currentUser?.role || '')) ? 0.3 : 1 }}>
