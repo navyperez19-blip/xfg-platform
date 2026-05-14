@@ -107,6 +107,9 @@ style={{ background: '#1A1917', border: '1px solid #2E2C29', borderRadius: '6px'
 <p style={{ color: '#F5F2ED', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.2rem' }}>{agent.full_name}</p>
 <p style={{ color: '#C9A96E', fontSize: '0.72rem', fontFamily: 'monospace', marginBottom: '0.2rem' }}>{agent.xfg_id}</p>
 <p style={{ color: '#5C5A56', fontSize: '0.72rem' }}>{agent.state}</p>
+                  <p style={{ color: '#9A9890', fontSize: '0.68rem', marginTop: '0.2rem' }}>
+                    {Math.floor((Date.now() - new Date(agent.updated_at).getTime()) / (1000 * 60 * 60 * 24))}d in stage
+                  </p>
 {agent.agent_model && <p style={{ color: '#9A9890', fontSize: '0.7rem', marginTop: '0.2rem', textTransform: 'capitalize' }}>{agent.agent_model}</p>}
 {agent.is_locked && <p style={{ color: '#C9A96E', fontSize: '0.7rem', marginTop: '0.2rem' }}>🔒 Locked</p>}
 </div>

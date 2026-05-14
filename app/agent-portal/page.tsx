@@ -176,6 +176,19 @@ export default function AgentPortalPage() {
           </div>
         </div>
 
+        <div style={{ background: '#1A1917', border: '1px solid #2E2C29', borderRadius: '10px', padding: '1rem 1.5rem', marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <p style={{ color: '#9A9890', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'Georgia, serif' }}>Onboarding Progress</p>
+            <p style={{ color: '#C9A96E', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }}>{Math.round((currentStageIndex / 8) * 100)}%</p>
+          </div>
+          <div style={{ background: '#242220', borderRadius: '4px', height: '6px', overflow: 'hidden' }}>
+            <div style={{ background: '#C9A96E', height: '6px', borderRadius: '4px', width: `${Math.round((currentStageIndex / 8) * 100)}%`, transition: 'width 0.5s ease' }} />
+          </div>
+          <p style={{ color: '#5C5A56', fontSize: '0.72rem', marginTop: '0.5rem', fontFamily: 'Georgia, serif' }}>
+            Step {currentStageIndex + 1} of 9 · {STAGES[currentStageIndex]?.label}
+          </p>
+        </div>
+
         <div style={card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>

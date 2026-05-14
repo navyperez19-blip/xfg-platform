@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import NavBar from './components/NavBar'
 
 export const metadata: Metadata = {
   title: 'XFG Platform',
@@ -19,7 +20,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body style={{ margin: 0, padding: 0 }}>
+        <NavBar />
+        {children}
+      </body>
     </html>
   )
 }
