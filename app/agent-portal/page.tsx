@@ -26,6 +26,39 @@ export default function AgentPortalPage() {
   const [checklistItems, setChecklistItems] = useState<any[]>([])
   const [checklistProgress, setChecklistProgress] = useState<any[]>([])
   const [stateResources, setStateResources] = useState<any>(null)
+  const [movingStage, setMovingStage] = useState(false)
+
+  const loadChecklist = async (agentData: any) => {
+    const { data: items } = await supabase
+      .from('checklist_items')
+      .select('*')
+      .eq('stage', agentData.current_stage)
+      .order('display_order')
+
+    const { data: progress } = await supabase
+      .from('agent_checklist_progress')
+      .select('*')
+      .eq('agent_id', agentData.id)
+
+    setChecklistItems(items || [])
+    setChecklistProgress(progress || [])
+
+    if (agentData.current_stage === 'licensing') {
+      const { data: examLink } = await supabase
+        .from('state_exam_links')
+        .select('*')
+        .eq('state_code', agentData.state)
+        .single()
+      const { data: bgLink } = await supabase
+        .from('state_background_links')
+        .select('*')
+        .eq('state_code', agentData.state)
+        .single()
+      setStateResources({ exam: examLink, background: bgLink })
+    } else {
+      setStateResources(null)
+    }
+  }
 
   useEffect(() => {
     const load = async () => {
@@ -40,34 +73,7 @@ export default function AgentPortalPage() {
 
       if (agentData) {
         setAgent(agentData)
-
-        const { data: items } = await supabase
-          .from('checklist_items')
-          .select('*')
-          .eq('stage', agentData.current_stage)
-          .order('display_order')
-
-        const { data: progress } = await supabase
-          .from('agent_checklist_progress')
-          .select('*')
-          .eq('agent_id', agentData.id)
-
-        setChecklistItems(items || [])
-        setChecklistProgress(progress || [])
-
-        if (agentData.current_stage === 'licensing') {
-          const { data: examLink } = await supabase
-            .from('state_exam_links')
-            .select('*')
-            .eq('state_code', agentData.state)
-            .single()
-          const { data: bgLink } = await supabase
-            .from('state_background_links')
-            .select('*')
-            .eq('state_code', agentData.state)
-            .single()
-          setStateResources({ exam: examLink, background: bgLink })
-        }
+        await loadChecklist(agentData)
       }
 
       setLoading(false)
@@ -86,8 +92,6 @@ export default function AgentPortalPage() {
   }
 
   const toggleItem = async (itemId: string) => {
-    alert('clicked ' + itemId)
-    console.log('toggleItem called', itemId, 'agent:', agent?.id, 'locked:', agent?.is_locked)
     if (!agent || agent.is_locked) return
     const current = getStatus(itemId)
     const newStatus = current === 'approved' ? 'not_started' : 'approved'
@@ -108,6 +112,29 @@ export default function AgentPortalPage() {
     })
   }
 
+  const moveToNextStage = async () => {
+    if (!agent || movingStage) return
+    const currentIndex = STAGES.findIndex(s => s.key === agent.current_stage)
+    const nextStage = STAGES[currentIndex + 1]
+    if (!nextStage) return
+    setMovingStage(true)
+    await supabase
+      .from('agents')
+      .update({ current_stage: nextStage.key })
+      .eq('id', agent.id)
+    const updatedAgent = { ...agent, current_stage: nextStage.key }
+    setAgent(updatedAgent)
+    await supabase.from('notifications').insert({
+      recipient_id: (await supabase.from('users').select('id').eq('role', 'superadmin').limit(1).single()).data?.id,
+      agent_id: agent.id,
+      type: 'stage_change',
+      title: 'Agent self-advanced',
+      message: `${agent.full_name} moved themselves from ${agent.current_stage.replace(/_/g, ' ')} to ${nextStage.key.replace(/_/g, ' ')}`
+    })
+    await loadChecklist(updatedAgent)
+    setMovingStage(false)
+  }
+
   if (loading) return (
     <main style={{ minHeight: '100vh', background: '#0F0F0E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <p style={{ color: '#9A9890', fontFamily: 'Georgia, serif' }}>Loading your portal...</p>
@@ -125,7 +152,9 @@ export default function AgentPortalPage() {
 
   const currentStageIndex = STAGES.findIndex(s => s.key === agent.current_stage)
   const currentStage = STAGES[currentStageIndex]
-  const allComplete = checklistItems.filter(i => i.is_required).every(i => getStatus(i.id) === 'approved')
+  const nextStage = STAGES[currentStageIndex + 1]
+  const requiredItems = checklistItems.filter(i => i.is_required)
+  const allComplete = requiredItems.length > 0 && requiredItems.every(i => getStatus(i.id) === 'approved')
 
   return (
     <main style={{ minHeight: '100vh', background: '#0F0F0E', color: '#F5F2ED', fontFamily: 'Georgia, serif' }}>
@@ -201,11 +230,10 @@ export default function AgentPortalPage() {
               {checklistItems.map(item => {
                 const isApproved = getStatus(item.id) === 'approved'
                 return (
-                  <button
+                  <div
                     key={item.id}
-                    disabled={agent.is_locked}
                     onClick={() => toggleItem(item.id)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '6px', background: isApproved ? '#1C3A2A' : '#242220', border: `1px solid ${isApproved ? '#2D6A4F' : '#2E2C29'}`, cursor: agent.is_locked ? 'default' : 'pointer', textAlign: 'left', width: '100%', fontFamily: 'Georgia, serif' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '6px', background: isApproved ? '#1C3A2A' : '#242220', border: `1px solid ${isApproved ? '#2D6A4F' : '#2E2C29'}`, cursor: agent.is_locked ? 'default' : 'pointer' }}
                   >
                     <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: `2px solid ${isApproved ? '#6FCF97' : '#5C5A56'}`, background: isApproved ? '#6FCF97' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       {isApproved && <span style={{ color: '#0F0F0E', fontSize: '0.65rem', fontWeight: '700' }}>✓</span>}
@@ -214,10 +242,20 @@ export default function AgentPortalPage() {
                       <p style={{ color: isApproved ? '#6FCF97' : '#F5F2ED', fontSize: '0.85rem', textDecoration: isApproved ? 'line-through' : 'none', margin: 0 }}>{item.title}</p>
                       {item.description && <p style={{ color: '#9A9890', fontSize: '0.75rem', marginTop: '0.15rem', margin: 0 }}>{item.description}</p>}
                     </div>
-                  </button>
+                  </div>
                 )
               })}
             </div>
+
+            {allComplete && nextStage && !agent.is_locked && (
+              <button
+                onClick={moveToNextStage}
+                disabled={movingStage}
+                style={{ marginTop: '1.25rem', width: '100%', padding: '0.9rem', background: movingStage ? '#8B6A3A' : '#C9A96E', color: '#0F0F0E', border: 'none', borderRadius: '8px', cursor: movingStage ? 'default' : 'pointer', fontSize: '0.9rem', fontWeight: '700', fontFamily: 'Georgia, serif', letterSpacing: '0.04em' }}
+              >
+                {movingStage ? 'Moving...' : `Move to ${nextStage.label} →`}
+              </button>
+            )}
           </div>
         )}
 
