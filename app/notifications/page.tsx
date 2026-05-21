@@ -75,44 +75,44 @@ export default function NotificationsPage() {
   }
 
   if (loading) return (
-    <main style={{ minHeight: '100vh', background: '#0F0F0E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: '#9A9890', fontFamily: 'Georgia, serif' }}>Loading notifications...</p>
+    <main style={{ minHeight: '100vh', background: '#F5F2ED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p style={{ color: '#6B6966', fontFamily: 'Georgia, serif' }}>Loading notifications...</p>
     </main>
   )
 
   return (
-    <main style={{ minHeight: '100vh', background: '#0F0F0E', color: '#F5F2ED', fontFamily: 'Georgia, serif', padding: '2rem 1.5rem' }}>
+    <main style={{ minHeight: '100vh', background: '#F5F2ED', color: '#1A1814', fontFamily: 'Georgia, serif', padding: '2rem 1.5rem' }}>
       <div style={{ maxWidth: '760px', margin: '0 auto' }}>
-        <button onClick={() => router.push('/dashboard')} style={{ background: 'transparent', border: 'none', color: '#9A9890', fontSize: '0.85rem', fontFamily: 'Georgia, serif', cursor: 'pointer', marginBottom: '1.5rem', padding: '0' }}>
+        <button onClick={() => router.push('/dashboard')} style={{ background: 'transparent', border: 'none', color: '#6B6966', fontSize: '0.85rem', fontFamily: 'Georgia, serif', cursor: 'pointer', marginBottom: '1.5rem', padding: '0' }}>
           ← Dashboard
         </button>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
           <div>
             <p style={{ color: '#C9A96E', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '0.25rem' }}>XFG · X Financial Group</p>
-            <h1 style={{ color: '#F5F2ED', fontSize: '1.6rem', fontWeight: '400', marginBottom: '0.2rem' }}>Notifications</h1>
-            <p style={{ color: '#9A9890', fontSize: '0.85rem' }}>{notifications.length} total</p>
+            <h1 style={{ color: '#1A1814', fontSize: '1.6rem', fontWeight: '400', marginBottom: '0.2rem' }}>Notifications</h1>
+            <p style={{ color: '#6B6966', fontSize: '0.85rem' }}>{notifications.length} total</p>
           </div>
           {notifications.length > 0 && (
-            <button onClick={clearAll} style={{ background: 'transparent', border: '1px solid #2E2C29', color: '#9A9890', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }}>
+            <button onClick={clearAll} style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }}>
               Clear All
             </button>
           )}
         </div>
 
         {notifications.length === 0 ? (
-          <div style={{ background: '#1A1917', border: '1px solid #2E2C29', borderRadius: '10px', padding: '3rem', textAlign: 'center' }}>
-            <p style={{ color: '#9A9890', fontSize: '0.9rem' }}>No notifications yet.</p>
+          <div style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '3rem', textAlign: 'center' }}>
+            <p style={{ color: '#6B6966', fontSize: '0.9rem' }}>No notifications yet.</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {notifications.map(n => (
-              <div key={n.id} style={{ background: '#1A1917', border: '1px solid #2E2C29', borderRadius: '10px', padding: '1.25rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+              <div key={n.id} style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '1.25rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: getTypeColor(n.type), flexShrink: 0, marginTop: '0.4rem' }} />
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.4rem' }}>
                     <div>
-                      <span style={{ background: '#242220', border: `1px solid ${getTypeColor(n.type)}`, color: getTypeColor(n.type), fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.15rem 0.5rem', borderRadius: '3px', marginRight: '0.5rem' }}>
+                      <span style={{ background: '#F5EDD9', border: `1px solid ${getTypeColor(n.type)}`, color: getTypeColor(n.type), fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.15rem 0.5rem', borderRadius: '3px', marginRight: '0.5rem' }}>
                         {getTypeLabel(n.type)}
                       </span>
                       {n.agents && (
@@ -121,17 +121,17 @@ export default function NotificationsPage() {
                         </span>
                       )}
                     </div>
-                    <button onClick={() => deleteNotification(n.id)} style={{ background: 'transparent', border: 'none', color: '#5C5A56', cursor: 'pointer', fontSize: '0.8rem', padding: '0' }}>✕</button>
+                    <button onClick={() => deleteNotification(n.id)} style={{ background: 'transparent', border: 'none', color: '#9A9890', cursor: 'pointer', fontSize: '0.8rem', padding: '0' }}>✕</button>
                   </div>
-                  <p style={{ color: '#F5F2ED', fontSize: '0.9rem', marginBottom: '0.25rem' }}>{n.title}</p>
-                  <p style={{ color: '#9A9890', fontSize: '0.8rem', marginBottom: '0.4rem' }}>{n.message}</p>
+                  <p style={{ color: '#1A1814', fontSize: '0.9rem', marginBottom: '0.25rem' }}>{n.title}</p>
+                  <p style={{ color: '#6B6966', fontSize: '0.8rem', marginBottom: '0.4rem' }}>{n.message}</p>
                   {n.agents && (
-                    <div style={{ display: 'flex', gap: '1rem', fontSize: '0.75rem', color: '#5C5A56' }}>
+                    <div style={{ display: 'flex', gap: '1rem', fontSize: '0.75rem', color: '#9A9890' }}>
                       <span>{n.agents.full_name}</span>
                       <span>Stage: {STAGE_LABELS[n.agents.current_stage] || n.agents.current_stage}</span>
                     </div>
                   )}
-                  <p style={{ color: '#5C5A56', fontSize: '0.72rem', marginTop: '0.4rem' }}>{new Date(n.created_at).toLocaleString()}</p>
+                  <p style={{ color: '#9A9890', fontSize: '0.72rem', marginTop: '0.4rem' }}>{new Date(n.created_at).toLocaleString()}</p>
                 </div>
               </div>
             ))}
