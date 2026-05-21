@@ -7,25 +7,25 @@ import { useRouter } from 'next/navigation'
 import NotificationBell from '../components/NotificationBell'
 
 const S = {
-  page: { minHeight: '100vh', background: '#0F0F0E', color: '#F5F2ED', fontFamily: 'Georgia, serif' },
+  page: { minHeight: '100vh', background: '#F5F2ED', color: '#1A1814', fontFamily: 'Georgia, serif' },
   inner: { maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' },
   brand: { color: '#C9A96E', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase' as const, marginBottom: '0.5rem' },
-  title: { color: '#F5F2ED', fontSize: '1.6rem', fontWeight: '400', marginBottom: '0.25rem' },
-  subtitle: { color: '#9A9890', fontSize: '0.85rem' },
-  badge: { display: 'inline-block', background: '#242220', border: '1px solid #C9A96E', color: '#C9A96E', fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase' as const, padding: '0.2rem 0.6rem', borderRadius: '4px', marginLeft: '0.5rem' },
+  title: { color: '#1A1814', fontSize: '1.8rem', fontWeight: '400', marginBottom: '0.25rem' },
+  subtitle: { color: '#6B6966', fontSize: '0.9rem' },
+  badge: { display: 'inline-block', background: '#F5EDD9', border: '1px solid #C9A96E', color: '#8B6A2E', fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase' as const, padding: '0.2rem 0.6rem', borderRadius: '4px', marginLeft: '0.5rem' },
   headerRight: { display: 'flex', alignItems: 'center', gap: '0.75rem' },
-  signout: { background: 'transparent', border: '1px solid #2E2C29', color: '#9A9890', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif' },
+  signout: { background: 'transparent', border: '1px solid #DDD9D2', color: '#6B6966', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'Georgia, serif' },
   navRow: { display: 'flex', gap: '0.75rem', marginBottom: '2rem', flexWrap: 'wrap' as const },
-  navBtn: { background: 'transparent', border: '1px solid #2E2C29', color: '#F5F2ED', padding: '0.6rem 1.25rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif', textDecoration: 'none', display: 'inline-block' },
-  navBtnGold: { background: '#C9A96E', border: '1px solid #C9A96E', color: '#0F0F0E', padding: '0.6rem 1.25rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif', textDecoration: 'none', display: 'inline-block', fontWeight: '600' },
+  navBtn: { background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#1A1814', padding: '0.6rem 1.25rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'Georgia, serif', textDecoration: 'none', display: 'inline-block' },
+  navBtnGold: { background: '#C9A96E', border: '1px solid #C9A96E', color: '#FFFFFF', padding: '0.6rem 1.25rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'Georgia, serif', textDecoration: 'none', display: 'inline-block', fontWeight: '600' },
   statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' },
-  statCard: { background: '#1A1917', border: '1px solid #2E2C29', borderRadius: '10px', padding: '1.25rem', textAlign: 'center' as const },
-  statLabel: { color: '#9A9890', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginBottom: '0.5rem' },
-  statNum: { fontSize: '2rem', fontWeight: '400' },
-  card: { background: '#1A1917', border: '1px solid #2E2C29', borderRadius: '10px', padding: '1.5rem' },
+  statCard: { background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '1.5rem', textAlign: 'center' as const },
+  statLabel: { color: '#6B6966', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginBottom: '0.5rem' },
+  statNum: { fontSize: '2.2rem', fontWeight: '400' },
+  card: { background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '1.5rem' },
   cardTitle: { color: '#C9A96E', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase' as const, marginBottom: '1rem' },
-  permItem: { color: '#9A9890', fontSize: '0.9rem', marginBottom: '0.5rem' },
+  permItem: { color: '#6B6966', fontSize: '0.95rem', marginBottom: '0.5rem' },
 }
 
 export default function DashboardPage() {
@@ -58,7 +58,7 @@ export default function DashboardPage() {
   if (!profile) return (
     <main style={S.page}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <p style={{ color: '#9A9890', fontFamily: 'Georgia, serif' }}>Loading...</p>
+        <p style={{ color: '#6B6966', fontFamily: 'Georgia, serif' }}>Loading...</p>
       </div>
     </main>
   )
@@ -77,7 +77,7 @@ export default function DashboardPage() {
           </div>
           <div style={S.headerRight}>
             <NotificationBell />
-            <button onClick={() => router.push('/change-password')} style={{ ...S.signout, marginRight: '0.5rem' }}>Change Password</button>
+            <button onClick={() => router.push('/change-password')} style={S.signout}>Settings</button>
             <button onClick={handleLogout} style={S.signout}>Sign Out</button>
           </div>
         </div>
@@ -100,11 +100,11 @@ export default function DashboardPage() {
           </div>
           <div style={S.statCard}>
             <p style={S.statLabel}>In Pipeline</p>
-            <p style={{ ...S.statNum, color: '#F5F2ED' }}>{stats.pipeline}</p>
+            <p style={{ ...S.statNum, color: '#1A1814' }}>{stats.pipeline}</p>
           </div>
           <div style={S.statCard}>
             <p style={S.statLabel}>Active</p>
-            <p style={{ ...S.statNum, color: '#C9A96E' }}>{stats.active}</p>
+            <p style={{ ...S.statNum, color: '#2D6A4F' }}>{stats.active}</p>
           </div>
         </div>
 
