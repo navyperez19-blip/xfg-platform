@@ -50,46 +50,46 @@ export default function Notes({ agentId }: NotesProps) {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-4">Notes</h2>
-      <div className="flex gap-2 mb-4">
+      <p style={{ color: '#C9A96E', fontSize: '0.72rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>Notes</p>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
         <input
           type="text"
           value={newNote}
           onChange={(e) => setNewNote(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && addNote()}
           placeholder="Add a note..."
-          className="flex-1 bg-gray-800 text-white px-4 py-2 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500 text-sm"
+          style={{ flex: 1, background: '#EDEAE4', color: '#1A1814', border: '1px solid #DDD9D2', borderRadius: '6px', padding: '0.5rem 0.75rem', fontSize: '0.85rem', fontFamily: 'Georgia, serif', outline: 'none' }}
         />
         <button
           onClick={addNote}
           disabled={saving || !newNote.trim()}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm transition disabled:opacity-50"
+          style={{ background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '6px', padding: '0.5rem 1rem', fontSize: '0.85rem', fontFamily: 'Georgia, serif', fontWeight: '600', cursor: saving || !newNote.trim() ? 'not-allowed' : 'pointer', opacity: saving || !newNote.trim() ? 0.5 : 1 }}
         >
           Add
         </button>
       </div>
       {loading ? (
-        <p className="text-gray-400 text-sm">Loading notes...</p>
+        <p style={{ color: '#6B6966', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }}>Loading notes...</p>
       ) : notes.length === 0 ? (
-        <p className="text-gray-400 text-sm">No notes yet.</p>
+        <p style={{ color: '#6B6966', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }}>No notes yet.</p>
       ) : (
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           {notes.map(note => (
-            <div key={note.id} className="bg-gray-800 p-3 rounded-xl">
-              <div className="flex justify-between items-start gap-2">
-                <p className="text-sm text-white flex-1">{note.content}</p>
+            <div key={note.id} style={{ background: '#EDEAE4', border: '1px solid #DDD9D2', borderRadius: '6px', padding: '0.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+                <p style={{ color: '#1A1814', fontSize: '0.85rem', fontFamily: 'Georgia, serif', flex: 1 }}>{note.content}</p>
                 <button
                   onClick={async () => {
                     if (!confirm('Delete this note?')) return
                     await supabase.from('notes').delete().eq('id', note.id)
                     setNotes(prev => prev.filter(n => n.id !== note.id))
                   }}
-                  className="text-gray-600 hover:text-red-400 text-xs transition flex-shrink-0"
+                  style={{ background: 'transparent', border: 'none', color: '#9A9890', cursor: 'pointer', fontSize: '0.8rem', padding: '0', flexShrink: 0 }}
                 >
                   ✕
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p style={{ color: '#9A9890', fontSize: '0.72rem', fontFamily: 'Georgia, serif', marginTop: '0.35rem' }}>
                 {note.users?.full_name || 'Admin'} · {new Date(note.created_at).toLocaleDateString()}
               </p>
             </div>

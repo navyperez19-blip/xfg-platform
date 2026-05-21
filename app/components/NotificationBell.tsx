@@ -26,7 +26,7 @@ export default function NotificationBell() {
   return (
     <button
       onClick={() => router.push('/notifications')}
-      style={{ position: 'relative', background: 'transparent', border: '1px solid #2E2C29', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+      style={{ position: 'relative', background: 'transparent', border: '1px solid #DDD9D2', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
     >
       <span style={{ fontSize: '1rem' }}>🔔</span>
       {unreadCount > 0 && (
