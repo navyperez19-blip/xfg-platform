@@ -132,9 +132,9 @@ export default function SignupPage() {
 
   const fieldInput: React.CSSProperties = {
     width: '100%',
-    background: '#242220',
-    color: '#F5F2ED',
-    border: '1px solid #2E2C29',
+    background: '#EDEAE4',
+    color: '#1A1814',
+    border: '1px solid #DDD9D2',
     borderRadius: '8px',
     padding: '0.75rem 1rem',
     fontSize: '0.95rem',
@@ -144,7 +144,7 @@ export default function SignupPage() {
   }
 
   const fieldLabel: React.CSSProperties = {
-    color: '#9A9890',
+    color: '#6B6966',
     fontSize: '0.75rem',
     letterSpacing: '0.08em',
     textTransform: 'uppercase',
@@ -154,15 +154,15 @@ export default function SignupPage() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', background: '#0F0F0E', color: '#F5F2ED', fontFamily: 'Georgia, serif', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem 1rem' }}>
+    <main style={{ minHeight: '100vh', background: '#F5F2ED', color: '#1A1814', fontFamily: 'Georgia, serif', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem 1rem' }}>
       <div style={{ width: '100%', maxWidth: '460px' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <p style={{ color: '#C9A96E', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>XFG · X Financial Group</p>
-          <h1 style={{ color: '#F5F2ED', fontSize: '1.8rem', fontWeight: '400', marginBottom: '0.25rem' }}>Join XFG</h1>
-          <p style={{ color: '#9A9890', fontSize: '0.85rem', fontStyle: 'italic' }}>Create your agent account</p>
+          <h1 style={{ color: '#1A1814', fontSize: '1.8rem', fontWeight: '400', marginBottom: '0.25rem' }}>Join XFG</h1>
+          <p style={{ color: '#6B6966', fontSize: '0.85rem', fontStyle: 'italic' }}>Create your agent account</p>
         </div>
 
-        <div style={{ background: '#1A1917', border: '1px solid #2E2C29', borderRadius: '12px', padding: '2rem' }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '12px', padding: '2rem' }}>
           <form onSubmit={handleSubmit}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
               <div>
@@ -204,11 +204,11 @@ export default function SignupPage() {
               <input type="password" value={form.confirm_password} onChange={(e) => setForm({ ...form, confirm_password: e.target.value })} required placeholder="Re-enter password" style={fieldInput} />
             </div>
             {error && <p style={{ color: '#E07070', fontSize: '0.85rem', marginBottom: '1rem' }}>{error}</p>}
-            <button type="submit" disabled={loading} style={{ width: '100%', background: '#C9A96E', color: '#0F0F0E', border: 'none', borderRadius: '8px', padding: '0.875rem', fontSize: '0.95rem', fontFamily: 'Georgia, serif', fontWeight: '600', cursor: loading ? 'not-allowed' : 'pointer', letterSpacing: '0.03em', opacity: loading ? 0.6 : 1 }}>
+            <button type="submit" disabled={loading} style={{ width: '100%', background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '8px', padding: '0.875rem', fontSize: '0.95rem', fontFamily: 'Georgia, serif', fontWeight: '600', cursor: loading ? 'not-allowed' : 'pointer', letterSpacing: '0.03em', opacity: loading ? 0.6 : 1 }}>
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
-          <p style={{ textAlign: 'center', color: '#5C5A56', fontSize: '0.8rem', marginTop: '1.5rem' }}>
+          <p style={{ textAlign: 'center', color: '#6B6966', fontSize: '0.8rem', marginTop: '1.5rem' }}>
             Already have an account?{' '}
             <Link href="/login" style={{ color: '#C9A96E', textDecoration: 'none' }}>Sign in</Link>
           </p>
