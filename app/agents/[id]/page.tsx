@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter, useParams } from 'next/navigation'
 import Notes from '../../components/Notes'
+import AgentMessages from '../../components/AgentMessages'
 import { getCurrentUser, canLockAgent } from '../../lib/auth'
 
 const STAGES = [
@@ -382,6 +383,12 @@ export default function AgentDetailPage() {
         {/* Notes */}
         <div style={card}>
           <Notes agentId={agent.id} />
+        </div>
+
+        {/* Messages */}
+        <div style={card}>
+          <p style={sectionTitle}>Messages to Agent</p>
+          <AgentMessages agentId={agent.id} agentEmail={agent.email} agentName={agent.full_name} isAdminView={true} />
         </div>
 
         {/* Stage History */}

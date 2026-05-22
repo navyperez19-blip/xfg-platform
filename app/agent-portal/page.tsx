@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import AgentMessages from '../components/AgentMessages'
 import { useRouter } from 'next/navigation'
 
 const STAGES = [
@@ -312,6 +313,11 @@ export default function AgentPortalPage() {
             </div>
           </div>
         )}
+
+        <div style={card}>
+          <p style={sectionTitle}>Messages from Your Team</p>
+          <AgentMessages agentId={agent.id} agentEmail={agent.email} agentName={agent.full_name} isAdminView={false} />
+        </div>
 
         <div style={card}>
           <p style={sectionTitle}>What Happens Next</p>
