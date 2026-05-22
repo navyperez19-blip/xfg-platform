@@ -36,6 +36,22 @@ export default function PipelinePage() {
       const { data } = await supabase.from('agents').select('*').order('created_at', { ascending: false })
       setAgents(data || [])
       setLoading(false)
+
+      const channel = supabase
+        .channel('pipeline-agents')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'agents',
+        }, async () => {
+          const { data: updated } = await supabase.from('agents').select('*').order('created_at', { ascending: false })
+          setAgents(updated || [])
+        })
+        .subscribe()
+
+      return () => {
+        supabase.removeChannel(channel)
+      }
     }
     getAgents()
   }, [router])

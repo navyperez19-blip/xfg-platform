@@ -124,13 +124,22 @@ export default function AgentPortalPage() {
       .eq('id', agent.id)
     const updatedAgent = { ...agent, current_stage: nextStage.key }
     setAgent(updatedAgent)
-    await supabase.from('notifications').insert({
-      recipient_id: (await supabase.from('users').select('id').eq('role', 'superadmin').limit(1).single()).data?.id,
-      agent_id: agent.id,
-      type: 'stage_change',
-      title: 'Agent self-advanced',
-      message: `${agent.full_name} moved themselves from ${agent.current_stage.replace(/_/g, ' ')} to ${nextStage.key.replace(/_/g, ' ')}`
-    })
+    const { data: admins } = await supabase
+      .from('users')
+      .select('id')
+      .in('role', ['superadmin', 'executive'])
+
+    if (admins && admins.length > 0) {
+      await supabase.from('notifications').insert(
+        admins.map(admin => ({
+          recipient_id: admin.id,
+          agent_id: agent.id,
+          type: 'stage_change',
+          title: 'Agent self-advanced',
+          message: `${agent.full_name} moved themselves from ${agent.current_stage.replace(/_/g, ' ')} to ${nextStage.key.replace(/_/g, ' ')}`
+        }))
+      )
+    }
     await loadChecklist(updatedAgent)
     setMovingStage(false)
   }
