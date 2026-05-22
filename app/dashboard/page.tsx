@@ -129,12 +129,7 @@ export default function DashboardPage() {
               <p style={S.permItem}>· Move agents through training</p>
             </>
           )}
-          {profile.role === 'noah' && (
-            <>
-              <p style={S.permItem}>· Conduct activation calls</p>
-              <p style={S.permItem}>· Mark agents as Active</p>
-            </>
-          )}
+
           {['executive', 'superadmin'].includes(profile.role) && (
             <>
               <p style={S.permItem}>· Full access to all pipeline stages</p>

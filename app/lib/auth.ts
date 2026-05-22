@@ -22,8 +22,8 @@ export function canMoveStage(role: string, stage: string): boolean {
     contracting: ['joe', 'executive', 'superadmin'],
     system_setup: ['joe', 'executive', 'superadmin'],
     training: ['jesse', 'executive', 'superadmin'],
-    activation: ['noah', 'executive', 'superadmin'],
-    active: ['noah', 'executive', 'superadmin'],
+    activation: ['executive', 'superadmin'],
+    active: ['executive', 'superadmin'],
   }
   return stageOwners[stage]?.includes(role) || false
 }
@@ -33,7 +33,7 @@ export function canCreateAgent(role: string): boolean {
 }
 
 export function canAddNotes(role: string): boolean {
-  return ['finley', 'joe', 'jesse', 'noah', 'executive', 'superadmin'].includes(role)
+  return ['finley', 'joe', 'jesse', 'executive', 'superadmin'].includes(role)
 }
 
 export function canLockAgent(role: string): boolean {
