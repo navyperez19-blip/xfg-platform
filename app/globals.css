@@ -11,14 +11,21 @@
 body {
   background-color: #F5F2ED;
   color: #1A1814;
-  font-family: 'Georgia', 'Times New Roman', serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 input, select, textarea, button {
-  font-family: inherit;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 ::placeholder {
   color: #9A9890;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 600;
+  line-height: 1.3;
 }

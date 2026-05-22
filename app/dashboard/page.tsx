@@ -6,28 +6,6 @@ import { getCurrentUser } from '../lib/auth'
 import { useRouter } from 'next/navigation'
 import NotificationBell from '../components/NotificationBell'
 
-const S = {
-  page: { minHeight: '100vh', background: '#F5F2ED', color: '#1A1814', fontFamily: 'Georgia, serif' },
-  inner: { maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' },
-  brand: { color: '#C9A96E', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase' as const, marginBottom: '0.5rem' },
-  title: { color: '#1A1814', fontSize: '1.8rem', fontWeight: '400', marginBottom: '0.25rem' },
-  subtitle: { color: '#6B6966', fontSize: '0.9rem' },
-  badge: { display: 'inline-block', background: '#F5EDD9', border: '1px solid #C9A96E', color: '#8B6A2E', fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase' as const, padding: '0.2rem 0.6rem', borderRadius: '4px', marginLeft: '0.5rem' },
-  headerRight: { display: 'flex', alignItems: 'center', gap: '0.75rem' },
-  signout: { background: 'transparent', border: '1px solid #DDD9D2', color: '#6B6966', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'Georgia, serif' },
-  navRow: { display: 'flex', gap: '0.75rem', marginBottom: '2rem', flexWrap: 'wrap' as const },
-  navBtn: { background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#1A1814', padding: '0.6rem 1.25rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'Georgia, serif', textDecoration: 'none', display: 'inline-block' },
-  navBtnGold: { background: '#C9A96E', border: '1px solid #C9A96E', color: '#FFFFFF', padding: '0.6rem 1.25rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'Georgia, serif', textDecoration: 'none', display: 'inline-block', fontWeight: '600' },
-  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' },
-  statCard: { background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '1.5rem', textAlign: 'center' as const },
-  statLabel: { color: '#6B6966', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginBottom: '0.5rem' },
-  statNum: { fontSize: '2.2rem', fontWeight: '400' },
-  card: { background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '1.5rem' },
-  cardTitle: { color: '#C9A96E', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase' as const, marginBottom: '1rem' },
-  permItem: { color: '#6B6966', fontSize: '0.95rem', marginBottom: '0.5rem' },
-}
-
 export default function DashboardPage() {
   const router = useRouter()
   const [profile, setProfile] = useState<any>(null)
@@ -56,87 +34,84 @@ export default function DashboardPage() {
   }
 
   if (!profile) return (
-    <main style={S.page}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <p style={{ color: '#6B6966', fontFamily: 'Georgia, serif' }}>Loading...</p>
-      </div>
+    <main style={{ minHeight: '100vh', background: '#F5F2ED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p style={{ color: '#6B6966', fontFamily: 'Inter, sans-serif' }}>Loading...</p>
     </main>
   )
 
   return (
-    <main style={S.page}>
-      <div style={S.inner}>
-        <div style={S.header}>
+    <main style={{ minHeight: '100vh', background: '#F5F2ED' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
           <div>
-            <p style={S.brand}>XFG · X Financial Group</p>
-            <h1 style={S.title}>
-              {profile.full_name}
-              <span style={S.badge}>{profile.role}</span>
-            </h1>
-            <p style={S.subtitle}>Agent Operations Platform</p>
+            <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '600', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.4rem' }}>XFG · X Financial Group</p>
+            <h1 style={{ color: '#1A1814', fontSize: '1.75rem', fontWeight: '700', marginBottom: '0.25rem' }}>Welcome back, {profile.full_name}</h1>
+            <p style={{ color: '#6B6966', fontSize: '0.9rem' }}>Agent Operations Platform</p>
           </div>
-          <div style={S.headerRight}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <span style={{ background: '#F5EDD9', color: '#8B6A2E', fontSize: '0.72rem', fontWeight: '600', letterSpacing: '0.06em', textTransform: 'uppercase', padding: '0.3rem 0.75rem', borderRadius: '20px' }}>{profile.role}</span>
             <NotificationBell />
-            <button onClick={() => router.push('/change-password')} style={S.signout}>Settings</button>
-            <button onClick={handleLogout} style={S.signout}>Sign Out</button>
+            <button onClick={() => router.push('/change-password')} style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>Settings</button>
+            <button onClick={handleLogout} style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>Sign Out</button>
           </div>
         </div>
 
-        <div style={S.navRow}>
-          <button onClick={() => router.push('/pipeline')} style={S.navBtnGold}>Pipeline</button>
+        <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+          <button onClick={() => router.push('/pipeline')} style={{ background: '#C9A96E', border: 'none', color: '#FFFFFF', padding: '0.6rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600' }}>Pipeline</button>
           {['finley', 'executive', 'superadmin'].includes(profile.role) && (
-            <button onClick={() => router.push('/agents/new')} style={S.navBtn}>+ New Agent</button>
+            <button onClick={() => router.push('/agents/new')} style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#1A1814', padding: '0.6rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>+ New Agent</button>
           )}
           {['executive', 'superadmin'].includes(profile.role) && (
-            <button onClick={() => router.push('/analytics')} style={S.navBtn}>Analytics</button>
+            <button onClick={() => router.push('/analytics')} style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#1A1814', padding: '0.6rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>Analytics</button>
           )}
-          <button onClick={() => router.push('/search')} style={S.navBtn}>Search Agents</button>
+          <button onClick={() => router.push('/search')} style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#1A1814', padding: '0.6rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>Search Agents</button>
         </div>
 
-        <div style={S.statsGrid}>
-          <div style={S.statCard}>
-            <p style={S.statLabel}>Total Agents</p>
-            <p style={{ ...S.statNum, color: '#C9A96E' }}>{stats.total}</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+            <p style={{ color: '#6B6966', fontSize: '0.8rem', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>Total Agents</p>
+            <p style={{ color: '#C9A96E', fontSize: '2.5rem', fontWeight: '700', lineHeight: 1 }}>{stats.total}</p>
           </div>
-          <div style={S.statCard}>
-            <p style={S.statLabel}>In Pipeline</p>
-            <p style={{ ...S.statNum, color: '#1A1814' }}>{stats.pipeline}</p>
+          <div style={{ background: '#FFFFFF', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+            <p style={{ color: '#6B6966', fontSize: '0.8rem', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>In Pipeline</p>
+            <p style={{ color: '#1A1814', fontSize: '2.5rem', fontWeight: '700', lineHeight: 1 }}>{stats.pipeline}</p>
           </div>
-          <div style={S.statCard}>
-            <p style={S.statLabel}>Active</p>
-            <p style={{ ...S.statNum, color: '#2D6A4F' }}>{stats.active}</p>
+          <div style={{ background: '#FFFFFF', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+            <p style={{ color: '#6B6966', fontSize: '0.8rem', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>Active Agents</p>
+            <p style={{ color: '#2D6A4F', fontSize: '2.5rem', fontWeight: '700', lineHeight: 1 }}>{stats.active}</p>
           </div>
         </div>
 
-        <div style={S.card}>
-          <p style={S.cardTitle}>Your Access</p>
+        <div style={{ background: '#FFFFFF', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+          <p style={{ color: '#C9A96E', fontSize: '0.75rem', fontWeight: '600', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1rem' }}>Your Access Level</p>
           {profile.role === 'finley' && (
-            <>
-              <p style={S.permItem}>· Create and manage new agents</p>
-              <p style={S.permItem}>· Track licensing and exam progress</p>
-              <p style={S.permItem}>· Schedule onboarding calls</p>
-            </>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Create and manage agents</p>
+              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Track licensing progress</p>
+              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Schedule onboarding calls</p>
+              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Move agents through licensing</p>
+            </div>
           )}
           {profile.role === 'joe' && (
-            <>
-              <p style={S.permItem}>· Verify contracts and agreements</p>
-              <p style={S.permItem}>· Confirm dialer and CRM setup</p>
-            </>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Verify contracts</p>
+              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Confirm dialer and CRM setup</p>
+            </div>
           )}
           {profile.role === 'jesse' && (
-            <>
-              <p style={S.permItem}>· Verify all training completions</p>
-              <p style={S.permItem}>· Move agents through training</p>
-            </>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Verify training completions</p>
+              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Move agents through training</p>
+            </div>
           )}
-
           {['executive', 'superadmin'].includes(profile.role) && (
-            <>
-              <p style={S.permItem}>· Full access to all pipeline stages</p>
-              <p style={S.permItem}>· Override any stage with audit log</p>
-              <p style={S.permItem}>· Assign agent models</p>
-              <p style={S.permItem}>· Executive analytics and reporting</p>
-            </>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Full access to all stages</p>
+              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Override any stage with audit log</p>
+              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Assign agent models</p>
+              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Executive analytics and reporting</p>
+            </div>
           )}
         </div>
       </div>
