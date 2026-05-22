@@ -7,7 +7,6 @@ import Notes from '../../components/Notes'
 import { getCurrentUser, canLockAgent } from '../../lib/auth'
 
 const STAGES = [
-  { key: 'new_lead', label: 'New Lead' },
   { key: 'contacted', label: 'Contacted' },
   { key: 'licensing', label: 'Licensing' },
   { key: 'onboarding', label: 'Onboarding' },
@@ -280,7 +279,6 @@ export default function AgentDetailPage() {
             <p style={{ color: '#6B6966', fontSize: '0.8rem', marginBottom: '1rem' }}>Force move this agent to any stage. A reason is required and permanently logged.</p>
             <select id="override-stage" style={{ ...input, marginBottom: '0.75rem' }}>
               <option value="">Select target stage...</option>
-              <option value="new_lead">New Lead</option>
               <option value="contacted">Contacted</option>
               <option value="licensing">Licensing</option>
               <option value="onboarding">Onboarding</option>

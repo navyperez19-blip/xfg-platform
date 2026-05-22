@@ -5,7 +5,6 @@ import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
 
 const STAGES = [
-  { key: 'new_lead', label: 'New Lead', order: 1 },
   { key: 'contacted', label: 'Contacted', order: 2 },
   { key: 'licensing', label: 'Licensing', order: 3 },
   { key: 'onboarding', label: 'Onboarding', order: 4 },
@@ -317,7 +316,6 @@ export default function AgentPortalPage() {
         <div style={card}>
           <p style={sectionTitle}>What Happens Next</p>
           <p style={{ color: '#6B6966', fontSize: '0.9rem', lineHeight: '1.6' }}>
-            {agent.current_stage === 'new_lead' && 'Your application has been received. A member of our team will be in touch with you shortly to begin the licensing process.'}
             {agent.current_stage === 'contacted' && 'Our team has reached out to you. Please check your email and respond as soon as possible to move forward with licensing.'}
             {agent.current_stage === 'licensing' && 'You are in the licensing phase. Use the state resources above to book your exam, complete your background check, and fingerprinting.'}
             {agent.current_stage === 'onboarding' && 'Your onboarding call is being scheduled. You will receive details shortly. Once locked, your admin team will guide you through next steps.'}

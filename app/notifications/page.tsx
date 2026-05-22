@@ -69,7 +69,7 @@ export default function NotificationsPage() {
   }
 
   const STAGE_LABELS: Record<string, string> = {
-    new_lead: 'New Lead', contacted: 'Contacted', licensing: 'Licensing',
+    contacted: 'Contacted', licensing: 'Licensing',
     onboarding: 'Onboarding', contracting: 'Contracting', system_setup: 'System Setup',
     training: 'Training', activation: 'Activation', active: 'Active'
   }

@@ -105,7 +105,7 @@ export default function SignupPage() {
       email: form.email,
       phone: form.phone,
       state: form.state,
-      current_stage: 'new_lead',
+      current_stage: 'contacted',
       is_locked: false,
     })
 

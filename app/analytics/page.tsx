@@ -6,7 +6,6 @@ import { getCurrentUser } from '../lib/auth'
 import { useRouter } from 'next/navigation'
 
 const STAGES = [
-  { key: 'new_lead', label: 'New Lead' },
   { key: 'contacted', label: 'Contacted' },
   { key: 'licensing', label: 'Licensing' },
   { key: 'onboarding', label: 'Onboarding' },

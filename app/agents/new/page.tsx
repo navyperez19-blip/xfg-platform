@@ -50,7 +50,7 @@ export default function NewAgentPage() {
       .insert({
         ...form,
         xfg_id,
-        current_stage: 'new_lead',
+        current_stage: 'contacted',
         is_locked: false,
       })
 
