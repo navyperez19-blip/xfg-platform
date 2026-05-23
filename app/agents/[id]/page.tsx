@@ -224,6 +224,22 @@ export default function AgentDetailPage() {
                     ))}
                   </select>
                 </div>
+                <div>
+                  <label style={label}>Licensed Status</label>
+                  <select
+                    defaultValue={agent.is_licensed || ''}
+                    style={input}
+                    onChange={async (e) => {
+                      await supabase.from('agents').update({ is_licensed: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                      setAgent({ ...agent, is_licensed: e.target.value })
+                    }}
+                  >
+                    <option value="">Unknown</option>
+                    <option value="yes">Yes — Active License</option>
+                    <option value="no">No — Not Licensed</option>
+                    <option value="expired">Expired License</option>
+                  </select>
+                </div>
               </div>
               <p style={{ color: '#6B6966', fontSize: '0.72rem' }}>Changes save automatically when you click out of a field.</p>
             </div>

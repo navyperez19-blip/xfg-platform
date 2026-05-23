@@ -18,7 +18,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [form, setForm] = useState({
-    first_name: '', last_name: '', email: '', phone: '', age: '', state: '', password: '', confirm_password: '',
+    first_name: '', last_name: '', email: '', phone: '', age: '', state: '', password: '', confirm_password: '', is_licensed: '',
   })
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
@@ -49,7 +49,7 @@ export default function SignupPage() {
     }
     const xfg_id = 'XFG-' + String(nextNumber).padStart(6, '0')
 
-    const { error: agentError } = await supabase.from('agents').insert({ user_id: userId, xfg_id, full_name, email: form.email, phone: form.phone, state: form.state, current_stage: 'contacted', is_locked: false })
+    const { error: agentError } = await supabase.from('agents').insert({ user_id: userId, xfg_id, full_name, email: form.email, phone: form.phone, state: form.state, current_stage: 'contacted', is_locked: false, is_licensed: form.is_licensed })
     if (agentError) { setError('Agent profile creation failed: ' + agentError.message); setLoading(false); return }
 
     await fetch('/api/send-welcome', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ full_name, email: form.email, xfg_id, state: form.state }) })
@@ -102,6 +102,15 @@ export default function SignupPage() {
                   {US_STATES.map((s) => (<option key={s} value={s}>{s}</option>))}
                 </select>
               </div>
+            </div>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={lbl}>Are you currently licensed?</label>
+              <select value={form.is_licensed} onChange={(e) => setForm({ ...form, is_licensed: e.target.value })} required style={inp}>
+                <option value="">Select...</option>
+                <option value="yes">Yes — I have an active insurance license</option>
+                <option value="no">No — I am not yet licensed</option>
+                <option value="expired">My license has expired</option>
+              </select>
             </div>
             <div style={{ marginBottom: '16px' }}>
               <label style={lbl}>Password</label>
