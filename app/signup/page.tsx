@@ -18,14 +18,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [form, setForm] = useState({
-    first_name: '',
-    last_name: '',
-    email: '',
-    phone: '',
-    age: '',
-    state: '',
-    password: '',
-    confirm_password: '',
+    first_name: '', last_name: '', email: '', phone: '', age: '', state: '', password: '', confirm_password: '',
   })
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
@@ -33,184 +26,99 @@ export default function SignupPage() {
     setLoading(true)
     setError('')
 
-    if (form.password !== form.confirm_password) {
-      setError('Passwords do not match.')
-      setLoading(false)
-      return
-    }
-
-    if (form.password.length < 8) {
-      setError('Password must be at least 8 characters.')
-      setLoading(false)
-      return
-    }
-
-    if (parseInt(form.age) < 18) {
-      setError('You must be at least 18 years old to apply.')
-      setLoading(false)
-      return
-    }
+    if (form.password !== form.confirm_password) { setError('Passwords do not match.'); setLoading(false); return }
+    if (form.password.length < 8) { setError('Password must be at least 8 characters.'); setLoading(false); return }
+    if (parseInt(form.age) < 18) { setError('You must be at least 18 years old to apply.'); setLoading(false); return }
 
     const full_name = form.first_name.trim() + ' ' + form.last_name.trim()
 
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-    })
-
-    if (authError) {
-      setError(authError.message)
-      setLoading(false)
-      return
-    }
+    const { data: authData, error: authError } = await supabase.auth.signUp({ email: form.email, password: form.password })
+    if (authError) { setError(authError.message); setLoading(false); return }
 
     const userId = authData.user?.id
-    if (!userId) {
-      setError('Account creation failed. Please try again.')
-      setLoading(false)
-      return
-    }
+    if (!userId) { setError('Account creation failed. Please try again.'); setLoading(false); return }
 
-    const { error: userError } = await supabase.from('users').insert({
-      id: userId,
-      email: form.email,
-      full_name,
-      role: 'agent'
-    })
+    const { error: userError } = await supabase.from('users').insert({ id: userId, email: form.email, full_name, role: 'agent' })
+    if (userError) { setError('Profile creation failed: ' + userError.message); setLoading(false); return }
 
-    if (userError) {
-      setError('Profile creation failed: ' + userError.message)
-      setLoading(false)
-      return
-    }
-
-    const { data: counterData } = await supabase
-      .from('agents')
-      .select('xfg_id')
-      .order('created_at', { ascending: false })
-      .limit(1)
-
+    const { data: counterData } = await supabase.from('agents').select('xfg_id').order('created_at', { ascending: false }).limit(1)
     let nextNumber = 1
     if (counterData && counterData.length > 0) {
-      const lastId = counterData[0].xfg_id
-      const lastNumber = parseInt(lastId.replace('XFG-', ''))
+      const lastNumber = parseInt(counterData[0].xfg_id.replace('XFG-', ''))
       nextNumber = lastNumber + 1
     }
     const xfg_id = 'XFG-' + String(nextNumber).padStart(6, '0')
 
-    const { error: agentError } = await supabase.from('agents').insert({
-      user_id: userId,
-      xfg_id,
-      full_name,
-      email: form.email,
-      phone: form.phone,
-      state: form.state,
-      current_stage: 'contacted',
-      is_locked: false,
-    })
+    const { error: agentError } = await supabase.from('agents').insert({ user_id: userId, xfg_id, full_name, email: form.email, phone: form.phone, state: form.state, current_stage: 'contacted', is_locked: false })
+    if (agentError) { setError('Agent profile creation failed: ' + agentError.message); setLoading(false); return }
 
-    if (agentError) {
-      setError('Agent profile creation failed: ' + agentError.message)
-      setLoading(false)
-      return
-    }
-
-    await fetch('/api/send-welcome', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        full_name,
-        email: form.email,
-        xfg_id,
-        state: form.state,
-      })
-    })
+    await fetch('/api/send-welcome', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ full_name, email: form.email, xfg_id, state: form.state }) })
 
     router.push('/agent-portal')
     setLoading(false)
   }
 
-  const fieldInput: React.CSSProperties = {
-    width: '100%',
-    background: '#EDEAE4',
-    color: '#1A1814',
-    border: '1px solid #DDD9D2',
-    borderRadius: '8px',
-    padding: '0.75rem 1rem',
-    fontSize: '0.95rem',
-    fontFamily: 'Georgia, serif',
-    outline: 'none',
-    boxSizing: 'border-box',
-  }
-
-  const fieldLabel: React.CSSProperties = {
-    color: '#6B6966',
-    fontSize: '0.75rem',
-    letterSpacing: '0.08em',
-    textTransform: 'uppercase',
-    display: 'block',
-    marginBottom: '0.5rem',
-    fontFamily: 'Georgia, serif',
-  }
+  const inp = { width: '100%', background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '14px 16px', fontSize: '16px', fontFamily: 'Inter, sans-serif', outline: 'none', color: '#1A1814', boxSizing: 'border-box' as const }
+  const lbl = { color: '#6B6966', fontSize: '13px', fontWeight: '600' as const, display: 'block', marginBottom: '6px' }
 
   return (
-    <main style={{ minHeight: '100vh', background: '#F5F2ED', color: '#1A1814', fontFamily: 'Georgia, serif', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem 1rem' }}>
-      <div style={{ width: '100%', maxWidth: '460px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <p style={{ color: '#C9A96E', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>XFG · X Financial Group</p>
-          <h1 style={{ color: '#1A1814', fontSize: '1.8rem', fontWeight: '400', marginBottom: '0.25rem' }}>Join XFG</h1>
-          <p style={{ color: '#6B6966', fontSize: '0.85rem', fontStyle: 'italic' }}>Create your agent account</p>
+    <main style={{ minHeight: '100vh', background: '#F5F2ED', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '24px 16px 40px' }}>
+      <div style={{ width: '100%', maxWidth: '480px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '28px', paddingTop: '16px' }}>
+          <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>XFG · X Financial Group</p>
+          <h1 style={{ color: '#1A1814', fontSize: '28px', fontWeight: '700', marginBottom: '6px' }}>Join XFG</h1>
+          <p style={{ color: '#6B6966', fontSize: '15px' }}>Create your agent account</p>
         </div>
 
-        <div style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '12px', padding: '2rem' }}>
+        <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
           <form onSubmit={handleSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
               <div>
-                <label style={fieldLabel}>First Name</label>
-                <input type="text" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} required placeholder="John" style={fieldInput} />
+                <label style={lbl}>First Name</label>
+                <input type="text" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} required placeholder="John" style={inp} />
               </div>
               <div>
-                <label style={fieldLabel}>Last Name</label>
-                <input type="text" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} required placeholder="Smith" style={fieldInput} />
+                <label style={lbl}>Last Name</label>
+                <input type="text" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} required placeholder="Smith" style={inp} />
               </div>
             </div>
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={fieldLabel}>Email</label>
-              <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required placeholder="john@example.com" style={fieldInput} />
+            <div style={{ marginBottom: '16px' }}>
+              <label style={lbl}>Email Address</label>
+              <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required placeholder="john@example.com" style={inp} />
             </div>
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={fieldLabel}>Phone Number</label>
-              <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required placeholder="555-555-5555" style={fieldInput} />
+            <div style={{ marginBottom: '16px' }}>
+              <label style={lbl}>Phone Number</label>
+              <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required placeholder="555-555-5555" style={inp} />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
               <div>
-                <label style={fieldLabel}>Age</label>
-                <input type="number" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} required min="18" max="100" placeholder="25" style={fieldInput} />
+                <label style={lbl}>Age</label>
+                <input type="number" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} required min="18" max="100" placeholder="25" style={inp} />
               </div>
               <div>
-                <label style={fieldLabel}>State</label>
-                <select value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} required style={fieldInput}>
-                  <option value="">State...</option>
+                <label style={lbl}>State</label>
+                <select value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} required style={inp}>
+                  <option value="">Select...</option>
                   {US_STATES.map((s) => (<option key={s} value={s}>{s}</option>))}
                 </select>
               </div>
             </div>
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={fieldLabel}>Password</label>
-              <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required placeholder="Min. 8 characters" style={fieldInput} />
+            <div style={{ marginBottom: '16px' }}>
+              <label style={lbl}>Password</label>
+              <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required placeholder="Min. 8 characters" style={inp} />
             </div>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={fieldLabel}>Confirm Password</label>
-              <input type="password" value={form.confirm_password} onChange={(e) => setForm({ ...form, confirm_password: e.target.value })} required placeholder="Re-enter password" style={fieldInput} />
+            <div style={{ marginBottom: '20px' }}>
+              <label style={lbl}>Confirm Password</label>
+              <input type="password" value={form.confirm_password} onChange={(e) => setForm({ ...form, confirm_password: e.target.value })} required placeholder="Re-enter password" style={inp} />
             </div>
-            {error && <p style={{ color: '#E07070', fontSize: '0.85rem', marginBottom: '1rem' }}>{error}</p>}
-            <button type="submit" disabled={loading} style={{ width: '100%', background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '8px', padding: '0.875rem', fontSize: '0.95rem', fontFamily: 'Georgia, serif', fontWeight: '600', cursor: loading ? 'not-allowed' : 'pointer', letterSpacing: '0.03em', opacity: loading ? 0.6 : 1 }}>
+            {error && <p style={{ color: '#8B2635', fontSize: '14px', marginBottom: '16px', background: '#FFF5F5', padding: '10px 14px', borderRadius: '8px' }}>{error}</p>}
+            <button type="submit" disabled={loading} style={{ width: '100%', background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, fontFamily: 'Inter, sans-serif' }}>
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
-          <p style={{ textAlign: 'center', color: '#6B6966', fontSize: '0.8rem', marginTop: '1.5rem' }}>
+          <p style={{ textAlign: 'center', color: '#6B6966', fontSize: '14px', marginTop: '20px' }}>
             Already have an account?{' '}
-            <Link href="/login" style={{ color: '#C9A96E', textDecoration: 'none' }}>Sign in</Link>
+            <Link href="/login" style={{ color: '#C9A96E', fontWeight: '600', textDecoration: 'none' }}>Sign In</Link>
           </p>
         </div>
       </div>

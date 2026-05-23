@@ -16,8 +16,8 @@ const STAGES = [
   { key: 'active', label: 'Active Agent', order: 9 },
 ]
 
-const card = { background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '1.5rem', marginBottom: '1.25rem' }
-const sectionTitle = { color: '#C9A96E', fontSize: '0.72rem', letterSpacing: '0.1em', textTransform: 'uppercase' as const, marginBottom: '1rem', fontFamily: 'Georgia, serif' }
+const card = { background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '16px', marginBottom: '1.25rem' }
+const sectionTitle = { color: '#C9A96E', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' as const, marginBottom: '1rem', fontFamily: 'Georgia, serif' }
 
 export default function AgentPortalPage() {
   const router = useRouter()
@@ -167,33 +167,33 @@ export default function AgentPortalPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#F5F2ED', color: '#1A1814', fontFamily: 'Georgia, serif' }}>
-      <div style={{ maxWidth: '680px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+      <div style={{ width: '100%', maxWidth: '680px', margin: '0 auto', padding: '16px' }}>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
           <div>
             <p style={{ color: '#C9A96E', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '0.25rem' }}>XFG · X Financial Group</p>
-            <h1 style={{ color: '#1A1814', fontSize: '1.5rem', fontWeight: '400', marginBottom: '0.2rem' }}>My Portal</h1>
-            <p style={{ color: '#6B6966', fontSize: '0.85rem' }}>Welcome, {agent.full_name}</p>
+            <h1 style={{ color: '#1A1814', fontSize: '24px', fontWeight: '700', marginBottom: '0.2rem' }}>My Portal</h1>
+            <p style={{ color: '#6B6966', fontSize: '15px' }}>Welcome, {agent.full_name}</p>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button onClick={() => router.push('/change-password')} style={{ background: 'transparent', border: '1px solid #DDD9D2', color: '#6B6966', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }}>
+            <button onClick={() => router.push('/change-password')} style={{ background: 'transparent', border: '1px solid #DDD9D2', color: '#6B6966', padding: '14px 20px', borderRadius: '6px', cursor: 'pointer', fontSize: '15px', fontFamily: 'Georgia, serif' }}>
               Change Password
             </button>
-            <button onClick={handleLogout} style={{ background: 'transparent', border: '1px solid #DDD9D2', color: '#6B6966', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }}>
+            <button onClick={handleLogout} style={{ background: 'transparent', border: '1px solid #DDD9D2', color: '#6B6966', padding: '14px 20px', borderRadius: '6px', cursor: 'pointer', fontSize: '15px', fontFamily: 'Georgia, serif' }}>
               Sign Out
             </button>
           </div>
         </div>
 
-        <div style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '1rem 1.5rem', marginBottom: '1.25rem' }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '14px 16px', marginBottom: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <p style={{ color: '#6B6966', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'Georgia, serif' }}>Onboarding Progress</p>
-            <p style={{ color: '#C9A96E', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }}>{Math.round((currentStageIndex / 8) * 100)}%</p>
+            <p style={{ color: '#6B6966', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'Georgia, serif' }}>Onboarding Progress</p>
+            <p style={{ color: '#C9A96E', fontSize: '15px', fontFamily: 'Georgia, serif' }}>{Math.round((currentStageIndex / 8) * 100)}%</p>
           </div>
           <div style={{ background: '#EDEAE4', borderRadius: '4px', height: '6px', overflow: 'hidden' }}>
             <div style={{ background: '#C9A96E', height: '6px', borderRadius: '4px', width: `${Math.round((currentStageIndex / 8) * 100)}%`, transition: 'width 0.5s ease' }} />
           </div>
-          <p style={{ color: '#9A9890', fontSize: '0.72rem', marginTop: '0.5rem', fontFamily: 'Georgia, serif' }}>
+          <p style={{ color: '#9A9890', fontSize: '13px', marginTop: '0.5rem', fontFamily: 'Georgia, serif' }}>
             Step {currentStageIndex + 1} of 9 · {STAGES[currentStageIndex]?.label}
           </p>
         </div>
@@ -201,17 +201,17 @@ export default function AgentPortalPage() {
         <div style={card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <p style={{ color: '#C9A96E', fontFamily: 'monospace', fontSize: '1rem', fontWeight: '600', marginBottom: '0.25rem' }}>{agent.xfg_id}</p>
-              <p style={{ color: '#6B6966', fontSize: '0.85rem', marginBottom: '0.15rem' }}>{agent.email}</p>
-              {agent.phone && <p style={{ color: '#6B6966', fontSize: '0.85rem', marginBottom: '0.15rem' }}>{agent.phone}</p>}
-              <p style={{ color: '#6B6966', fontSize: '0.85rem' }}>State: {agent.state}</p>
+              <p style={{ color: '#C9A96E', fontFamily: 'monospace', fontSize: '18px', fontWeight: '600', marginBottom: '0.25rem' }}>{agent.xfg_id}</p>
+              <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '0.15rem' }}>{agent.email}</p>
+              {agent.phone && <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '0.15rem' }}>{agent.phone}</p>}
+              <p style={{ color: '#6B6966', fontSize: '15px' }}>State: {agent.state}</p>
             </div>
             <div style={{ textAlign: 'right' }}>
               <span style={{ background: '#F5EDD9', border: '1px solid #C9A96E', color: '#C9A96E', fontSize: '0.72rem', letterSpacing: '0.06em', textTransform: 'uppercase', padding: '0.25rem 0.6rem', borderRadius: '4px' }}>
                 {currentStage?.label}
               </span>
-              {agent.is_locked && <p style={{ color: '#C9A96E', fontSize: '0.75rem', marginTop: '0.5rem' }}>🔒 Admin managing</p>}
-              {agent.agent_model && <p style={{ color: '#6B6966', fontSize: '0.75rem', marginTop: '0.25rem', textTransform: 'capitalize' }}>{agent.agent_model} model</p>}
+              {agent.is_locked && <p style={{ color: '#C9A96E', fontSize: '13px', marginTop: '0.5rem' }}>🔒 Admin managing</p>}
+              {agent.agent_model && <p style={{ color: '#6B6966', fontSize: '13px', marginTop: '0.25rem', textTransform: 'capitalize' }}>{agent.agent_model} model</p>}
             </div>
           </div>
         </div>
@@ -223,11 +223,11 @@ export default function AgentPortalPage() {
               const isComplete = index < currentStageIndex
               const isCurrent = index === currentStageIndex
               return (
-                <div key={stage.key} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem', borderRadius: '6px', background: isCurrent ? '#F5EDD9' : 'transparent', border: isCurrent ? '1px solid #DDD9D2' : '1px solid transparent' }}>
+                <div key={stage.key} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '10px 12px', borderRadius: '6px', background: isCurrent ? '#F5EDD9' : 'transparent', border: isCurrent ? '1px solid #DDD9D2' : '1px solid transparent' }}>
                   <div style={{ width: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.7rem', fontWeight: '700', background: isComplete ? '#E8F5EE' : isCurrent ? '#C9A96E' : '#EDEAE4', color: isComplete ? '#2D6A4F' : isCurrent ? '#FFFFFF' : '#9A9890', border: isComplete ? '1px solid #2D6A4F' : isCurrent ? 'none' : '1px solid #DDD9D2' }}>
                     {isComplete ? '✓' : stage.order}
                   </div>
-                  <span style={{ fontSize: '0.85rem', color: isComplete ? '#2D6A4F' : isCurrent ? '#1A1814' : '#9A9890', fontWeight: isCurrent ? '600' : '400' }}>
+                  <span style={{ fontSize: '15px', color: isComplete ? '#2D6A4F' : isCurrent ? '#1A1814' : '#9A9890', fontWeight: isCurrent ? '600' : '400' }}>
                     {stage.label}
                   </span>
                   {isCurrent && <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: '#C9A96E' }}>Current</span>}
@@ -247,7 +247,7 @@ export default function AgentPortalPage() {
                 : <span style={{ background: '#FDF3E3', color: '#8B6A2E', fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>In Progress</span>
               }
             </div>
-            {!agent.is_locked && <p style={{ color: '#6B6966', fontSize: '0.75rem', marginBottom: '0.75rem' }}>Tap each item to mark it complete.</p>}
+            {!agent.is_locked && <p style={{ color: '#6B6966', fontSize: '13px', marginBottom: '0.75rem' }}>Tap each item to mark it complete.</p>}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {checklistItems.map(item => {
                 const isApproved = getStatus(item.id) === 'approved'
@@ -255,14 +255,14 @@ export default function AgentPortalPage() {
                   <div
                     key={item.id}
                     onClick={() => toggleItem(item.id)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', borderRadius: '6px', background: isApproved ? '#E8F5EE' : '#EDEAE4', border: `1px solid ${isApproved ? '#2D6A4F' : '#DDD9D2'}`, cursor: agent.is_locked ? 'default' : 'pointer' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '14px 12px', borderRadius: '6px', background: isApproved ? '#E8F5EE' : '#EDEAE4', border: `1px solid ${isApproved ? '#2D6A4F' : '#DDD9D2'}`, cursor: agent.is_locked ? 'default' : 'pointer' }}
                   >
                     <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: `2px solid ${isApproved ? '#2D6A4F' : '#9A9890'}`, background: isApproved ? '#2D6A4F' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       {isApproved && <span style={{ color: '#FFFFFF', fontSize: '0.65rem', fontWeight: '700' }}>✓</span>}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <p style={{ color: isApproved ? '#2D6A4F' : '#1A1814', fontSize: '0.85rem', textDecoration: isApproved ? 'line-through' : 'none', margin: 0 }}>{item.title}</p>
-                      {item.description && <p style={{ color: '#6B6966', fontSize: '0.75rem', marginTop: '0.15rem', margin: 0 }}>{item.description}</p>}
+                      <p style={{ color: isApproved ? '#2D6A4F' : '#1A1814', fontSize: '15px', textDecoration: isApproved ? 'line-through' : 'none', margin: 0 }}>{item.title}</p>
+                      {item.description && <p style={{ color: '#6B6966', fontSize: '13px', marginTop: '0.15rem', margin: 0 }}>{item.description}</p>}
                     </div>
                   </div>
                 )
@@ -273,7 +273,7 @@ export default function AgentPortalPage() {
               <button
                 onClick={moveToNextStage}
                 disabled={movingStage}
-                style={{ marginTop: '1.25rem', width: '100%', padding: '0.9rem', background: movingStage ? '#B8944F' : '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: movingStage ? 'default' : 'pointer', fontSize: '0.9rem', fontWeight: '700', fontFamily: 'Georgia, serif', letterSpacing: '0.04em' }}
+                style={{ marginTop: '1.25rem', width: '100%', padding: '14px 20px', background: movingStage ? '#B8944F' : '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: movingStage ? 'default' : 'pointer', fontSize: '15px', fontWeight: '700', fontFamily: 'Georgia, serif', letterSpacing: '0.04em' }}
               >
                 {movingStage ? 'Moving...' : `Move to ${nextStage.label} →`}
               </button>
@@ -330,7 +330,7 @@ export default function AgentPortalPage() {
 
         <div style={card}>
           <p style={sectionTitle}>What Happens Next</p>
-          <p style={{ color: '#6B6966', fontSize: '0.9rem', lineHeight: '1.6' }}>
+          <p style={{ color: '#6B6966', fontSize: '15px', lineHeight: '1.6' }}>
             {agent.current_stage === 'contacted' && 'Our team has reached out to you. Please check your email and respond as soon as possible to move forward with licensing.'}
             {agent.current_stage === 'licensing' && 'You are in the licensing phase. Use the state resources above to book your exam, complete your background check, and fingerprinting.'}
             {agent.current_stage === 'onboarding' && 'Your onboarding call is being scheduled. You will receive details shortly. Once locked, your admin team will guide you through next steps.'}

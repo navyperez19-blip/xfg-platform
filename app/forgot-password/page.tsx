@@ -14,62 +14,40 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
-
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: 'https://app.xfg.software/reset-password',
     })
-
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-    } else {
-      setSent(true)
-      setLoading(false)
-    }
+    if (error) { setError(error.message); setLoading(false) }
+    else { setSent(true); setLoading(false) }
   }
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold">Forgot Password</h1>
-          <p className="text-gray-400 mt-2">Enter your email to reset your password</p>
+    <main style={{ minHeight: '100vh', background: '#F5F2ED', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
+      <div style={{ width: '100%', maxWidth: '420px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+          <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>XFG · X Financial Group</p>
+          <h1 style={{ color: '#1A1814', fontSize: '28px', fontWeight: '700', marginBottom: '6px' }}>Forgot Password</h1>
+          <p style={{ color: '#6B6966', fontSize: '15px' }}>Enter your email to reset your password</p>
         </div>
-
-        <div className="bg-gray-900 rounded-2xl p-6">
+        <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
           {sent ? (
-            <div className="text-center">
-              <p className="text-green-400 font-semibold mb-2">Email sent!</p>
-              <p className="text-gray-400 text-sm mb-6">Check your inbox for a password reset link. It may take a few minutes to arrive.</p>
-              <Link href="/login" className="text-blue-400 hover:text-blue-300 text-sm">
-                Back to Sign In
-              </Link>
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ color: '#2D6A4F', fontWeight: '700', fontSize: '16px', marginBottom: '8px' }}>Email sent!</p>
+              <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '24px' }}>Check your inbox for a password reset link.</p>
+              <Link href="/login" style={{ color: '#C9A96E', fontWeight: '600', textDecoration: 'none', fontSize: '15px' }}>Back to Sign In</Link>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="text-gray-400 text-sm mb-1 block">Email Address</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full bg-gray-800 text-white px-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-blue-500"
-                  placeholder="you@example.com"
-                />
+            <form onSubmit={handleSubmit}>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ color: '#6B6966', fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Email Address</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@example.com" style={{ width: '100%', background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '14px 16px', fontSize: '16px', fontFamily: 'Inter, sans-serif', outline: 'none', color: '#1A1814', boxSizing: 'border-box' as const }} />
               </div>
-              {error && <p className="text-red-400 text-sm">{error}</p>}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-50"
-              >
+              {error && <p style={{ color: '#8B2635', fontSize: '14px', marginBottom: '16px', background: '#FFF5F5', padding: '10px 14px', borderRadius: '8px' }}>{error}</p>}
+              <button type="submit" disabled={loading} style={{ width: '100%', background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, fontFamily: 'Inter, sans-serif', marginBottom: '16px' }}>
                 {loading ? 'Sending...' : 'Send Reset Link'}
               </button>
-              <p className="text-center text-gray-400 text-sm">
-                <Link href="/login" className="text-blue-400 hover:text-blue-300">
-                  Back to Sign In
-                </Link>
+              <p style={{ textAlign: 'center' }}>
+                <Link href="/login" style={{ color: '#C9A96E', fontWeight: '600', textDecoration: 'none', fontSize: '14px' }}>Back to Sign In</Link>
               </p>
             </form>
           )}
