@@ -267,8 +267,14 @@ export default function AgentPortalPage() {
                           {item.description.includes('discord.gg') ? (
                             <>
                               {item.description.split('https://')[0]}
-                              <a href={'https://' + item.description.split('https://')[1]} target="_blank" rel="noopener noreferrer" style={{ color: '#C9A96E', fontWeight: '600', textDecoration: 'none' }}>
-                                {'https://' + item.description.split('https://')[1]}
+                              <a
+                                href={'https://' + item.description.split('https://')[1]}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ color: '#C9A96E', fontWeight: '600', textDecoration: 'underline' }}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Click here to join Discord
                               </a>
                             </>
                           ) : item.description}
