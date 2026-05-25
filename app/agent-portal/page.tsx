@@ -261,8 +261,19 @@ export default function AgentPortalPage() {
                       {isApproved && <span style={{ color: '#FFFFFF', fontSize: '0.65rem', fontWeight: '700' }}>✓</span>}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <p style={{ color: isApproved ? '#2D6A4F' : '#1A1814', fontSize: '15px', textDecoration: isApproved ? 'line-through' : 'none', margin: 0 }}>{item.title}</p>
-                      {item.description && <p style={{ color: '#6B6966', fontSize: '13px', marginTop: '0.15rem', margin: 0 }}>{item.description}</p>}
+                      <p style={{ color: isApproved ? '#6FCF97' : '#1A1814', fontSize: '15px', textDecoration: isApproved ? 'line-through' : 'none', margin: 0, fontWeight: '500' }}>{item.title}</p>
+                      {item.description && (
+                        <p style={{ color: '#6B6966', fontSize: '13px', marginTop: '4px', margin: 0 }}>
+                          {item.description.includes('discord.gg') ? (
+                            <>
+                              {item.description.split('https://')[0]}
+                              <a href={'https://' + item.description.split('https://')[1]} target="_blank" rel="noopener noreferrer" style={{ color: '#C9A96E', fontWeight: '600', textDecoration: 'none' }}>
+                                {'https://' + item.description.split('https://')[1]}
+                              </a>
+                            </>
+                          ) : item.description}
+                        </p>
+                      )}
                     </div>
                   </div>
                 )
