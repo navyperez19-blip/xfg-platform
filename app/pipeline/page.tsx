@@ -162,6 +162,7 @@ export default function PipelinePage() {
                     { label: 'Stage', key: 'current_stage' },
                     { label: 'State', key: 'state' },
                     { label: 'Model', key: 'agent_model' },
+                    { label: 'Licensed', key: 'is_licensed' },
                     { label: 'Days in Stage', key: 'days' },
                   ].map(col => (
                     <th key={col.key} onClick={() => handleSort(col.key as SortKey)} style={{ padding: '0.875rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#6B6966', letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none', background: sortKey === col.key ? '#FAFAF9' : 'transparent' }}>
@@ -186,6 +187,12 @@ export default function PipelinePage() {
                       </td>
                       <td style={{ padding: '0.875rem 1rem', color: '#6B6966', fontSize: '0.875rem' }}>{agent.state}</td>
                       <td style={{ padding: '0.875rem 1rem', color: '#6B6966', fontSize: '0.875rem', textTransform: 'capitalize' }}>{agent.agent_model || '—'}</td>
+                      <td style={{ padding: '0.875rem 1rem' }}>
+                        {agent.is_licensed === 'yes' && <span style={{ background: '#F0FFF4', color: '#2D6A4F', fontSize: '0.72rem', fontWeight: '600', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>Licensed</span>}
+                        {agent.is_licensed === 'no' && <span style={{ background: '#FFF5F5', color: '#8B2635', fontSize: '0.72rem', fontWeight: '600', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>Not Licensed</span>}
+                        {agent.is_licensed === 'expired' && <span style={{ background: '#FFFBF0', color: '#B5652A', fontSize: '0.72rem', fontWeight: '600', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>Expired</span>}
+                        {!agent.is_licensed && <span style={{ color: '#9A9890', fontSize: '0.72rem' }}>—</span>}
+                      </td>
                       <td style={{ padding: '0.875rem 1rem' }}>
                         <span style={{ color: getDaysColor(days), fontSize: '0.875rem', fontWeight: '600' }}>{days}d</span>
                       </td>
