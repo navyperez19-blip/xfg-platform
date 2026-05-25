@@ -295,8 +295,8 @@ export default function AgentPortalPage() {
               <div style={{ background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '1rem' }}>
                 <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '4px' }}>Create Your XFG Gmail</p>
                 <p style={{ color: '#6B6966', fontSize: '13px', marginBottom: '8px' }}>Set up your XFG email address in Gmail:</p>
-                <p style={{ color: '#C9A96E', fontSize: '14px', fontWeight: '600', fontFamily: 'monospace' }}>firstname.lastnamexfg@gmail.com</p>
-                <p style={{ color: '#9A9890', fontSize: '12px', marginTop: '4px' }}>Example: john.smithxfg@gmail.com</p>
+                <p style={{ color: '#C9A96E', fontSize: '14px', fontWeight: '600', fontFamily: 'monospace' }}>firstnamelastname.xfg@gmail.com</p>
+                <p style={{ color: '#9A9890', fontSize: '12px', marginTop: '4px' }}>Example: tristanperez.xfg@gmail.com</p>
               </div>
             </div>
           </div>
