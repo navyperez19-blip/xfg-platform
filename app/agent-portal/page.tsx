@@ -281,6 +281,27 @@ export default function AgentPortalPage() {
           </div>
         )}
 
+        {agent.current_stage === 'contacted' && (
+          <div style={card}>
+            <p style={sectionTitle}>Getting Started Resources</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <a href="https://discord.gg/nCEWxbJPU2" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '1rem', textDecoration: 'none' }}>
+                <div>
+                  <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '4px' }}>Join XFG Discord</p>
+                  <p style={{ color: '#6B6966', fontSize: '13px' }}>Connect with your team and stay updated</p>
+                </div>
+                <span style={{ color: '#C9A96E', fontSize: '15px', fontWeight: '600' }}>Join →</span>
+              </a>
+              <div style={{ background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '1rem' }}>
+                <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '4px' }}>Create Your XFG Gmail</p>
+                <p style={{ color: '#6B6966', fontSize: '13px', marginBottom: '8px' }}>Set up your XFG email address in Gmail:</p>
+                <p style={{ color: '#C9A96E', fontSize: '14px', fontWeight: '600', fontFamily: 'monospace' }}>firstname.lastnamexfg@gmail.com</p>
+                <p style={{ color: '#9A9890', fontSize: '12px', marginTop: '4px' }}>Example: john.smithxfg@gmail.com</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {agent.current_stage === 'licensing' && stateResources && (
           <div style={card}>
             <p style={sectionTitle}>State Resources — {agent.state}</p>
