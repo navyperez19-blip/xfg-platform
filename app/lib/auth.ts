@@ -15,7 +15,6 @@ export async function getCurrentUser() {
 
 export function canMoveStage(role: string, stage: string): boolean {
   const stageOwners: Record<string, string[]> = {
-    new_lead: ['finley', 'executive', 'superadmin'],
     contacted: ['finley', 'executive', 'superadmin'],
     licensing: ['finley', 'executive', 'superadmin'],
     onboarding: ['executive', 'superadmin'],
