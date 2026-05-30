@@ -240,6 +240,21 @@ export default function AgentDetailPage() {
                     <option value="expired">Expired License</option>
                   </select>
                 </div>
+                <div>
+                  <label style={label}>XFG Email</label>
+                  <input
+                    type="email"
+                    defaultValue={agent.xfg_email || ''}
+                    placeholder="firstnamelastname.xfg@gmail.com"
+                    style={input}
+                    onBlur={async (e) => {
+                      if (e.target.value !== agent.xfg_email) {
+                        await supabase.from('agents').update({ xfg_email: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                        setAgent({ ...agent, xfg_email: e.target.value })
+                      }
+                    }}
+                  />
+                </div>
               </div>
               <p style={{ color: '#6B6966', fontSize: '0.72rem' }}>Changes save automatically when you click out of a field.</p>
             </div>

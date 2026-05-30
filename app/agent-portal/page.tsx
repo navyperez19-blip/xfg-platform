@@ -205,6 +205,27 @@ export default function AgentPortalPage() {
               <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '0.15rem' }}>{agent.email}</p>
               {agent.phone && <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '0.15rem' }}>{agent.phone}</p>}
               <p style={{ color: '#6B6966', fontSize: '15px' }}>State: {agent.state}</p>
+              <div style={{ marginTop: '12px' }}>
+                <p style={{ color: '#6B6966', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>XFG Email</p>
+                {agent.xfg_email ? (
+                  <p style={{ color: '#C9A96E', fontSize: '14px', fontWeight: '600' }}>{agent.xfg_email}</p>
+                ) : (
+                  <p style={{ color: '#9A9890', fontSize: '13px', fontStyle: 'italic' }}>Not set yet</p>
+                )}
+                <input
+                  type="email"
+                  defaultValue={agent.xfg_email || ''}
+                  placeholder="firstnamelastname.xfg@gmail.com"
+                  style={{ width: '100%', background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '10px 14px', fontSize: '14px', fontFamily: 'Inter, sans-serif', outline: 'none', color: '#1A1814', marginTop: '6px', boxSizing: 'border-box' as const }}
+                  onBlur={async (e) => {
+                    if (e.target.value && e.target.value !== agent.xfg_email) {
+                      await supabase.from('agents').update({ xfg_email: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                      setAgent({ ...agent, xfg_email: e.target.value })
+                    }
+                  }}
+                />
+                <p style={{ color: '#9A9890', fontSize: '11px', marginTop: '4px' }}>Enter your XFG Gmail once created</p>
+              </div>
             </div>
             <div style={{ textAlign: 'right' }}>
               <span style={{ background: '#F5EDD9', border: '1px solid #C9A96E', color: '#C9A96E', fontSize: '0.72rem', letterSpacing: '0.06em', textTransform: 'uppercase', padding: '0.25rem 0.6rem', borderRadius: '4px' }}>
