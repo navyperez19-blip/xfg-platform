@@ -164,6 +164,7 @@ export default function PipelinePage() {
                     { label: 'Model', key: 'agent_model' },
                     { label: 'Licensed', key: 'is_licensed' },
                     { label: 'Days in Stage', key: 'days' },
+                    { label: 'Last Contact', key: 'last_contact_at' },
                   ].map(col => (
                     <th key={col.key} onClick={() => handleSort(col.key as SortKey)} style={{ padding: '0.875rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#6B6966', letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none', background: sortKey === col.key ? '#FAFAF9' : 'transparent' }}>
                       {col.label} {sortKey === col.key ? (sortDir === 'desc' ? '↓' : '↑') : ''}
@@ -195,6 +196,17 @@ export default function PipelinePage() {
                       </td>
                       <td style={{ padding: '0.875rem 1rem' }}>
                         <span style={{ color: getDaysColor(days), fontSize: '0.875rem', fontWeight: '600' }}>{days}d</span>
+                      </td>
+                      <td style={{ padding: '0.875rem 1rem' }}>
+                        {agent.last_contact_at ? (
+                          <div>
+                            <p style={{ color: '#1A1814', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.15rem' }}>{agent.last_contact_by}</p>
+                            <p style={{ color: '#9A9890', fontSize: '0.75rem' }}>{new Date(agent.last_contact_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at {new Date(agent.last_contact_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</p>
+                            {agent.last_contact_note && <p style={{ color: '#6B6966', fontSize: '0.72rem', marginTop: '0.1rem', fontStyle: 'italic' }}>{agent.last_contact_note.length > 40 ? agent.last_contact_note.substring(0, 40) + '...' : agent.last_contact_note}</p>}
+                          </div>
+                        ) : (
+                          <span style={{ color: '#DDD9D2', fontSize: '0.8rem' }}>No contact yet</span>
+                        )}
                       </td>
                       <td style={{ padding: '0.875rem 1rem' }}>
                         {agent.is_locked && <span style={{ background: '#FFF5F5', color: '#8B2635', fontSize: '0.72rem', fontWeight: '600', padding: '0.2rem 0.5rem', borderRadius: '4px', marginRight: '0.4rem' }}>Locked</span>}
@@ -231,6 +243,12 @@ export default function PipelinePage() {
                         <p style={{ color: '#C9A96E', fontSize: '0.72rem', fontFamily: 'monospace', marginBottom: '0.2rem' }}>{agent.xfg_id}</p>
                         <p style={{ color: '#9A9890', fontSize: '0.72rem', marginBottom: '0.2rem' }}>{agent.state}</p>
                         <p style={{ color: getDaysColor(days), fontSize: '0.72rem', fontWeight: '600' }}>{days}d in stage</p>
+                        {agent.last_contact_at && (
+                          <div style={{ marginTop: '0.3rem', borderTop: '1px solid #EBE8E3', paddingTop: '0.3rem' }}>
+                            <p style={{ color: '#6B6966', fontSize: '0.68rem', fontWeight: '600' }}>{agent.last_contact_by}</p>
+                            <p style={{ color: '#9A9890', fontSize: '0.65rem' }}>{new Date(agent.last_contact_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at {new Date(agent.last_contact_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</p>
+                          </div>
+                        )}
                         {agent.is_locked && <p style={{ color: '#C9A96E', fontSize: '0.7rem', marginTop: '0.2rem' }}>🔒 Locked</p>}
                       </div>
                     )
