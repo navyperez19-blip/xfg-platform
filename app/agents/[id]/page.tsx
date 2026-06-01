@@ -458,7 +458,6 @@ export default function AgentDetailPage() {
             {[
               { label: 'E&O Insurance', field: 'eo_document_url', url: agent.eo_document_url },
               { label: 'Insurance License', field: 'license_document_url', url: agent.license_document_url },
-              { label: 'Contract Document', field: 'contract_document_url', url: agent.contract_document_url },
             ].map(doc => (
               <div key={doc.field} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F5F2ED', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '0.875rem 1rem' }}>
                 <div>
@@ -493,6 +492,32 @@ export default function AgentDetailPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Carriers */}
+        <div style={card}>
+          <p style={sectionTitle}>Carrier Contracting</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {['Mutual of Omaha', 'Ethos', 'Instabrain', 'Corbridge', 'AHL'].map(carrier => {
+              const carriers = agent.carriers || {}
+              const isActive = carriers[carrier] === true
+              return (
+                <div key={carrier} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: isActive ? '#F0FFF4' : '#F5F2ED', border: `1px solid ${isActive ? '#A8D5B5' : '#DDD9D2'}`, borderRadius: '8px', padding: '0.875rem 1rem' }}>
+                  <p style={{ color: '#1A1814', fontSize: '0.9rem', fontWeight: '600' }}>{carrier}</p>
+                  <button
+                    onClick={async () => {
+                      const updated = { ...(agent.carriers || {}), [carrier]: !isActive }
+                      await supabase.from('agents').update({ carriers: updated, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                      setAgent({ ...agent, carriers: updated })
+                    }}
+                    style={{ background: isActive ? '#2D6A4F' : '#FFFFFF', border: `1px solid ${isActive ? '#2D6A4F' : '#DDD9D2'}`, color: isActive ? '#FFFFFF' : '#6B6966', padding: '0.4rem 1rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    {isActive ? '✓ Active' : 'Not Active'}
+                  </button>
+                </div>
+              )
+            })}
           </div>
         </div>
 

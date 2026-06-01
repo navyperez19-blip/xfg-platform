@@ -474,6 +474,25 @@ export default function AgentPortalPage() {
         </div>
 
         <div style={card}>
+          <p style={sectionTitle}>Carrier Contracting</p>
+          <p style={{ color: '#6B6966', fontSize: '13px', marginBottom: '12px' }}>Your active carrier contracts managed by your admin team.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {['Mutual of Omaha', 'Ethos', 'Instabrain', 'Corbridge', 'AHL'].map(carrier => {
+              const carriers = agent.carriers || {}
+              const isActive = carriers[carrier] === true
+              return (
+                <div key={carrier} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: isActive ? '#F0FFF4' : '#F0EDE8', border: `1px solid ${isActive ? '#A8D5B5' : '#DDD9D2'}`, borderRadius: '10px', padding: '14px 16px' }}>
+                  <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600' }}>{carrier}</p>
+                  <span style={{ background: isActive ? '#2D6A4F' : '#DDD9D2', color: isActive ? '#FFFFFF' : '#9A9890', padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600' }}>
+                    {isActive ? '✓ Active' : 'Pending'}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        <div style={card}>
           <p style={sectionTitle}>What Happens Next</p>
           <p style={{ color: '#6B6966', fontSize: '15px', lineHeight: '1.6' }}>
             {agent.current_stage === 'contacted' && 'Our team has reached out to you. Please check your email and respond as soon as possible to move forward with licensing.'}
