@@ -524,20 +524,32 @@ export default function AgentDetailPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {['Mutual of Omaha', 'Ethos', 'Instabrain', 'Corbridge', 'AHL'].map(carrier => {
               const carriers = agent.carriers || {}
-              const isActive = carriers[carrier] === true
+              const status = carriers[carrier] || 'none'
               return (
-                <div key={carrier} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: isActive ? '#F0FFF4' : '#F5F2ED', border: `1px solid ${isActive ? '#A8D5B5' : '#DDD9D2'}`, borderRadius: '8px', padding: '0.875rem 1rem' }}>
+                <div key={carrier} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: status === 'active' ? '#F0FFF4' : status === 'submitted' ? '#FFFBF0' : '#F5F2ED', border: `1px solid ${status === 'active' ? '#A8D5B5' : status === 'submitted' ? '#E8C87A' : '#DDD9D2'}`, borderRadius: '8px', padding: '0.875rem 1rem' }}>
                   <p style={{ color: '#1A1814', fontSize: '0.9rem', fontWeight: '600' }}>{carrier}</p>
-                  <button
-                    onClick={async () => {
-                      const updated = { ...(agent.carriers || {}), [carrier]: !isActive }
-                      await supabase.from('agents').update({ carriers: updated, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                      setAgent({ ...agent, carriers: updated })
-                    }}
-                    style={{ background: isActive ? '#2D6A4F' : '#FFFFFF', border: `1px solid ${isActive ? '#2D6A4F' : '#DDD9D2'}`, color: isActive ? '#FFFFFF' : '#6B6966', padding: '0.4rem 1rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}
-                  >
-                    {isActive ? '✓ Active' : 'Not Active'}
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      onClick={async () => {
+                        const updated = { ...(agent.carriers || {}), [carrier]: status === 'submitted' ? 'none' : 'submitted' }
+                        await supabase.from('agents').update({ carriers: updated, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                        setAgent({ ...agent, carriers: updated })
+                      }}
+                      style={{ background: status === 'submitted' ? '#B5652A' : '#FFFFFF', border: `1px solid ${status === 'submitted' ? '#B5652A' : '#DDD9D2'}`, color: status === 'submitted' ? '#FFFFFF' : '#6B6966', padding: '0.4rem 0.875rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}
+                    >
+                      {status === 'submitted' ? '⏳ Submitted' : 'Submit'}
+                    </button>
+                    <button
+                      onClick={async () => {
+                        const updated = { ...(agent.carriers || {}), [carrier]: status === 'active' ? 'none' : 'active' }
+                        await supabase.from('agents').update({ carriers: updated, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                        setAgent({ ...agent, carriers: updated })
+                      }}
+                      style={{ background: status === 'active' ? '#2D6A4F' : '#FFFFFF', border: `1px solid ${status === 'active' ? '#2D6A4F' : '#DDD9D2'}`, color: status === 'active' ? '#FFFFFF' : '#6B6966', padding: '0.4rem 0.875rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}
+                    >
+                      {status === 'active' ? '✓ Active' : 'Active'}
+                    </button>
+                  </div>
                 </div>
               )
             })}

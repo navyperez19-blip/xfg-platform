@@ -491,12 +491,12 @@ export default function AgentPortalPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {['Mutual of Omaha', 'Ethos', 'Instabrain', 'Corbridge', 'AHL'].map(carrier => {
               const carriers = agent.carriers || {}
-              const isActive = carriers[carrier] === true
+              const status = carriers[carrier] || 'none'
               return (
-                <div key={carrier} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: isActive ? '#F0FFF4' : '#F0EDE8', border: `1px solid ${isActive ? '#A8D5B5' : '#DDD9D2'}`, borderRadius: '10px', padding: '14px 16px' }}>
+                <div key={carrier} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: status === 'active' ? '#F0FFF4' : status === 'submitted' ? '#FFFBF0' : '#F0EDE8', border: `1px solid ${status === 'active' ? '#A8D5B5' : status === 'submitted' ? '#E8C87A' : '#DDD9D2'}`, borderRadius: '10px', padding: '14px 16px' }}>
                   <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600' }}>{carrier}</p>
-                  <span style={{ background: isActive ? '#2D6A4F' : '#DDD9D2', color: isActive ? '#FFFFFF' : '#9A9890', padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600' }}>
-                    {isActive ? '✓ Active' : 'Pending'}
+                  <span style={{ background: status === 'active' ? '#2D6A4F' : status === 'submitted' ? '#B5652A' : '#DDD9D2', color: status === 'active' || status === 'submitted' ? '#FFFFFF' : '#9A9890', padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600' }}>
+                    {status === 'active' ? '✓ Active' : status === 'submitted' ? '⏳ Submitted' : 'Pending'}
                   </span>
                 </div>
               )
