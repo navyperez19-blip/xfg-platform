@@ -55,6 +55,12 @@ export default function AnalyticsPage() {
   const locked = agents.filter(a => a.is_locked).length
   const supported = agents.filter(a => a.agent_model === 'supported').length
   const independent = agents.filter(a => a.agent_model === 'independent').length
+  const hasNPN = agents.filter(a => a.npn).length
+  const hasXFGEmail = agents.filter(a => a.xfg_email).length
+  const hasEO = agents.filter(a => a.eo_document_url).length
+  const hasLicense = agents.filter(a => a.license_document_url).length
+  const licensed = agents.filter(a => a.is_licensed === 'yes').length
+  const notLicensed = agents.filter(a => a.is_licensed === 'no').length
 
   const card = { background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '1.25rem' }
 
@@ -100,6 +106,25 @@ export default function AnalyticsPage() {
           <div style={card}>
             <p style={{ color: '#6B6966', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Independent Model</p>
             <p style={{ fontSize: '2rem', fontWeight: '400', color: '#1A1814' }}>{independent}</p>
+          </div>
+        </div>
+
+        <div style={{ ...card, marginBottom: '1.25rem' }}>
+          <p style={{ color: '#C9A96E', fontSize: '0.75rem', fontWeight: '600', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Profile Completion</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+            {[
+              { label: 'Have NPN', value: hasNPN, color: '#2D6A4F' },
+              { label: 'Have XFG Email', value: hasXFGEmail, color: '#2D6A4F' },
+              { label: 'E&O Uploaded', value: hasEO, color: '#2D6A4F' },
+              { label: 'License Uploaded', value: hasLicense, color: '#2D6A4F' },
+              { label: 'Licensed', value: licensed, color: '#2D6A4F' },
+              { label: 'Not Licensed', value: notLicensed, color: '#8B2635' },
+            ].map(stat => (
+              <div key={stat.label} style={{ background: '#F5F2ED', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '1rem', textAlign: 'center' }}>
+                <p style={{ color: '#6B6966', fontSize: '0.72rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>{stat.label}</p>
+                <p style={{ color: stat.color, fontSize: '1.75rem', fontWeight: '700' }}>{stat.value}</p>
+              </div>
+            ))}
           </div>
         </div>
 
