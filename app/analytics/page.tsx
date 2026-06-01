@@ -151,6 +151,28 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
+        <div style={{ ...card, marginBottom: '1.25rem' }}>
+          <p style={{ color: '#C9A96E', fontSize: '0.75rem', fontWeight: '600', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Agent XFG Emails</p>
+          {agents.filter(a => a.xfg_email).length === 0 ? (
+            <p style={{ color: '#9A9890', fontSize: '0.875rem' }}>No agents have set their XFG email yet.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {agents
+                .filter(a => a.xfg_email)
+                .sort((a, b) => a.full_name.localeCompare(b.full_name))
+                .map(a => (
+                  <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F5F2ED', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '0.75rem 1rem', cursor: 'pointer' }} onClick={() => router.push(`/agents/${a.id}`)}>
+                    <div>
+                      <p style={{ color: '#1A1814', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.15rem' }}>{a.full_name}</p>
+                      <p style={{ color: '#C9A96E', fontSize: '0.8rem', fontFamily: 'monospace' }}>{a.xfg_id}</p>
+                    </div>
+                    <p style={{ color: '#6B6966', fontSize: '0.875rem' }}>{a.xfg_email}</p>
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+
         <div style={card}>
           <p style={{ color: '#C9A96E', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Recent Stage Changes</p>
           {history.length === 0 ? (
