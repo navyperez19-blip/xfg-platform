@@ -256,6 +256,46 @@ export default function AgentDetailPage() {
                   />
                 </div>
               </div>
+              <div style={{ marginTop: '0.75rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                  <div>
+                    <label style={label}>National Producer Number (NPN)</label>
+                    <input type="text" defaultValue={agent.npn || ''} placeholder="e.g. 12345678" style={input} onBlur={async (e) => {
+                      if (e.target.value !== agent.npn) {
+                        await supabase.from('agents').update({ npn: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                        setAgent({ ...agent, npn: e.target.value })
+                      }
+                    }} />
+                  </div>
+                  <div>
+                    <label style={label}>Former IMO/FMO</label>
+                    <input type="text" defaultValue={agent.former_imo || ''} placeholder="e.g. PHP Agency" style={input} onBlur={async (e) => {
+                      if (e.target.value !== agent.former_imo) {
+                        await supabase.from('agents').update({ former_imo: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                        setAgent({ ...agent, former_imo: e.target.value })
+                      }
+                    }} />
+                  </div>
+                </div>
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <label style={label}>States Licensed In</label>
+                  <input type="text" defaultValue={agent.states_licensed || ''} placeholder="e.g. LA, TX, FL, GA" style={input} onBlur={async (e) => {
+                    if (e.target.value !== agent.states_licensed) {
+                      await supabase.from('agents').update({ states_licensed: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                      setAgent({ ...agent, states_licensed: e.target.value })
+                    }
+                  }} />
+                </div>
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <label style={label}>Previous Carriers</label>
+                  <textarea defaultValue={agent.previous_carriers || ''} placeholder="List all previous carriers..." style={{ ...input, height: '80px', resize: 'vertical' as const }} onBlur={async (e) => {
+                    if (e.target.value !== agent.previous_carriers) {
+                      await supabase.from('agents').update({ previous_carriers: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                      setAgent({ ...agent, previous_carriers: e.target.value })
+                    }
+                  }} />
+                </div>
+              </div>
               <p style={{ color: '#6B6966', fontSize: '0.72rem' }}>Changes save automatically when you click out of a field.</p>
             </div>
           )}
@@ -409,6 +449,51 @@ export default function AgentDetailPage() {
               })}
             </div>
           )}
+        </div>
+
+        {/* Documents */}
+        <div style={card}>
+          <p style={sectionTitle}>Agent Documents</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {[
+              { label: 'E&O Insurance', field: 'eo_document_url', url: agent.eo_document_url },
+              { label: 'Insurance License', field: 'license_document_url', url: agent.license_document_url },
+              { label: 'Contract Document', field: 'contract_document_url', url: agent.contract_document_url },
+            ].map(doc => (
+              <div key={doc.field} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F5F2ED', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '0.875rem 1rem' }}>
+                <div>
+                  <p style={{ color: '#1A1814', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.2rem' }}>{doc.label}</p>
+                  {doc.url ? (
+                    <a href={doc.url} target="_blank" rel="noopener noreferrer" style={{ color: '#C9A96E', fontSize: '0.8rem', textDecoration: 'none' }}>View Document →</a>
+                  ) : (
+                    <p style={{ color: '#9A9890', fontSize: '0.8rem' }}>No document uploaded</p>
+                  )}
+                </div>
+                <div>
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    id={`upload-${doc.field}`}
+                    style={{ display: 'none' }}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (!file) return
+                      const filePath = `${agent.id}/${doc.field}-${Date.now()}.${file.name.split('.').pop()}`
+                      const { error: uploadError } = await supabase.storage.from('agent-documents').upload(filePath, file)
+                      if (!uploadError) {
+                        const { data: urlData } = supabase.storage.from('agent-documents').getPublicUrl(filePath)
+                        await supabase.from('agents').update({ [doc.field]: urlData.publicUrl, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                        setAgent({ ...agent, [doc.field]: urlData.publicUrl })
+                      }
+                    }}
+                  />
+                  <label htmlFor={`upload-${doc.field}`} style={{ background: '#C9A96E', color: '#FFFFFF', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}>
+                    {doc.url ? 'Replace' : 'Upload'}
+                  </label>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Notes */}

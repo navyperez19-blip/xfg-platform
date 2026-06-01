@@ -388,6 +388,92 @@ export default function AgentPortalPage() {
         </div>
 
         <div style={card}>
+          <p style={sectionTitle}>My Information</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div>
+              <label style={{ color: '#6B6966', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '6px' }}>National Producer Number (NPN)</label>
+              <input type="text" defaultValue={agent.npn || ''} placeholder="e.g. 12345678" style={{ width: '100%', background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '10px 14px', fontSize: '15px', fontFamily: 'Inter, sans-serif', outline: 'none', color: '#1A1814', boxSizing: 'border-box' as const }}
+                onBlur={async (e) => {
+                  if (e.target.value !== agent.npn) {
+                    await supabase.from('agents').update({ npn: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                    setAgent({ ...agent, npn: e.target.value })
+                  }
+                }} />
+            </div>
+            <div>
+              <label style={{ color: '#6B6966', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '6px' }}>States Licensed In</label>
+              <input type="text" defaultValue={agent.states_licensed || ''} placeholder="e.g. LA, TX, FL, GA" style={{ width: '100%', background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '10px 14px', fontSize: '15px', fontFamily: 'Inter, sans-serif', outline: 'none', color: '#1A1814', boxSizing: 'border-box' as const }}
+                onBlur={async (e) => {
+                  if (e.target.value !== agent.states_licensed) {
+                    await supabase.from('agents').update({ states_licensed: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                    setAgent({ ...agent, states_licensed: e.target.value })
+                  }
+                }} />
+            </div>
+            <div>
+              <label style={{ color: '#6B6966', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '6px' }}>Former IMO/FMO</label>
+              <input type="text" defaultValue={agent.former_imo || ''} placeholder="e.g. PHP Agency" style={{ width: '100%', background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '10px 14px', fontSize: '15px', fontFamily: 'Inter, sans-serif', outline: 'none', color: '#1A1814', boxSizing: 'border-box' as const }}
+                onBlur={async (e) => {
+                  if (e.target.value !== agent.former_imo) {
+                    await supabase.from('agents').update({ former_imo: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                    setAgent({ ...agent, former_imo: e.target.value })
+                  }
+                }} />
+            </div>
+            <div>
+              <label style={{ color: '#6B6966', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '6px' }}>Previous Carriers</label>
+              <textarea defaultValue={agent.previous_carriers || ''} placeholder="List all previous carriers..." style={{ width: '100%', background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '10px 14px', fontSize: '15px', fontFamily: 'Inter, sans-serif', outline: 'none', color: '#1A1814', boxSizing: 'border-box' as const, height: '80px', resize: 'vertical' as const }}
+                onBlur={async (e) => {
+                  if (e.target.value !== agent.previous_carriers) {
+                    await supabase.from('agents').update({ previous_carriers: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                    setAgent({ ...agent, previous_carriers: e.target.value })
+                  }
+                }} />
+            </div>
+          </div>
+        </div>
+
+        <div style={card}>
+          <p style={sectionTitle}>Upload Documents</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {[
+              { label: 'E&O Insurance', field: 'eo_document_url', url: agent.eo_document_url },
+              { label: 'Insurance License', field: 'license_document_url', url: agent.license_document_url },
+              { label: 'Contract Document', field: 'contract_document_url', url: agent.contract_document_url },
+            ].map(doc => (
+              <div key={doc.field} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '14px 16px' }}>
+                <div>
+                  <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '4px' }}>{doc.label}</p>
+                  {doc.url ? (
+                    <a href={doc.url} target="_blank" rel="noopener noreferrer" style={{ color: '#C9A96E', fontSize: '13px', textDecoration: 'none', fontWeight: '600' }}>View →</a>
+                  ) : (
+                    <p style={{ color: '#9A9890', fontSize: '13px' }}>Not uploaded yet</p>
+                  )}
+                </div>
+                <div>
+                  <input type="file" accept=".pdf,.jpg,.jpeg,.png" id={`portal-upload-${doc.field}`} style={{ display: 'none' }}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (!file) return
+                      const filePath = `${agent.id}/${doc.field}-${Date.now()}.${file.name.split('.').pop()}`
+                      const { error: uploadError } = await supabase.storage.from('agent-documents').upload(filePath, file)
+                      if (!uploadError) {
+                        const { data: urlData } = supabase.storage.from('agent-documents').getPublicUrl(filePath)
+                        await supabase.from('agents').update({ [doc.field]: urlData.publicUrl, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                        setAgent({ ...agent, [doc.field]: urlData.publicUrl })
+                      }
+                    }}
+                  />
+                  <label htmlFor={`portal-upload-${doc.field}`} style={{ background: '#C9A96E', color: '#FFFFFF', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', display: 'inline-block' }}>
+                    {doc.url ? 'Replace' : 'Upload'}
+                  </label>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={card}>
           <p style={sectionTitle}>What Happens Next</p>
           <p style={{ color: '#6B6966', fontSize: '15px', lineHeight: '1.6' }}>
             {agent.current_stage === 'contacted' && 'Our team has reached out to you. Please check your email and respond as soon as possible to move forward with licensing.'}
