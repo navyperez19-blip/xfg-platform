@@ -544,6 +544,50 @@ export default function AgentDetailPage() {
           </div>
         </div>
 
+        {/* Last Contact */}
+        <div style={card}>
+          <p style={sectionTitle}>Last Contact</p>
+          {agent.last_contact_at && (
+            <div style={{ background: '#F5EDD9', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '0.875rem 1rem', marginBottom: '1rem' }}>
+              <p style={{ color: '#1A1814', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.25rem' }}>
+                {agent.last_contact_by} — {new Date(agent.last_contact_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} at {new Date(agent.last_contact_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+              </p>
+              {agent.last_contact_note && <p style={{ color: '#6B6966', fontSize: '0.85rem' }}>{agent.last_contact_note}</p>}
+            </div>
+          )}
+          {['superadmin', 'executive', 'finley', 'joe', 'jesse'].includes(currentUser?.role || '') && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div>
+                <label style={label}>Contact Note (optional)</label>
+                <input
+                  type="text"
+                  id="contact-note-input"
+                  placeholder="e.g. Called to check on licensing progress..."
+                  style={input}
+                />
+              </div>
+              <button
+                onClick={async () => {
+                  const noteEl = document.getElementById('contact-note-input') as HTMLInputElement
+                  const note = noteEl?.value?.trim() || ''
+                  const now = new Date().toISOString()
+                  await supabase.from('agents').update({
+                    last_contact_at: now,
+                    last_contact_by: currentUser.full_name,
+                    last_contact_note: note,
+                    updated_at: now
+                  }).eq('id', agent.id)
+                  setAgent({ ...agent, last_contact_at: now, last_contact_by: currentUser.full_name, last_contact_note: note })
+                  if (noteEl) noteEl.value = ''
+                }}
+                style={{ background: '#C9A96E', border: 'none', color: '#FFFFFF', padding: '0.6rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600', fontFamily: 'Inter, sans-serif', alignSelf: 'flex-start' }}
+              >
+                Log Contact Now
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Notes */}
         <div style={card}>
           <Notes agentId={agent.id} />
