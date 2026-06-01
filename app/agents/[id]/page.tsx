@@ -163,9 +163,32 @@ export default function AgentDetailPage() {
   return (
     <main style={{ minHeight: '100vh', background: '#F5F2ED', color: '#1A1814', fontFamily: 'Georgia, serif', padding: '1.5rem' }}>
       <div style={{ maxWidth: '760px', margin: '0 auto' }}>
-        <button onClick={() => router.push('/pipeline')} style={{ background: 'none', border: 'none', color: '#6B6966', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif', marginBottom: '1.5rem', display: 'block' }}>
-          ← Back to Pipeline
-        </button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <button onClick={() => router.push('/pipeline')} style={{ background: 'transparent', border: 'none', color: '#9A9890', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Inter, sans-serif', padding: 0 }}>
+            ← Back to Pipeline
+          </button>
+          {['superadmin', 'executive'].includes(currentUser?.role || '') && (
+            <button
+              onClick={async () => {
+                const confirmed = confirm(`Are you sure you want to permanently delete ${agent.full_name}? This cannot be undone.`)
+                if (!confirmed) return
+                const confirmed2 = confirm(`Final confirmation — delete ${agent.full_name} (${agent.xfg_id})?`)
+                if (!confirmed2) return
+                await supabase.from('agent_checklist_progress').delete().eq('agent_id', agent.id)
+                await supabase.from('notes').delete().eq('agent_id', agent.id)
+                await supabase.from('stage_history').delete().eq('agent_id', agent.id)
+                await supabase.from('overrides').delete().eq('agent_id', agent.id)
+                await supabase.from('notifications').delete().eq('agent_id', agent.id)
+                await supabase.from('agent_messages').delete().eq('agent_id', agent.id)
+                await supabase.from('agents').delete().eq('id', agent.id)
+                router.push('/pipeline')
+              }}
+              style={{ background: '#FFF5F5', border: '1px solid #8B2635', color: '#8B2635', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}
+            >
+              Delete Agent
+            </button>
+          )}
+        </div>
 
         {/* Agent Header */}
         <div style={card}>
