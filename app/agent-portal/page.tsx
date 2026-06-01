@@ -221,6 +221,8 @@ export default function AgentPortalPage() {
                     if (e.target.value && e.target.value !== agent.xfg_email) {
                       await supabase.from('agents').update({ xfg_email: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
                       setAgent({ ...agent, xfg_email: e.target.value })
+                      const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
+                      if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'profile_update', title: 'Agent added XFG email', message: `${agent.full_name} set their XFG email: ${e.target.value}` })))
                     }
                   }}
                 />
@@ -397,6 +399,8 @@ export default function AgentPortalPage() {
                   if (e.target.value !== agent.npn) {
                     await supabase.from('agents').update({ npn: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
                     setAgent({ ...agent, npn: e.target.value })
+                    const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
+                    if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'profile_update', title: 'Agent updated NPN', message: `${agent.full_name} added their National Producer Number: ${e.target.value}` })))
                   }
                 }} />
             </div>
@@ -407,6 +411,8 @@ export default function AgentPortalPage() {
                   if (e.target.value !== agent.states_licensed) {
                     await supabase.from('agents').update({ states_licensed: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
                     setAgent({ ...agent, states_licensed: e.target.value })
+                    const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
+                    if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'profile_update', title: 'Agent updated licensed states', message: `${agent.full_name} updated their licensed states: ${e.target.value}` })))
                   }
                 }} />
             </div>
@@ -417,6 +423,8 @@ export default function AgentPortalPage() {
                   if (e.target.value !== agent.former_imo) {
                     await supabase.from('agents').update({ former_imo: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
                     setAgent({ ...agent, former_imo: e.target.value })
+                    const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
+                    if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'profile_update', title: 'Agent updated former IMO/FMO', message: `${agent.full_name} listed their former IMO/FMO: ${e.target.value}` })))
                   }
                 }} />
             </div>
@@ -427,6 +435,8 @@ export default function AgentPortalPage() {
                   if (e.target.value !== agent.previous_carriers) {
                     await supabase.from('agents').update({ previous_carriers: e.target.value, updated_at: new Date().toISOString() }).eq('id', agent.id)
                     setAgent({ ...agent, previous_carriers: e.target.value })
+                    const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
+                    if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'profile_update', title: 'Agent updated previous carriers', message: `${agent.full_name} listed their previous carriers: ${e.target.value}` })))
                   }
                 }} />
             </div>
@@ -461,6 +471,8 @@ export default function AgentPortalPage() {
                         const { data: urlData } = supabase.storage.from('agent-documents').getPublicUrl(filePath)
                         await supabase.from('agents').update({ [doc.field]: urlData.publicUrl, updated_at: new Date().toISOString() }).eq('id', agent.id)
                         setAgent({ ...agent, [doc.field]: urlData.publicUrl })
+                        const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
+                        if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'document_upload', title: `Agent uploaded ${doc.label}`, message: `${agent.full_name} uploaded their ${doc.label} document` })))
                       }
                     }}
                   />
