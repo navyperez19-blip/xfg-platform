@@ -24,6 +24,7 @@ export default function AgentPortalPage() {
   const [agent, setAgent] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [checklistItems, setChecklistItems] = useState<any[]>([])
+  const [uploadStatus, setUploadStatus] = useState<Record<string, string>>({})
   const [checklistProgress, setChecklistProgress] = useState<any[]>([])
   const [stateResources, setStateResources] = useState<any>(null)
   const [movingStage, setMovingStage] = useState(false)
@@ -465,20 +466,27 @@ export default function AgentPortalPage() {
                     onChange={async (e) => {
                       const file = e.target.files?.[0]
                       if (!file) return
+                      setUploadStatus(prev => ({ ...prev, [doc.field]: 'uploading' }))
                       const filePath = `${agent.id}/${doc.field}-${Date.now()}.${file.name.split('.').pop()}`
                       const { error: uploadError } = await supabase.storage.from('agent-documents').upload(filePath, file)
                       if (!uploadError) {
                         const { data: urlData } = supabase.storage.from('agent-documents').getPublicUrl(filePath)
                         await supabase.from('agents').update({ [doc.field]: urlData.publicUrl, updated_at: new Date().toISOString() }).eq('id', agent.id)
                         setAgent({ ...agent, [doc.field]: urlData.publicUrl })
+                        setUploadStatus(prev => ({ ...prev, [doc.field]: 'done' }))
                         const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
                         if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'document_upload', title: `Agent uploaded ${doc.label}`, message: `${agent.full_name} uploaded their ${doc.label} document` })))
+                      } else {
+                        setUploadStatus(prev => ({ ...prev, [doc.field]: 'error' }))
                       }
                     }}
                   />
                   <label htmlFor={`portal-upload-${doc.field}`} style={{ background: '#C9A96E', color: '#FFFFFF', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', display: 'inline-block' }}>
                     {doc.url ? 'Replace' : 'Upload'}
                   </label>
+                  {uploadStatus[doc.field] === 'uploading' && <p style={{ color: '#B5652A', fontSize: '12px', marginTop: '4px' }}>Uploading...</p>}
+                  {uploadStatus[doc.field] === 'done' && <p style={{ color: '#2D6A4F', fontSize: '12px', marginTop: '4px' }}>✓ Uploaded successfully</p>}
+                  {uploadStatus[doc.field] === 'error' && <p style={{ color: '#8B2635', fontSize: '12px', marginTop: '4px' }}>Upload failed. Try again.</p>}
                 </div>
               </div>
             ))}
