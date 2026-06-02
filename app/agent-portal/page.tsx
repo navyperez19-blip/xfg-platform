@@ -450,44 +450,60 @@ export default function AgentPortalPage() {
             {[
               { label: 'E&O Insurance', field: 'eo_document_url', url: agent.eo_document_url },
               { label: 'Insurance License', field: 'license_document_url', url: agent.license_document_url },
-              { label: 'Contract Document', field: 'contract_document_url', url: agent.contract_document_url },
             ].map(doc => (
-              <div key={doc.field} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '14px 16px' }}>
-                <div>
-                  <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '4px' }}>{doc.label}</p>
-                  {doc.url ? (
-                    <a href={doc.url} target="_blank" rel="noopener noreferrer" style={{ color: '#C9A96E', fontSize: '13px', textDecoration: 'none', fontWeight: '600' }}>View →</a>
-                  ) : (
-                    <p style={{ color: '#9A9890', fontSize: '13px' }}>Not uploaded yet</p>
-                  )}
+              <div key={doc.field} style={{ background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '14px 16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '4px' }}>{doc.label}</p>
+                    {doc.url ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                        <span style={{ background: '#F0FFF4', color: '#2D6A4F', fontSize: '12px', fontWeight: '600', padding: '3px 10px', borderRadius: '20px', border: '1px solid #A8D5B5' }}>✓ Uploaded</span>
+                        <a href={doc.url} target="_blank" rel="noopener noreferrer" style={{ color: '#C9A96E', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>View →</a>
+                      </div>
+                    ) : (
+                      <span style={{ color: '#9A9890', fontSize: '13px' }}>Not uploaded yet</span>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    {doc.url && (
+                      <button
+                        onClick={async () => {
+                          if (!confirm('Remove this document?')) return
+                          await supabase.from('agents').update({ [doc.field]: null, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                          setAgent({ ...agent, [doc.field]: null })
+                          setUploadStatus(prev => ({ ...prev, [doc.field]: '' }))
+                        }}
+                        style={{ background: '#FFF5F5', border: '1px solid #8B2635', color: '#8B2635', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}
+                      >
+                        Remove
+                      </button>
+                    )}
+                    <input type="file" accept=".pdf,.jpg,.jpeg,.png" id={`portal-upload-${doc.field}`} style={{ display: 'none' }}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        setUploadStatus(prev => ({ ...prev, [doc.field]: 'uploading' }))
+                        const filePath = `${agent.id}/${doc.field}-${Date.now()}.${file.name.split('.').pop()}`
+                        const { error: uploadError } = await supabase.storage.from('agent-documents').upload(filePath, file)
+                        if (!uploadError) {
+                          const { data: urlData } = supabase.storage.from('agent-documents').getPublicUrl(filePath)
+                          await supabase.from('agents').update({ [doc.field]: urlData.publicUrl, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                          setAgent({ ...agent, [doc.field]: urlData.publicUrl })
+                          setUploadStatus(prev => ({ ...prev, [doc.field]: 'done' }))
+                          const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
+                          if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'document_upload', title: `Agent uploaded ${doc.label}`, message: `${agent.full_name} uploaded their ${doc.label} document` })))
+                        } else {
+                          setUploadStatus(prev => ({ ...prev, [doc.field]: 'error' }))
+                        }
+                      }}
+                    />
+                    <label htmlFor={`portal-upload-${doc.field}`} style={{ background: '#C9A96E', color: '#FFFFFF', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', display: 'inline-block' }}>
+                      {doc.url ? 'Replace' : 'Upload'}
+                    </label>
+                  </div>
                 </div>
-                <div>
-                  <input type="file" accept=".pdf,.jpg,.jpeg,.png" id={`portal-upload-${doc.field}`} style={{ display: 'none' }}
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0]
-                      if (!file) return
-                      setUploadStatus(prev => ({ ...prev, [doc.field]: 'uploading' }))
-                      const filePath = `${agent.id}/${doc.field}-${Date.now()}.${file.name.split('.').pop()}`
-                      const { error: uploadError } = await supabase.storage.from('agent-documents').upload(filePath, file)
-                      if (!uploadError) {
-                        const { data: urlData } = supabase.storage.from('agent-documents').getPublicUrl(filePath)
-                        await supabase.from('agents').update({ [doc.field]: urlData.publicUrl, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                        setAgent({ ...agent, [doc.field]: urlData.publicUrl })
-                        setUploadStatus(prev => ({ ...prev, [doc.field]: 'done' }))
-                        const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
-                        if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'document_upload', title: `Agent uploaded ${doc.label}`, message: `${agent.full_name} uploaded their ${doc.label} document` })))
-                      } else {
-                        setUploadStatus(prev => ({ ...prev, [doc.field]: 'error' }))
-                      }
-                    }}
-                  />
-                  <label htmlFor={`portal-upload-${doc.field}`} style={{ background: '#C9A96E', color: '#FFFFFF', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', display: 'inline-block' }}>
-                    {doc.url ? 'Replace' : 'Upload'}
-                  </label>
-                  {uploadStatus[doc.field] === 'uploading' && <p style={{ color: '#B5652A', fontSize: '12px', marginTop: '4px' }}>Uploading...</p>}
-                  {uploadStatus[doc.field] === 'done' && <p style={{ color: '#2D6A4F', fontSize: '12px', marginTop: '4px' }}>✓ Uploaded successfully</p>}
-                  {uploadStatus[doc.field] === 'error' && <p style={{ color: '#8B2635', fontSize: '12px', marginTop: '4px' }}>Upload failed. Try again.</p>}
-                </div>
+                {uploadStatus[doc.field] === 'uploading' && <p style={{ color: '#B5652A', fontSize: '12px', marginTop: '8px' }}>Uploading...</p>}
+                {uploadStatus[doc.field] === 'error' && <p style={{ color: '#8B2635', fontSize: '12px', marginTop: '8px' }}>Upload failed. Try again.</p>}
               </div>
             ))}
           </div>
