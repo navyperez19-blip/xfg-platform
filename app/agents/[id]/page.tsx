@@ -474,62 +474,6 @@ export default function AgentDetailPage() {
           )}
         </div>
 
-        {/* Documents */}
-        <div style={card}>
-          <p style={sectionTitle}>Agent Documents</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {[
-              { label: 'E&O Insurance', field: 'eo_document_url', url: agent.eo_document_url },
-              { label: 'Insurance License', field: 'license_document_url', url: agent.license_document_url },
-            ].map(doc => (
-              <div key={doc.field} style={{ background: '#F5F2ED', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '0.875rem 1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div style={{ flex: 1 }}>
-                    <p style={{ color: '#1A1814', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem' }}>{doc.label}</p>
-                    {doc.url ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <span style={{ background: '#F0FFF4', color: '#2D6A4F', fontSize: '0.72rem', fontWeight: '600', padding: '2px 8px', borderRadius: '20px', border: '1px solid #A8D5B5' }}>✓ Uploaded</span>
-                        <a href={doc.url} target="_blank" rel="noopener noreferrer" style={{ color: '#C9A96E', fontSize: '0.8rem', fontWeight: '600', textDecoration: 'none' }}>View Document →</a>
-                      </div>
-                    ) : (
-                      <p style={{ color: '#9A9890', fontSize: '0.8rem' }}>No document uploaded</p>
-                    )}
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    {doc.url && (
-                      <button
-                        onClick={async () => {
-                          if (!confirm(`Remove ${doc.label} document?`)) return
-                          await supabase.from('agents').update({ [doc.field]: null, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                          setAgent({ ...agent, [doc.field]: null })
-                        }}
-                        style={{ background: '#FFF5F5', border: '1px solid #8B2635', color: '#8B2635', padding: '0.4rem 0.75rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}
-                      >
-                        Remove
-                      </button>
-                    )}
-                    <input type="file" accept=".pdf,.jpg,.jpeg,.png" id={`admin-upload-${doc.field}`} style={{ display: 'none' }}
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0]
-                        if (!file) return
-                        const filePath = `${agent.id}/${doc.field}-${Date.now()}.${file.name.split('.').pop()}`
-                        const { error: uploadError } = await supabase.storage.from('agent-documents').upload(filePath, file)
-                        if (!uploadError) {
-                          const { data: urlData } = supabase.storage.from('agent-documents').getPublicUrl(filePath)
-                          await supabase.from('agents').update({ [doc.field]: urlData.publicUrl, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                          setAgent({ ...agent, [doc.field]: urlData.publicUrl })
-                        }
-                      }}
-                    />
-                    <label htmlFor={`admin-upload-${doc.field}`} style={{ background: '#C9A96E', color: '#FFFFFF', padding: '0.4rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600', display: 'inline-block' }}>
-                      {doc.url ? 'Replace' : 'Upload'}
-                    </label>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
 
         {/* Carriers */}
         <div style={card}>
