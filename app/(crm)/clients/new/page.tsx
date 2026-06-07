@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient, createPolicy } from '@/app/_actions/crm-actions'
+import { createCRMClient, createCRMPolicy } from '@/app/_actions/crm-actions'
 import {
   CARRIERS,
   PRODUCT_TYPES,
@@ -64,7 +64,7 @@ export default function NewClientPage() {
     }
     setLoading(true)
     try {
-      const result = await createClient({
+      const result = await createCRMClient({
         ...client,
         health_status: client.health_status as any || undefined,
         date_of_birth: client.date_of_birth || undefined,
@@ -89,7 +89,7 @@ export default function NewClientPage() {
     }
     setLoading(true)
     try {
-      const result = await createPolicy({
+      const result = await createCRMPolicy({
         client_id: createdClientId,
         carrier: policy.carrier,
         product_type: policy.product_type,

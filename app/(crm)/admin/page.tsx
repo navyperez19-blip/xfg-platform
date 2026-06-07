@@ -1,11 +1,10 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/app/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { POLICY_STATUSES } from '@/app/crm-constants'
 
 export default async function AdminOverviewPage() {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createClient()
   const { data: { session } } = await supabase.auth.getSession()
 
   const { data: userRecord } = await supabase

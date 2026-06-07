@@ -1,7 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient as createSupabase } from '@/app/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 
 export type ClientFormData = {
@@ -33,7 +32,7 @@ export type PolicyFormData = {
   notes?: string
 }
 
-async function getAgentRecord(supabase: ReturnType<typeof createServerActionClient>) {
+async function getAgentRecord(supabase: Awaited<ReturnType<typeof createSupabase>>) {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) throw new Error('Not authenticated')
 
@@ -47,8 +46,8 @@ async function getAgentRecord(supabase: ReturnType<typeof createServerActionClie
   return agent
 }
 
-export async function createClient(formData: ClientFormData) {
-  const supabase = createServerActionClient({ cookies })
+export async function createCRMClient(formData: ClientFormData) {
+  const supabase = await createSupabase()
   const agent = await getAgentRecord(supabase)
 
   const { data, error } = await supabase
@@ -62,7 +61,7 @@ export async function createClient(formData: ClientFormData) {
     .single()
 
   if (error) {
-    console.error('createClient error:', error)
+    console.error('createCRMClient error:', error)
     return { error: error.message }
   }
 
@@ -71,8 +70,8 @@ export async function createClient(formData: ClientFormData) {
   return { data }
 }
 
-export async function updateClient(id: string, formData: Partial<ClientFormData>) {
-  const supabase = createServerActionClient({ cookies })
+export async function updateCRMClient(id: string, formData: Partial<ClientFormData>) {
+  const supabase = await createSupabase()
   await getAgentRecord(supabase)
 
   const { data, error } = await supabase
@@ -90,8 +89,8 @@ export async function updateClient(id: string, formData: Partial<ClientFormData>
   return { data }
 }
 
-export async function deleteClient(id: string) {
-  const supabase = createServerActionClient({ cookies })
+export async function deleteCRMClient(id: string) {
+  const supabase = await createSupabase()
   await getAgentRecord(supabase)
 
   const { error } = await supabase
@@ -106,8 +105,8 @@ export async function deleteClient(id: string) {
   return { success: true }
 }
 
-export async function createPolicy(formData: PolicyFormData) {
-  const supabase = createServerActionClient({ cookies })
+export async function createCRMPolicy(formData: PolicyFormData) {
+  const supabase = await createSupabase()
   const agent = await getAgentRecord(supabase)
 
   const { data, error } = await supabase
@@ -123,7 +122,7 @@ export async function createPolicy(formData: PolicyFormData) {
     .single()
 
   if (error) {
-    console.error('createPolicy error:', error)
+    console.error('createCRMPolicy error:', error)
     return { error: error.message }
   }
 
@@ -133,8 +132,8 @@ export async function createPolicy(formData: PolicyFormData) {
   return { data }
 }
 
-export async function updatePolicy(id: string, formData: Partial<PolicyFormData>) {
-  const supabase = createServerActionClient({ cookies })
+export async function updateCRMPolicy(id: string, formData: Partial<PolicyFormData>) {
+  const supabase = await createSupabase()
   await getAgentRecord(supabase)
 
   const { data, error } = await supabase
@@ -151,8 +150,8 @@ export async function updatePolicy(id: string, formData: Partial<PolicyFormData>
   return { data }
 }
 
-export async function deletePolicy(id: string) {
-  const supabase = createServerActionClient({ cookies })
+export async function deleteCRMPolicy(id: string) {
+  const supabase = await createSupabase()
   await getAgentRecord(supabase)
 
   const { error } = await supabase
