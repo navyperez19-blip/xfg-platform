@@ -22,27 +22,48 @@ export default async function CRMLayout({
   const adminRoles = ['superadmin', 'executive']
   const isAdmin = adminRoles.includes(userRecord?.role ?? '')
 
-  // Get agent record
+  // If admin, allow straight through — no agent record needed
+  if (isAdmin) {
+    const navAgent = {
+      id: userRecord?.id ?? '',
+      full_name: userRecord?.full_name ?? '',
+      agent_model: userRecord?.role ?? 'superadmin',
+    }
+    return (
+      <div style={{
+        display: 'flex',
+        minHeight: '100vh',
+        backgroundColor: '#F5F2ED',
+        fontFamily: "'Inter', sans-serif",
+      }}>
+        <CRMNav agent={navAgent} isAdmin={true} />
+        <main style={{
+          flex: 1,
+          marginLeft: '240px',
+          padding: '32px',
+          minHeight: '100vh',
+        }}>
+          {children}
+        </main>
+      </div>
+    )
+  }
+
+  // For regular agents, check they exist and are active
   const { data: agentRecord } = await supabase
     .from('agents')
     .select('id, full_name, agent_model, current_stage')
     .eq('user_id', session.user.id)
     .single()
 
-  // Non-admins must be active agents to access CRM
-  if (!isAdmin && agentRecord?.current_stage !== 'active') {
-    redirect('/pipeline')
-  }
-
-  // If no agent record and not admin, redirect
-  if (!isAdmin && !agentRecord) {
+  if (!agentRecord || agentRecord.current_stage !== 'active') {
     redirect('/pipeline')
   }
 
   const navAgent = {
-    id: agentRecord?.id ?? userRecord?.id ?? '',
-    full_name: agentRecord?.full_name ?? userRecord?.full_name ?? '',
-    agent_model: isAdmin ? (userRecord?.role ?? 'admin') : (agentRecord?.agent_model ?? 'agent'),
+    id: agentRecord.id,
+    full_name: agentRecord.full_name ?? '',
+    agent_model: agentRecord.agent_model ?? 'agent',
   }
 
   return (
@@ -52,7 +73,7 @@ export default async function CRMLayout({
       backgroundColor: '#F5F2ED',
       fontFamily: "'Inter', sans-serif",
     }}>
-      <CRMNav agent={navAgent} isAdmin={isAdmin} />
+      <CRMNav agent={navAgent} isAdmin={false} />
       <main style={{
         flex: 1,
         marginLeft: '240px',
