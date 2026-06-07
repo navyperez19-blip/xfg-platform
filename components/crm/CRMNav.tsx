@@ -1,0 +1,159 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+
+type Agent = {
+  id: string
+  full_name: string
+  agent_model: string
+}
+
+export default function CRMNav({
+  agent,
+  isAdmin,
+}: {
+  agent: Agent
+  isAdmin: boolean
+}) {
+  const pathname = usePathname()
+
+  const navItems = [
+    { href: '/crm', label: 'Dashboard', icon: '⬡', exact: true },
+    { href: '/crm/clients', label: 'My Clients', icon: '◈' },
+    { href: '/crm/clients/new', label: 'Add Client', icon: '+' },
+    ...(isAdmin ? [{ href: '/crm/admin', label: 'All Agents', icon: '◉' }] : []),
+  ]
+
+  const isActive = (href: string, exact?: boolean) => {
+    if (exact) return pathname === href
+    return pathname.startsWith(href)
+  }
+
+  return (
+    <aside style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '240px',
+      height: '100vh',
+      backgroundColor: '#1A1A1A',
+      display: 'flex',
+      flexDirection: 'column',
+      zIndex: 100,
+      borderRight: '1px solid #2A2A2A',
+    }}>
+      {/* Logo */}
+      <div style={{ padding: '28px 24px 20px', borderBottom: '1px solid #2A2A2A' }}>
+        <div style={{
+          fontSize: '11px',
+          fontWeight: '700',
+          letterSpacing: '0.2em',
+          color: '#C9A96E',
+          textTransform: 'uppercase',
+          marginBottom: '4px',
+        }}>
+          XFG
+        </div>
+        <div style={{
+          fontSize: '14px',
+          fontWeight: '600',
+          color: '#FFFFFF',
+          letterSpacing: '0.02em',
+        }}>
+          Production CRM
+        </div>
+      </div>
+
+      {/* Agent info */}
+      <div style={{ padding: '16px 24px', borderBottom: '1px solid #2A2A2A' }}>
+        <div style={{
+          width: '36px',
+          height: '36px',
+          borderRadius: '50%',
+          backgroundColor: '#C9A96E',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '14px',
+          fontWeight: '700',
+          color: '#1A1A1A',
+          marginBottom: '10px',
+        }}>
+          {agent.full_name?.[0]}
+        </div>
+        <div style={{ fontSize: '13px', fontWeight: '600', color: '#FFFFFF', lineHeight: 1.3 }}>
+          {agent.full_name}
+        </div>
+        <div style={{
+          fontSize: '11px',
+          color: '#666',
+          marginTop: '2px',
+          textTransform: 'capitalize',
+          letterSpacing: '0.05em',
+        }}>
+          {agent.agent_model}
+        </div>
+      </div>
+
+      {/* Nav items */}
+      <nav style={{ padding: '12px', flex: 1 }}>
+        {navItems.map((item) => {
+          const active = isActive(item.href, item.exact)
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '10px 12px',
+                borderRadius: '8px',
+                marginBottom: '2px',
+                textDecoration: 'none',
+                backgroundColor: active ? '#C9A96E15' : 'transparent',
+                border: active ? '1px solid #C9A96E30' : '1px solid transparent',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <span style={{
+                fontSize: '14px',
+                color: active ? '#C9A96E' : '#555',
+                width: '18px',
+                textAlign: 'center',
+              }}>
+                {item.icon}
+              </span>
+              <span style={{
+                fontSize: '13px',
+                fontWeight: active ? '600' : '400',
+                color: active ? '#FFFFFF' : '#888',
+              }}>
+                {item.label}
+              </span>
+            </Link>
+          )
+        })}
+      </nav>
+
+      {/* Back to pipeline */}
+      <div style={{ padding: '16px 12px', borderTop: '1px solid #2A2A2A' }}>
+        <Link
+          href="/pipeline"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            padding: '10px 12px',
+            borderRadius: '8px',
+            textDecoration: 'none',
+          }}
+        >
+          <span style={{ fontSize: '12px', color: '#555' }}>←</span>
+          <span style={{ fontSize: '12px', color: '#555' }}>Back to Pipeline</span>
+        </Link>
+      </div>
+    </aside>
+  )
+}
