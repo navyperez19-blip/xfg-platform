@@ -183,11 +183,18 @@ export default function AgentPortalPage() {
           <div style={card}>
             <h2 style={{ color: '#1A1814', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>Create Your XFG Email</h2>
             <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '20px' }}>Set up your XFG Gmail account and enter it below. This will be your official XFG email address.</p>
-            <div style={{ background: '#F5EDD9', border: '1px solid #E8C87A', borderRadius: '10px', padding: '14px 16px', marginBottom: '20px' }}>
+            <div style={{ background: '#F5EDD9', border: '1px solid #E8C87A', borderRadius: '10px', padding: '14px 16px', marginBottom: '16px' }}>
               <p style={{ color: '#8B6A2E', fontSize: '14px', fontWeight: '600', marginBottom: '4px' }}>Your XFG Email Format:</p>
               <p style={{ color: '#C9A96E', fontSize: '16px', fontWeight: '700', fontFamily: 'monospace' }}>firstnamelastname.xfg@gmail.com</p>
               <p style={{ color: '#9A9890', fontSize: '12px', marginTop: '4px' }}>Example: tristanperez.xfg@gmail.com</p>
             </div>
+            <a href="https://accounts.google.com/signup" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '14px 16px', textDecoration: 'none', marginBottom: '20px' }}>
+              <div>
+                <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '700', marginBottom: '2px' }}>Create Gmail Account</p>
+                <p style={{ color: '#6B6966', fontSize: '13px' }}>Click here to open Gmail and create your XFG email</p>
+              </div>
+              <span style={{ color: '#C9A96E', fontSize: '15px', fontWeight: '600' }}>Open Gmail →</span>
+            </a>
             <label style={lbl}>Your XFG Email</label>
             <input type="email" value={formData.xfg_email} onChange={(e) => setFormData({ ...formData, xfg_email: e.target.value })} placeholder="firstnamelastname.xfg@gmail.com" style={inp} />
             <button
