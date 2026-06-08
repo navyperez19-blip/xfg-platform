@@ -140,7 +140,7 @@ export default function AgentPortalPage() {
   const inp = { width: '100%', background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '14px 16px', fontSize: '16px', fontFamily: 'Inter, sans-serif', outline: 'none', color: '#1A1814', boxSizing: 'border-box' as const }
   const lbl = { color: '#6B6966', fontSize: '13px', fontWeight: '600' as const, display: 'block', marginBottom: '6px', textTransform: 'uppercase' as const, letterSpacing: '0.06em' }
   const card = { background: '#FFFFFF', borderRadius: '16px', padding: '28px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginBottom: '16px' }
-  const nextBtn = { width: '100%', background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700' as const, cursor: 'pointer', fontFamily: 'Inter, sans-serif', marginTop: '20px', opacity: saving ? 0.7 : 1 }
+
 
   if (loading) return (
     <main style={{ minHeight: '100vh', background: '#F5F2ED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -517,16 +517,47 @@ export default function AgentPortalPage() {
         {stepKey === 'system_setup' && (
           <div style={card}>
             <h2 style={{ color: '#1A1814', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>System Setup</h2>
-            <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '20px' }}>Your contracts are being processed. The XFG team is setting up your CRM, dialer, and email access.</p>
+            <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '20px' }}>Check off each item as you receive access. The XFG team will confirm each one on their end.</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
-              {['CRM Access', 'Dialer Setup', 'XFG Email Configured', 'Agent Profile Complete'].map(item => (
-                <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: '#F0EDE8', borderRadius: '8px' }}>
-                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid #DDD9D2', background: 'transparent', flexShrink: 0 }} />
-                  <p style={{ color: '#6B6966', fontSize: '14px' }}>{item}</p>
-                </div>
-              ))}
+              {['CRM Access', 'Dialer Setup', 'XFG Email Configured', 'Agent Profile Complete'].map(item => {
+                const items = agent.system_setup_items || {}
+                const isChecked = items[item] === true
+                return (
+                  <div
+                    key={item}
+                    onClick={async () => {
+                      const updated = { ...(agent.system_setup_items || {}), [item]: !isChecked }
+                      await supabase.from('agents').update({ system_setup_items: updated, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                      setAgent({ ...agent, system_setup_items: updated })
+                      if (!isChecked) {
+                        const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
+                        if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'profile_update', title: `Agent confirmed: ${item}`, message: `${agent.full_name} confirmed they have ${item} set up` })))
+                      }
+                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', background: isChecked ? '#F0FFF4' : '#F0EDE8', borderRadius: '10px', border: `1px solid ${isChecked ? '#A8D5B5' : '#DDD9D2'}`, cursor: 'pointer' }}
+                  >
+                    <div style={{ width: '22px', height: '22px', borderRadius: '6px', border: `2px solid ${isChecked ? '#2D6A4F' : '#DDD9D2'}`, background: isChecked ? '#2D6A4F' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {isChecked && <span style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: '700' }}>✓</span>}
+                    </div>
+                    <p style={{ color: isChecked ? '#2D6A4F' : '#1A1814', fontSize: '15px', fontWeight: isChecked ? '600' : '400' }}>{item}</p>
+                  </div>
+                )
+              })}
             </div>
-            <p style={{ color: '#9A9890', fontSize: '13px', textAlign: 'center' }}>The team will reach out when everything is ready.</p>
+            {Object.values(agent.system_setup_items || {}).filter(Boolean).length === 4 ? (
+              <div style={{ display: 'flex', gap: '12px' }}>
+                {currentStep > 0 && (
+                  <button onClick={goBack} disabled={saving} style={{ flex: 1, background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                    ← Back
+                  </button>
+                )}
+                <button onClick={() => saveAndNext({})} disabled={saving} style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                  {saving ? 'Saving...' : 'Next →'}
+                </button>
+              </div>
+            ) : (
+              <p style={{ color: '#9A9890', fontSize: '13px', textAlign: 'center' }}>Check off all items above to continue.</p>
+            )}
           </div>
         )}
 
