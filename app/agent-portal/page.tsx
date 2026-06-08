@@ -315,18 +315,6 @@ export default function AgentPortalPage() {
                 <label style={lbl}>States Licensed In <span style={{ color: '#8B2635' }}>*</span></label>
                 <input type="text" value={formData.states_licensed} onChange={(e) => setFormData({ ...formData, states_licensed: e.target.value })} placeholder="e.g. LA, TX, FL, GA" style={inp} />
               </div>
-              <div>
-                <label style={lbl}>Former IMO/FMO <span style={{ color: '#9A9890', fontWeight: '400' }}>(optional)</span></label>
-                <input type="text" value={formData.former_imo} onChange={(e) => setFormData({ ...formData, former_imo: e.target.value })} placeholder="e.g. PHP Agency" style={inp} />
-              </div>
-              <div>
-                <label style={lbl}>Previous Carriers <span style={{ color: '#9A9890', fontWeight: '400' }}>(optional)</span></label>
-                <textarea value={formData.previous_carriers} onChange={(e) => setFormData({ ...formData, previous_carriers: e.target.value })} placeholder="List any previous carriers..." style={{ ...inp, height: '80px', resize: 'vertical' as const }} />
-              </div>
-              <div>
-                <label style={lbl}>Release Terms from Former IMO <span style={{ color: '#9A9890', fontWeight: '400' }}>(optional)</span></label>
-                <textarea value={formData.release_terms} onChange={(e) => setFormData({ ...formData, release_terms: e.target.value })} placeholder="Any release terms or restrictions from your former IMO..." style={{ ...inp, height: '80px', resize: 'vertical' as const }} />
-              </div>
             </div>
               <a href="https://form.jotform.com/261576964108062" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F5EDD9', border: '1px solid #E8C87A', borderRadius: '10px', padding: '16px', textDecoration: 'none', marginTop: '8px' }}>
                 <div>
