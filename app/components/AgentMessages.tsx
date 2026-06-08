@@ -33,11 +33,7 @@ export default function AgentMessages({ agentId, agentEmail, agentName, isAdminV
       setMessages(data || [])
 
       if (!isAdminView) {
-        await supabase
-          .from('agent_messages')
-          .update({ is_read: true })
-          .eq('agent_id', agentId)
-          .eq('is_read', false)
+        await supabase.from('agent_messages').update({ is_read: true }).eq('agent_id', agentId).eq('is_read', false)
       }
     }
     load()
@@ -49,11 +45,7 @@ export default function AgentMessages({ agentId, agentEmail, agentName, isAdminV
 
     const { data: inserted } = await supabase
       .from('agent_messages')
-      .insert({
-        agent_id: agentId,
-        sent_by: currentUser.id,
-        message: newMessage.trim(),
-      })
+      .insert({ agent_id: agentId, sent_by: currentUser.id, message: newMessage.trim() })
       .select('*, users(full_name, role)')
       .single()
 
@@ -64,33 +56,40 @@ export default function AgentMessages({ agentId, agentEmail, agentName, isAdminV
       await fetch('/api/send-message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          agentEmail,
-          agentName,
-          senderName: currentUser.full_name,
-          message: newMessage.trim(),
-        })
+        body: JSON.stringify({ agentEmail, agentName, senderName: currentUser.full_name, message: newMessage.trim() })
       })
     }
-
     setSending(false)
+  }
+
+  const deleteMessage = async (id: string) => {
+    if (!confirm('Delete this message?')) return
+    await supabase.from('agent_messages').delete().eq('id', id)
+    setMessages(prev => prev.filter(m => m.id !== id))
   }
 
   return (
     <div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem', maxHeight: '300px', overflowY: 'auto' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px', maxHeight: '400px', overflowY: 'auto' }}>
         {messages.length === 0 && (
-          <p style={{ color: '#9A9890', fontSize: '0.875rem', textAlign: 'center', padding: '1rem 0' }}>No messages yet.</p>
+          <p style={{ color: '#9A9890', fontSize: '14px', textAlign: 'center', padding: '16px 0' }}>No messages yet.</p>
         )}
         {messages.map(msg => {
           const isAdmin = msg.users?.role !== 'agent'
           return (
             <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: isAdmin ? 'flex-end' : 'flex-start' }}>
-              <div style={{ background: isAdmin ? '#C9A96E' : '#F0EDE8', borderRadius: isAdmin ? '12px 12px 2px 12px' : '12px 12px 12px 2px', padding: '0.75rem 1rem', maxWidth: '80%' }}>
-                <p style={{ color: isAdmin ? '#FFFFFF' : '#1A1814', fontSize: '0.9rem', marginBottom: '0.25rem' }}>{msg.message}</p>
-                <p style={{ color: isAdmin ? 'rgba(255,255,255,0.7)' : '#9A9890', fontSize: '0.72rem' }}>
-                  {msg.users?.full_name} · {new Date(msg.created_at).toLocaleString()}
-                </p>
+              <div style={{ maxWidth: '85%', position: 'relative' }}>
+                <div style={{ background: isAdmin ? '#C9A96E' : '#F0EDE8', borderRadius: isAdmin ? '12px 12px 2px 12px' : '12px 12px 12px 2px', padding: '10px 14px' }}>
+                  <p style={{ color: isAdmin ? '#FFFFFF' : '#1A1814', fontSize: '14px', marginBottom: '4px', lineHeight: '1.5' }}>{msg.message}</p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                    <p style={{ color: isAdmin ? 'rgba(255,255,255,0.7)' : '#9A9890', fontSize: '11px' }}>
+                      {msg.users?.full_name} · {new Date(msg.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {new Date(msg.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                    </p>
+                    {isAdminView && (
+                      <button onClick={() => deleteMessage(msg.id)} style={{ background: 'transparent', border: 'none', color: isAdmin ? 'rgba(255,255,255,0.6)' : '#DDD9D2', cursor: 'pointer', fontSize: '12px', padding: '0', lineHeight: 1 }}>✕</button>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           )
@@ -98,21 +97,21 @@ export default function AgentMessages({ agentId, agentEmail, agentName, isAdminV
       </div>
 
       {isAdminView && (
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', gap: '10px' }}>
           <input
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
             placeholder="Write a message to this agent..."
-            style={{ flex: 1, background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '0.6rem 1rem', fontSize: '0.875rem', outline: 'none', fontFamily: 'Inter, sans-serif' }}
+            style={{ flex: 1, background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '10px 14px', fontSize: '14px', outline: 'none', fontFamily: 'Inter, sans-serif', color: '#1A1814' }}
           />
           <button
             onClick={sendMessage}
             disabled={sending || !newMessage.trim()}
-            style={{ background: '#C9A96E', border: 'none', color: '#FFFFFF', padding: '0.6rem 1.25rem', borderRadius: '8px', cursor: sending ? 'default' : 'pointer', fontSize: '0.875rem', fontWeight: '600', opacity: sending || !newMessage.trim() ? 0.6 : 1 }}
+            style={{ background: '#C9A96E', border: 'none', color: '#FFFFFF', padding: '10px 18px', borderRadius: '8px', cursor: sending ? 'default' : 'pointer', fontSize: '14px', fontWeight: '600', opacity: sending || !newMessage.trim() ? 0.6 : 1, fontFamily: 'Inter, sans-serif' }}
           >
-            {sending ? 'Sending...' : 'Send'}
+            {sending ? '...' : 'Send'}
           </button>
         </div>
       )}

@@ -3,94 +3,93 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-interface NotesProps {
+interface Props {
   agentId: string
 }
 
-export default function Notes({ agentId }: NotesProps) {
+export default function Notes({ agentId }: Props) {
   const [notes, setNotes] = useState<any[]>([])
   const [newNote, setNewNote] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [adding, setAdding] = useState(false)
+  const [currentUser, setCurrentUser] = useState<any>(null)
 
   useEffect(() => {
-    const loadNotes = async () => {
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase.from('users').select('*').eq('id', user.id).single()
+        setCurrentUser(profile)
+      }
       const { data } = await supabase
         .from('notes')
         .select('*, users(full_name)')
         .eq('agent_id', agentId)
         .order('created_at', { ascending: false })
       setNotes(data || [])
-      setLoading(false)
     }
-    loadNotes()
+    load()
   }, [agentId])
 
   const addNote = async () => {
-    if (!newNote.trim()) return
-    setSaving(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setSaving(false); return }
-    const { data, error } = await supabase
+    if (!newNote.trim() || !currentUser) return
+    setAdding(true)
+    const { data: inserted } = await supabase
       .from('notes')
-      .insert({
-        agent_id: agentId,
-        author_id: user.id,
-        content: newNote.trim(),
-        is_internal: true
-      })
+      .insert({ agent_id: agentId, user_id: currentUser.id, content: newNote.trim() })
       .select('*, users(full_name)')
       .single()
-    if (!error && data) {
-      setNotes(prev => [data, ...prev])
+    if (inserted) {
+      setNotes(prev => [inserted, ...prev])
       setNewNote('')
     }
-    setSaving(false)
+    setAdding(false)
+  }
+
+  const deleteNote = async (id: string) => {
+    if (!confirm('Delete this note?')) return
+    await supabase.from('notes').delete().eq('id', id)
+    setNotes(prev => prev.filter(n => n.id !== id))
   }
 
   return (
     <div>
-      <p style={{ color: '#C9A96E', fontSize: '0.72rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>Notes</p>
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
         <input
           type="text"
           value={newNote}
           onChange={(e) => setNewNote(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && addNote()}
-          placeholder="Add a note..."
-          style={{ flex: 1, background: '#EDEAE4', color: '#1A1814', border: '1px solid #DDD9D2', borderRadius: '6px', padding: '0.5rem 0.75rem', fontSize: '0.85rem', fontFamily: 'Georgia, serif', outline: 'none' }}
+          placeholder="Add an internal note..."
+          style={{ flex: 1, background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '10px 14px', fontSize: '14px', outline: 'none', fontFamily: 'Inter, sans-serif', color: '#1A1814' }}
         />
         <button
           onClick={addNote}
-          disabled={saving || !newNote.trim()}
-          style={{ background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '6px', padding: '0.5rem 1rem', fontSize: '0.85rem', fontFamily: 'Georgia, serif', fontWeight: '600', cursor: saving || !newNote.trim() ? 'not-allowed' : 'pointer', opacity: saving || !newNote.trim() ? 0.5 : 1 }}
+          disabled={adding || !newNote.trim()}
+          style={{ background: '#C9A96E', border: 'none', color: '#FFFFFF', padding: '10px 18px', borderRadius: '8px', cursor: adding ? 'default' : 'pointer', fontSize: '14px', fontWeight: '600', opacity: adding || !newNote.trim() ? 0.6 : 1, fontFamily: 'Inter, sans-serif' }}
         >
-          Add
+          {adding ? '...' : 'Add'}
         </button>
       </div>
-      {loading ? (
-        <p style={{ color: '#6B6966', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }}>Loading notes...</p>
-      ) : notes.length === 0 ? (
-        <p style={{ color: '#6B6966', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }}>No notes yet.</p>
+
+      {notes.length === 0 ? (
+        <p style={{ color: '#9A9890', fontSize: '14px' }}>No notes yet.</p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {notes.map(note => (
-            <div key={note.id} style={{ background: '#EDEAE4', border: '1px solid #DDD9D2', borderRadius: '6px', padding: '0.75rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
-                <p style={{ color: '#1A1814', fontSize: '0.85rem', fontFamily: 'Georgia, serif', flex: 1 }}>{note.content}</p>
+            <div key={note.id} style={{ background: '#F5F2ED', border: '1px solid #EBE8E3', borderRadius: '8px', padding: '12px 14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                <p style={{ color: '#1A1814', fontSize: '14px', lineHeight: '1.5', flex: 1 }}>{note.content}</p>
                 <button
-                  onClick={async () => {
-                    if (!confirm('Delete this note?')) return
-                    await supabase.from('notes').delete().eq('id', note.id)
-                    setNotes(prev => prev.filter(n => n.id !== note.id))
-                  }}
-                  style={{ background: 'transparent', border: 'none', color: '#9A9890', cursor: 'pointer', fontSize: '0.8rem', padding: '0', flexShrink: 0 }}
+                  onClick={() => deleteNote(note.id)}
+                  style={{ background: 'transparent', border: 'none', color: '#DDD9D2', cursor: 'pointer', fontSize: '14px', padding: '0', flexShrink: 0, lineHeight: 1 }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#8B2635')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#DDD9D2')}
                 >
                   ✕
                 </button>
               </div>
-              <p style={{ color: '#9A9890', fontSize: '0.72rem', fontFamily: 'Georgia, serif', marginTop: '0.35rem' }}>
-                {note.users?.full_name || 'Admin'} · {new Date(note.created_at).toLocaleDateString()}
+              <p style={{ color: '#9A9890', fontSize: '11px', marginTop: '6px' }}>
+                {note.users?.full_name || 'Admin'} · {new Date(note.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {new Date(note.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
               </p>
             </div>
           ))}
