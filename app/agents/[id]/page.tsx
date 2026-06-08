@@ -57,6 +57,7 @@ export default function AgentDetailPage() {
   const [saving, setSaving] = useState(false)
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [stageHistory, setStageHistory] = useState<any[]>([])
+  const [contactLogs, setContactLogs] = useState<any[]>([])
 
   useEffect(() => {
     const load = async () => {
@@ -67,6 +68,8 @@ export default function AgentDetailPage() {
         setAgent(data)
         const { data: history } = await supabase.from('stage_history').select('*').eq('agent_id', params.id).order('created_at', { ascending: false })
         setStageHistory(history || [])
+        const { data: logs } = await supabase.from('contact_logs').select('*').eq('agent_id', params.id).order('created_at', { ascending: false })
+        setContactLogs(logs || [])
       }
       const user2 = await getCurrentUser()
       setCurrentUser(user2)
@@ -262,29 +265,57 @@ export default function AgentDetailPage() {
 
             {/* Last Contact */}
             <div style={card}>
-              <p style={sectionTitle}>Last Contact Log</p>
-              {agent.last_contact_at && (
-                <div style={{ background: '#F5EDD9', border: '1px solid #E8C87A', borderRadius: '8px', padding: '12px 14px', marginBottom: '14px' }}>
-                  <p style={{ color: '#1A1814', fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>
-                    {agent.last_contact_by} — {new Date(agent.last_contact_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} at {new Date(agent.last_contact_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
-                  </p>
-                  {agent.last_contact_note && <p style={{ color: '#6B6966', fontSize: '13px' }}>{agent.last_contact_note}</p>}
+              <p style={sectionTitle}>Contact Log</p>
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+                <input type="text" id="contact-note-input" placeholder="Add a contact note..." style={{ ...inp, flex: 1 }} />
+                <button
+                  onClick={async () => {
+                    const noteEl = document.getElementById('contact-note-input') as HTMLInputElement
+                    const note = noteEl?.value?.trim() || ''
+                    const now = new Date().toISOString()
+                    await supabase.from('contact_logs').insert({ agent_id: agent.id, logged_by_name: currentUser.full_name, logged_by_id: currentUser.id, note })
+                    await supabase.from('agents').update({ last_contact_at: now, last_contact_by: currentUser.full_name, last_contact_note: note, updated_at: now }).eq('id', agent.id)
+                    setAgent({ ...agent, last_contact_at: now, last_contact_by: currentUser.full_name, last_contact_note: note })
+                    if (noteEl) noteEl.value = ''
+                    const { data: logs } = await supabase.from('contact_logs').select('*').eq('agent_id', agent.id).order('created_at', { ascending: false })
+                    setContactLogs(logs || [])
+                  }}
+                  style={{ background: '#C9A96E', border: 'none', color: '#FFFFFF', padding: '10px 18px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', fontFamily: 'Inter, sans-serif', whiteSpace: 'nowrap' as const }}
+                >
+                  Log Contact
+                </button>
+              </div>
+              {contactLogs.length === 0 ? (
+                <p style={{ color: '#9A9890', fontSize: '14px' }}>No contact logs yet.</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {contactLogs.map(log => (
+                    <div key={log.id} style={{ background: '#F5EDD9', border: '1px solid #E8C87A', borderRadius: '8px', padding: '12px 14px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                        <div style={{ flex: 1 }}>
+                          <p style={{ color: '#1A1814', fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>{log.logged_by_name}</p>
+                          {log.note && <p style={{ color: '#6B6966', fontSize: '13px', marginBottom: '4px' }}>{log.note}</p>}
+                          <p style={{ color: '#9A9890', fontSize: '11px' }}>
+                            {new Date(log.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {new Date(log.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                          </p>
+                        </div>
+                        <button
+                          onClick={async () => {
+                            if (!confirm('Delete this contact log?')) return
+                            await supabase.from('contact_logs').delete().eq('id', log.id)
+                            setContactLogs(prev => prev.filter(l => l.id !== log.id))
+                          }}
+                          style={{ background: 'transparent', border: 'none', color: '#DDD9D2', cursor: 'pointer', fontSize: '14px', padding: '0', flexShrink: 0 }}
+                          onMouseEnter={e => (e.currentTarget.style.color = '#8B2635')}
+                          onMouseLeave={e => (e.currentTarget.style.color = '#DDD9D2')}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
-              <input type="text" id="contact-note-input" placeholder="Add a contact note..." style={{ ...inp, marginBottom: '10px' }} />
-              <button
-                onClick={async () => {
-                  const noteEl = document.getElementById('contact-note-input') as HTMLInputElement
-                  const note = noteEl?.value?.trim() || ''
-                  const now = new Date().toISOString()
-                  await supabase.from('agents').update({ last_contact_at: now, last_contact_by: currentUser.full_name, last_contact_note: note, updated_at: now }).eq('id', agent.id)
-                  setAgent({ ...agent, last_contact_at: now, last_contact_by: currentUser.full_name, last_contact_note: note })
-                  if (noteEl) noteEl.value = ''
-                }}
-                style={{ background: '#C9A96E', border: 'none', color: '#FFFFFF', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}
-              >
-                Log Contact Now
-              </button>
             </div>
 
           </div>
