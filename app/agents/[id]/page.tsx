@@ -44,9 +44,9 @@ const UNLICENSED_STEPS = [
   { key: 'activation', label: 'Activation' },
 ]
 
-const card = { background: '#FFFFFF', borderRadius: '12px', padding: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', marginBottom: '16px' }
+const card = { background: '#FFFFFF', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', marginBottom: '20px' }
 const sectionTitle = { color: '#C9A96E', fontSize: '11px', fontWeight: '700' as const, letterSpacing: '0.1em', textTransform: 'uppercase' as const, marginBottom: '16px' }
-const inp = { width: '100%', background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '10px 14px', fontSize: '14px', fontFamily: 'Inter, sans-serif', outline: 'none', color: '#1A1814', boxSizing: 'border-box' as const }
+const inp = { width: '100%', background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '12px 14px', fontSize: '15px', fontFamily: 'Inter, sans-serif', outline: 'none', color: '#1A1814', boxSizing: 'border-box' as const }
 const lbl = { color: '#6B6966', fontSize: '11px', fontWeight: '600' as const, display: 'block', marginBottom: '4px', textTransform: 'uppercase' as const, letterSpacing: '0.06em' }
 
 export default function AgentDetailPage() {
@@ -122,7 +122,7 @@ export default function AgentDetailPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#F5F2ED', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '24px 16px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 24px' }}>
 
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -152,7 +152,7 @@ export default function AgentDetailPage() {
           )}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '24px' }}>
           <div>
 
             {/* Agent Identity Card */}
