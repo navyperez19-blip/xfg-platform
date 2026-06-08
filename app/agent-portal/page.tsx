@@ -106,8 +106,33 @@ export default function AgentPortalPage() {
     }
 
     await supabase.from('agents').update(payload).eq('id', agent.id)
+    const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
+    if (admins && admins.length > 0) {
+      await supabase.from('notifications').insert(
+        admins.map(admin => ({
+          recipient_id: admin.id,
+          agent_id: agent.id,
+          type: 'stage_change',
+          title: `Agent completed: ${steps[currentStep]?.title}`,
+          message: `${agent.full_name} completed the "${steps[currentStep]?.title}" step and moved to "${steps[currentStep + 1]?.title || 'Done'}"`
+        }))
+      )
+    }
     setAgent({ ...agent, ...payload })
     setCurrentStep(nextIndex)
+    setSaving(false)
+    window.scrollTo(0, 0)
+  }
+
+  const goBack = async () => {
+    if (currentStep === 0) return
+    setSaving(true)
+    const steps = agent.is_licensed === 'yes' ? LICENSED_STEPS : UNLICENSED_STEPS
+    const prevIndex = currentStep - 1
+    const prevKey = steps[prevIndex].key
+    await supabase.from('agents').update({ wizard_step: prevKey, updated_at: new Date().toISOString() }).eq('id', agent.id)
+    setAgent({ ...agent, wizard_step: prevKey })
+    setCurrentStep(prevIndex)
     setSaving(false)
     window.scrollTo(0, 0)
   }
@@ -197,13 +222,14 @@ export default function AgentPortalPage() {
             </a>
             <label style={lbl}>Your XFG Email</label>
             <input type="email" value={formData.xfg_email} onChange={(e) => setFormData({ ...formData, xfg_email: e.target.value })} placeholder="firstnamelastname.xfg@gmail.com" style={inp} />
-            <button
-              disabled={saving || !formData.xfg_email}
-              onClick={() => saveAndNext({ xfg_email: formData.xfg_email })}
-              style={{ ...nextBtn, opacity: saving || !formData.xfg_email ? 0.5 : 1 }}
-            >
-              {saving ? 'Saving...' : 'Next →'}
-            </button>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+              {currentStep > 0 && (
+                <button onClick={goBack} disabled={saving} style={{ flex: 1, background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Back</button>
+              )}
+              <button disabled={saving || !formData.xfg_email} onClick={() => saveAndNext({ xfg_email: formData.xfg_email })} style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif', opacity: saving || !formData.xfg_email ? 0.5 : 1 }}>
+                {saving ? 'Saving...' : 'Next →'}
+              </button>
+            </div>
           </div>
         )}
 
@@ -221,13 +247,14 @@ export default function AgentPortalPage() {
               </div>
               <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '500' }}>I have joined the XFG Discord</p>
             </div>
-            <button
-              disabled={saving || !discordConfirmed}
-              onClick={() => saveAndNext({})}
-              style={{ ...nextBtn, opacity: saving || !discordConfirmed ? 0.5 : 1 }}
-            >
-              {saving ? 'Saving...' : 'Next →'}
-            </button>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+              {currentStep > 0 && (
+                <button onClick={goBack} disabled={saving} style={{ flex: 1, background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Back</button>
+              )}
+              <button disabled={saving || !discordConfirmed} onClick={() => saveAndNext({})} style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif', opacity: saving || !discordConfirmed ? 0.5 : 1 }}>
+                {saving ? 'Saving...' : 'Next →'}
+              </button>
+            </div>
           </div>
         )}
 
@@ -236,6 +263,9 @@ export default function AgentPortalPage() {
           <div style={card}>
             <h2 style={{ color: '#1A1814', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>Are You Currently Licensed?</h2>
             <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '20px' }}>This determines your path through the XFG onboarding process.</p>
+            {currentStep > 0 && (
+              <button onClick={goBack} disabled={saving} style={{ marginBottom: '12px', background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '12px 16px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Back</button>
+            )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <button
                 onClick={async () => {
@@ -298,13 +328,14 @@ export default function AgentPortalPage() {
                 <textarea value={formData.release_terms} onChange={(e) => setFormData({ ...formData, release_terms: e.target.value })} placeholder="Any release terms or restrictions from your former IMO..." style={{ ...inp, height: '80px', resize: 'vertical' as const }} />
               </div>
             </div>
-            <button
-              disabled={saving || !formData.npn || !formData.states_licensed}
-              onClick={() => saveAndNext({ npn: formData.npn, states_licensed: formData.states_licensed, former_imo: formData.former_imo, previous_carriers: formData.previous_carriers, release_terms: formData.release_terms })}
-              style={{ ...nextBtn, opacity: saving || !formData.npn || !formData.states_licensed ? 0.5 : 1 }}
-            >
-              {saving ? 'Saving...' : 'Next →'}
-            </button>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+              {currentStep > 0 && (
+                <button onClick={goBack} disabled={saving} style={{ flex: 1, background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Back</button>
+              )}
+              <button disabled={saving || !formData.npn || !formData.states_licensed} onClick={() => saveAndNext({ npn: formData.npn, states_licensed: formData.states_licensed, former_imo: formData.former_imo, previous_carriers: formData.previous_carriers, release_terms: formData.release_terms })} style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif', opacity: saving || !formData.npn || !formData.states_licensed ? 0.5 : 1 }}>
+                {saving ? 'Saving...' : 'Next →'}
+              </button>
+            </div>
           </div>
         )}
 
@@ -335,20 +366,14 @@ export default function AgentPortalPage() {
               </div>
               <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '500' }}>I have reached out to the XFG team</p>
             </div>
-            <button
-              disabled={saving || !contactConfirmed}
-              onClick={async () => {
-                await fetch('/api/send-contracting-alert', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ agentName: agent.full_name, agentEmail: agent.email, xfgEmail: agent.xfg_email, npn: agent.npn, states: agent.states_licensed })
-                })
-                saveAndNext({})
-              }}
-              style={{ ...nextBtn, opacity: saving || !contactConfirmed ? 0.5 : 1 }}
-            >
-              {saving ? 'Sending...' : 'Submit & Continue →'}
-            </button>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+              {currentStep > 0 && (
+                <button onClick={goBack} disabled={saving} style={{ flex: 1, background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Back</button>
+              )}
+              <button disabled={saving || !contactConfirmed} onClick={async () => { await fetch('/api/send-contracting-alert', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agentName: agent.full_name, agentEmail: agent.email, xfgEmail: agent.xfg_email, npn: agent.npn, states: agent.states_licensed }) }); saveAndNext({}) }} style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif', opacity: saving || !contactConfirmed ? 0.5 : 1 }}>
+                {saving ? 'Sending...' : 'Submit & Continue →'}
+              </button>
+            </div>
           </div>
         )}
 
@@ -366,9 +391,14 @@ export default function AgentPortalPage() {
                 <span style={{ color: '#C9A96E', fontSize: '15px', fontWeight: '600' }}>Book Now →</span>
               </a>
             )}
-            <button disabled={saving} onClick={() => saveAndNext({})} style={nextBtn}>
-              {saving ? 'Saving...' : 'I have booked my exam →'}
-            </button>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+              {currentStep > 0 && (
+                <button onClick={goBack} disabled={saving} style={{ flex: 1, background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Back</button>
+              )}
+              <button disabled={saving} onClick={() => saveAndNext({})} style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                {saving ? 'Saving...' : 'I have booked my exam →'}
+              </button>
+            </div>
           </div>
         )}
 
@@ -384,9 +414,14 @@ export default function AgentPortalPage() {
               </div>
               <span style={{ color: '#C9A96E', fontSize: '15px', fontWeight: '600' }}>Start →</span>
             </a>
-            <button disabled={saving} onClick={() => saveAndNext({})} style={nextBtn}>
-              {saving ? 'Saving...' : 'I have completed the course →'}
-            </button>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+              {currentStep > 0 && (
+                <button onClick={goBack} disabled={saving} style={{ flex: 1, background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Back</button>
+              )}
+              <button disabled={saving} onClick={() => saveAndNext({})} style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                {saving ? 'Saving...' : 'I have completed the course →'}
+              </button>
+            </div>
           </div>
         )}
 
@@ -398,9 +433,14 @@ export default function AgentPortalPage() {
             <div style={{ background: '#F0FFF4', border: '1px solid #A8D5B5', borderRadius: '10px', padding: '16px', marginBottom: '20px' }}>
               <p style={{ color: '#2D6A4F', fontSize: '14px', fontWeight: '600' }}>💡 Tip: Review your course materials the night before. Most people pass on their first try.</p>
             </div>
-            <button disabled={saving} onClick={() => saveAndNext({})} style={nextBtn}>
-              {saving ? 'Saving...' : 'I have passed my exam →'}
-            </button>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+              {currentStep > 0 && (
+                <button onClick={goBack} disabled={saving} style={{ flex: 1, background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Back</button>
+              )}
+              <button disabled={saving} onClick={() => saveAndNext({})} style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                {saving ? 'Saving...' : 'I have passed my exam →'}
+              </button>
+            </div>
           </div>
         )}
 
@@ -418,9 +458,14 @@ export default function AgentPortalPage() {
                 <span style={{ color: '#C9A96E', fontSize: '15px', fontWeight: '600' }}>Schedule →</span>
               </a>
             )}
-            <button disabled={saving} onClick={() => saveAndNext({})} style={nextBtn}>
-              {saving ? 'Saving...' : 'Completed / Not Required →'}
-            </button>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+              {currentStep > 0 && (
+                <button onClick={goBack} disabled={saving} style={{ flex: 1, background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Back</button>
+              )}
+              <button disabled={saving} onClick={() => saveAndNext({})} style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                {saving ? 'Saving...' : 'Completed / Not Required →'}
+              </button>
+            </div>
           </div>
         )}
 
@@ -438,9 +483,14 @@ export default function AgentPortalPage() {
                 <span style={{ color: '#C9A96E', fontSize: '15px', fontWeight: '600' }}>Apply →</span>
               </a>
             )}
-            <button disabled={saving} onClick={() => saveAndNext({})} style={nextBtn}>
-              {saving ? 'Saving...' : 'I have submitted my application →'}
-            </button>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+              {currentStep > 0 && (
+                <button onClick={goBack} disabled={saving} style={{ flex: 1, background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Back</button>
+              )}
+              <button disabled={saving} onClick={() => saveAndNext({})} style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                {saving ? 'Saving...' : 'I have submitted my application →'}
+              </button>
+            </div>
           </div>
         )}
 
@@ -452,9 +502,14 @@ export default function AgentPortalPage() {
             <div style={{ background: '#F0FFF4', border: '1px solid #A8D5B5', borderRadius: '10px', padding: '16px', marginBottom: '20px' }}>
               <p style={{ color: '#2D6A4F', fontSize: '14px', fontWeight: '600' }}>✓ Once you receive your license, click the button below to proceed to contracting.</p>
             </div>
-            <button disabled={saving} onClick={() => saveAndNext({ is_licensed: 'yes' })} style={nextBtn}>
-              {saving ? 'Saving...' : 'I have received my license →'}
-            </button>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+              {currentStep > 0 && (
+                <button onClick={goBack} disabled={saving} style={{ flex: 1, background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Back</button>
+              )}
+              <button disabled={saving} onClick={() => saveAndNext({ is_licensed: 'yes' })} style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                {saving ? 'Saving...' : 'I have received my license →'}
+              </button>
+            </div>
           </div>
         )}
 
