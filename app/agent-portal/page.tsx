@@ -305,7 +305,7 @@ export default function AgentPortalPage() {
         {stepKey === 'contracting_info' && (
           <div style={card}>
             <h2 style={{ color: '#1A1814', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>Contracting Information</h2>
-            <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '20px' }}>Please fill in your licensing details. Your NPN and licensed states are required.</p>
+            <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '16px' }}>Please fill in your licensing details below, then complete the XFG contracting form.</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
                 <label style={lbl}>National Producer Number (NPN) <span style={{ color: '#8B2635' }}>*</span></label>
@@ -328,6 +328,13 @@ export default function AgentPortalPage() {
                 <textarea value={formData.release_terms} onChange={(e) => setFormData({ ...formData, release_terms: e.target.value })} placeholder="Any release terms or restrictions from your former IMO..." style={{ ...inp, height: '80px', resize: 'vertical' as const }} />
               </div>
             </div>
+              <a href="https://form.jotform.com/261576964108062" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F5EDD9', border: '1px solid #E8C87A', borderRadius: '10px', padding: '16px', textDecoration: 'none', marginTop: '8px' }}>
+                <div>
+                  <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '700', marginBottom: '2px' }}>Complete XFG Contracting Form</p>
+                  <p style={{ color: '#6B6966', fontSize: '13px' }}>Click to open and complete your official contracting paperwork</p>
+                </div>
+                <span style={{ color: '#C9A96E', fontSize: '15px', fontWeight: '600' }}>Open Form →</span>
+              </a>
             <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
               {currentStep > 0 && (
                 <button onClick={goBack} disabled={saving} style={{ flex: 1, background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Back</button>
