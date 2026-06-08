@@ -85,11 +85,25 @@ export default function AgentDetailPage() {
     const newIndex = direction === 'forward' ? currentIndex + 1 : currentIndex - 1
     if (newIndex < 0 || newIndex >= STAGES.length) { setSaving(false); return }
     const newStage = STAGES[newIndex].key
-    await supabase.from('agents').update({ current_stage: newStage, updated_at: new Date().toISOString() }).eq('id', agent.id)
+
+    const stageToWizardStep: Record<string, string> = {
+      contacted: 'xfg_email',
+      licensing: agent.is_licensed === 'yes' ? 'contracting_info' : 'complete_course',
+      onboarding: 'complete_course',
+      contracting: 'contracting_info',
+      system_setup: 'system_setup',
+      training: 'system_setup',
+      activation: 'activation',
+      active: 'activation',
+    }
+
+    const wizardStep = stageToWizardStep[newStage] || 'xfg_email'
+
+    await supabase.from('agents').update({ current_stage: newStage, wizard_step: wizardStep, updated_at: new Date().toISOString() }).eq('id', agent.id)
     await supabase.from('stage_history').insert({ agent_id: agent.id, from_stage: agent.current_stage, to_stage: newStage, changed_by: currentUser?.id })
     const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
     if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'stage_change', title: 'Agent stage updated', message: `${agent.full_name} moved from ${agent.current_stage.replace(/_/g, ' ')} to ${newStage.replace(/_/g, ' ')} by ${currentUser?.full_name}` })))
-    setAgent({ ...agent, current_stage: newStage })
+    setAgent({ ...agent, current_stage: newStage, wizard_step: wizardStep })
     setSaving(false)
   }
 
