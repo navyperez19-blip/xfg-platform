@@ -76,13 +76,13 @@ export default function JoinPage() {
             <h1 style={{ color: '#1A1814', fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: '700', lineHeight: '1.1', marginBottom: '20px', letterSpacing: '-0.02em' }}>
               Build a successful business with a foundation provided for you.
             </h1>
-            <p style={{ color: '#6B6966', fontSize: '17px', lineHeight: '1.7', marginBottom: '40px' }}>
+            <p style={{ color: '#6B6966', fontSize: '16px', lineHeight: '1.6', marginBottom: '20px' }}>
               Join hundreds of agents who have built financial freedom with XFG. Everything you need to succeed is already in place.
             </p>
 
-            <div style={{ borderTop: '1px solid #DDD9D2', paddingTop: '32px' }}>
-              <p style={{ color: '#9A9890', fontSize: '11px', fontWeight: '700', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '24px' }}>What You Get</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ borderTop: '1px solid #DDD9D2', paddingTop: '20px' }}>
+              <p style={{ color: '#9A9890', fontSize: '11px', fontWeight: '700', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '14px' }}>What You Get</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {[
                   { title: 'Fully Remote', desc: 'Work from anywhere in the country, in any state.' },
                   { title: 'Daily Training', desc: 'Learn and grow alongside top producers every day.' },
@@ -96,7 +96,7 @@ export default function JoinPage() {
                     <span style={{ color: '#C9A96E', fontSize: '12px', fontWeight: '700', minWidth: '24px', paddingTop: '2px' }}>0{i + 1}</span>
                     <div>
                       <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '3px' }}>{item.title}</p>
-                      <p style={{ color: '#9A9890', fontSize: '14px', lineHeight: '1.5' }}>{item.desc}</p>
+                      <p style={{ color: '#9A9890', fontSize: '13px', lineHeight: '1.4' }}>{item.desc}</p>
                     </div>
                   </div>
                 ))}
