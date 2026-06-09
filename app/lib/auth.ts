@@ -20,8 +20,6 @@ export function canMoveStage(role: string, stage: string): boolean {
     onboarding: ['executive', 'superadmin'],
     contracting: ['joe', 'executive', 'superadmin'],
     system_setup: ['joe', 'executive', 'superadmin'],
-    training: ['jesse', 'executive', 'superadmin'],
-    activation: ['executive', 'superadmin'],
     active: ['executive', 'superadmin'],
   }
   return stageOwners[stage]?.includes(role) || false

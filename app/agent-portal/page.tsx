@@ -12,7 +12,6 @@ const LICENSED_STEPS = [
   { key: 'contracting_info', title: 'Contracting Information' },
   { key: 'contact_team', title: 'Contact the XFG Team' },
   { key: 'system_setup', title: 'System Setup' },
-  { key: 'activation', title: 'Activation' },
 ]
 
 const UNLICENSED_STEPS = [
@@ -28,7 +27,6 @@ const UNLICENSED_STEPS = [
   { key: 'contracting_info', title: 'Contracting Information' },
   { key: 'contact_team', title: 'Contact the XFG Team' },
   { key: 'system_setup', title: 'System Setup' },
-  { key: 'activation', title: 'Activation' },
 ]
 
 export default function AgentPortalPage() {
@@ -101,10 +99,6 @@ export default function AgentPortalPage() {
     if (nextKey === 'system_setup' && agent.current_stage !== 'system_setup') {
       payload.current_stage = 'system_setup'
     }
-    if (nextKey === 'activation' && agent.current_stage !== 'activation') {
-      payload.current_stage = 'activation'
-    }
-
     await supabase.from('agents').update(payload).eq('id', agent.id)
     const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
     if (admins && admins.length > 0) {
@@ -553,18 +547,6 @@ export default function AgentPortalPage() {
             ) : (
               <p style={{ color: '#9A9890', fontSize: '13px', textAlign: 'center' }}>Check off all items above to continue.</p>
             )}
-          </div>
-        )}
-
-        {/* Activation */}
-        {stepKey === 'activation' && (
-          <div style={card}>
-            <h2 style={{ color: '#1A1814', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>Almost There!</h2>
-            <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '20px' }}>Your activation is being finalized by the XFG team. You'll receive an email when you're ready to start dialing.</p>
-            <div style={{ background: '#F5EDD9', border: '1px solid #E8C87A', borderRadius: '10px', padding: '20px', textAlign: 'center' }}>
-              <p style={{ color: '#8B6A2E', fontSize: '18px', fontWeight: '700', marginBottom: '4px' }}>🎯 Get Ready</p>
-              <p style={{ color: '#6B6966', fontSize: '14px' }}>Review your products, know your carriers, and prepare for your first day dialing.</p>
-            </div>
           </div>
         )}
 

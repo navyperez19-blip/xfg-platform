@@ -13,8 +13,6 @@ const STAGES = [
   { key: 'onboarding', label: 'Onboarding' },
   { key: 'contracting', label: 'Contracting' },
   { key: 'system_setup', label: 'System Setup' },
-  { key: 'training', label: 'Training' },
-  { key: 'activation', label: 'Activation' },
   { key: 'active', label: 'Active' },
 ]
 
@@ -25,7 +23,6 @@ const LICENSED_STEPS = [
   { key: 'contracting_info', label: 'Contracting Info' },
   { key: 'contact_team', label: 'Contact Team' },
   { key: 'system_setup', label: 'System Setup' },
-  { key: 'activation', label: 'Activation' },
 ]
 
 const UNLICENSED_STEPS = [
@@ -41,7 +38,6 @@ const UNLICENSED_STEPS = [
   { key: 'contracting_info', label: 'Contracting Info' },
   { key: 'contact_team', label: 'Contact Team' },
   { key: 'system_setup', label: 'System Setup' },
-  { key: 'activation', label: 'Activation' },
 ]
 
 const card = { background: '#FFFFFF', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', marginBottom: '20px' }
@@ -92,9 +88,7 @@ export default function AgentDetailPage() {
       onboarding: 'complete_course',
       contracting: 'contracting_info',
       system_setup: 'system_setup',
-      training: 'system_setup',
-      activation: 'activation',
-      active: 'activation',
+      active: 'system_setup',
     }
 
     const wizardStep = stageToWizardStep[newStage] || 'xfg_email'

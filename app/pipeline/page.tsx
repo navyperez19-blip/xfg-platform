@@ -10,8 +10,6 @@ const STAGES = [
   { key: 'onboarding', label: 'Onboarding' },
   { key: 'contracting', label: 'Contracting' },
   { key: 'system_setup', label: 'System Setup' },
-  { key: 'training', label: 'Training' },
-  { key: 'activation', label: 'Activation' },
   { key: 'active', label: 'Active' },
 ]
 

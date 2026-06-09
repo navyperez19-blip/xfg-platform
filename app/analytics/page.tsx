@@ -11,8 +11,6 @@ const STAGES = [
   { key: 'onboarding', label: 'Onboarding' },
   { key: 'contracting', label: 'Contracting' },
   { key: 'system_setup', label: 'System Setup' },
-  { key: 'training', label: 'Training' },
-  { key: 'activation', label: 'Activation' },
   { key: 'active', label: 'Active' },
 ]
 
@@ -192,6 +190,49 @@ export default function AnalyticsPage() {
                   <span style={{ color: '#9A9890', fontSize: '0.75rem' }}>{new Date(h.created_at).toLocaleDateString()}</span>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        <div style={{ ...card, marginBottom: '1.25rem' }}>
+          <p style={{ color: '#C9A96E', fontSize: '0.75rem', fontWeight: '600', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Carrier Contracting Status</p>
+          {agents.filter(a => a.carriers && Object.keys(a.carriers).length > 0).length === 0 ? (
+            <p style={{ color: '#9A9890', fontSize: '0.875rem' }}>No carrier contracting data yet.</p>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid #EBE8E3' }}>
+                    <th style={{ padding: '10px 12px', textAlign: 'left', color: '#6B6966', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Agent</th>
+                    {['Mutual of Omaha', 'Ethos', 'Instabrain', 'Corbridge', 'AHL'].map(carrier => (
+                      <th key={carrier} style={{ padding: '10px 12px', textAlign: 'center', color: '#6B6966', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{carrier}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {agents
+                    .filter(a => a.carriers && Object.values(a.carriers).some(v => v === 'submitted' || v === 'active'))
+                    .sort((a, b) => a.full_name.localeCompare(b.full_name))
+                    .map((agent, index) => (
+                      <tr key={agent.id} style={{ borderBottom: '1px solid #F5F2ED', background: index % 2 === 0 ? '#FFFFFF' : '#FAFAF9', cursor: 'pointer' }} onClick={() => router.push(`/agents/${agent.id}`)}>
+                        <td style={{ padding: '10px 12px' }}>
+                          <p style={{ color: '#1A1814', fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>{agent.full_name}</p>
+                          <p style={{ color: '#C9A96E', fontSize: '12px', fontFamily: 'monospace' }}>{agent.xfg_id}</p>
+                        </td>
+                        {['Mutual of Omaha', 'Ethos', 'Instabrain', 'Corbridge', 'AHL'].map(carrier => {
+                          const status = agent.carriers?.[carrier] || 'none'
+                          return (
+                            <td key={carrier} style={{ padding: '10px 12px', textAlign: 'center' }}>
+                              {status === 'active' && <span style={{ background: '#F0FFF4', color: '#2D6A4F', fontSize: '12px', fontWeight: '600', padding: '3px 10px', borderRadius: '20px' }}>✓ Active</span>}
+                              {status === 'submitted' && <span style={{ background: '#FFFBF0', color: '#B5652A', fontSize: '12px', fontWeight: '600', padding: '3px 10px', borderRadius: '20px' }}>⏳ Submitted</span>}
+                              {status === 'none' && <span style={{ color: '#DDD9D2', fontSize: '12px' }}>—</span>}
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
