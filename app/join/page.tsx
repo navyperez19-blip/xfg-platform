@@ -107,8 +107,8 @@ export default function JoinPage() {
           {/* Right — Form */}
           <div style={{ position: 'relative' }}>
             <div style={{ background: '#FFFFFF', borderRadius: '20px', padding: '36px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}>
-              <h2 style={{ color: '#1A1814', fontSize: '24px', fontWeight: '700', marginBottom: '4px' }}>Start Your Application</h2>
-              <p style={{ color: '#9A9890', fontSize: '14px', marginBottom: '28px' }}>Every application is reviewed by our leadership team.</p>
+              <h2 style={{ color: '#1A1814', fontSize: '24px', fontWeight: '700', marginBottom: '4px' }}>Start Your Journey Here</h2>
+              <p style={{ color: '#9A9890', fontSize: '14px', marginBottom: '28px' }}>Our leadership team will be here to support you.</p>
 
               <form onSubmit={handleSubmit}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
