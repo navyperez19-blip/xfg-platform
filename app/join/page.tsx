@@ -68,7 +68,7 @@ export default function JoinPage() {
         <div style={{ textAlign: 'center', paddingTop: '16px', marginBottom: '40px' }}>
           <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>XFG · X Financial Group</p>
           <h1 style={{ color: '#1A1814', fontSize: '36px', fontWeight: '700', lineHeight: '1.2', marginBottom: '12px' }}>Welcome to XFG</h1>
-          <p style={{ color: '#6B6966', fontSize: '16px', maxWidth: '500px', margin: '0 auto', lineHeight: '1.6' }}>Build a successful business with everything provided for you. Join hundreds of agents building financial freedom.</p>
+          <p style={{ color: '#6B6966', fontSize: '16px', maxWidth: '500px', margin: '0 auto', lineHeight: '1.6' }}>Build a successful business with a foundation provided for you. Join hundreds of agents building financial freedom.</p>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'start' }}>
