@@ -65,15 +65,15 @@ export default function JoinPage() {
     <main style={{ minHeight: '100vh', background: '#F5F2ED', fontFamily: 'Inter, sans-serif' }}>
 
       {/* Hero Section */}
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '60px 24px 40px' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 16px 40px' }}>
         <div style={{ marginBottom: '8px' }}>
           <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.15em', textTransform: 'uppercase' }}>XFG · X Financial Group</p>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '40px', alignItems: 'start' }}>
 
           {/* Left — Offer */}
           <div style={{ paddingTop: '8px' }}>
-            <h1 style={{ color: '#1A1814', fontSize: '48px', fontWeight: '700', lineHeight: '1.1', marginBottom: '20px', letterSpacing: '-0.02em' }}>
+            <h1 style={{ color: '#1A1814', fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: '700', lineHeight: '1.1', marginBottom: '20px', letterSpacing: '-0.02em' }}>
               Build a successful business with a foundation provided for you.
             </h1>
             <p style={{ color: '#6B6966', fontSize: '17px', lineHeight: '1.7', marginBottom: '40px' }}>
@@ -105,7 +105,7 @@ export default function JoinPage() {
           </div>
 
           {/* Right — Form */}
-          <div style={{ position: 'sticky', top: '24px' }}>
+          <div style={{ position: 'relative' }}>
             <div style={{ background: '#FFFFFF', borderRadius: '20px', padding: '36px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}>
               <h2 style={{ color: '#1A1814', fontSize: '24px', fontWeight: '700', marginBottom: '4px' }}>Start Your Application</h2>
               <p style={{ color: '#9A9890', fontSize: '14px', marginBottom: '28px' }}>Every application is reviewed by our leadership team.</p>
