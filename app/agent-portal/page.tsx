@@ -202,6 +202,19 @@ export default function AgentPortalPage() {
                 </div>
                 <span style={{ background: '#F0FFF4', color: '#2D6A4F', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px', border: '1px solid #A8D5B5' }}>✓ Ready</span>
               </div>
+              <div style={{ background: '#1A1814', borderRadius: '10px', padding: '20px 16px', textAlign: 'center' }}>
+                <p style={{ color: '#C9A96E', fontSize: '13px', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>You Are All Set</p>
+                <p style={{ color: '#F5F2ED', fontSize: '18px', fontWeight: '700', marginBottom: '4px' }}>Let's Get Selling. 🚀</p>
+                <p style={{ color: '#9A9890', fontSize: '13px', marginBottom: '20px' }}>Jump into the virtual office, join the live dial, and start building your book of business.</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <a href="https://discord.gg/nCEWxbJPU2" target="_blank" rel="noopener noreferrer" style={{ background: '#5865F2', color: '#FFFFFF', padding: '14px', borderRadius: '10px', textDecoration: 'none', fontSize: '15px', fontWeight: '700', display: 'block' }}>
+                    Join the Virtual Office on Discord →
+                  </a>
+                  <a href="https://discord.gg/nCEWxbJPU2" target="_blank" rel="noopener noreferrer" style={{ background: '#242220', border: '1px solid #2E2C29', color: '#C9A96E', padding: '14px', borderRadius: '10px', textDecoration: 'none', fontSize: '15px', fontWeight: '700', display: 'block' }}>
+                    Join the Live Dial →
+                  </a>
+                </div>
+              </div>
               <div style={{ background: '#F5EDD9', border: '1px solid #E8C87A', borderRadius: '10px', padding: '14px 16px' }}>
                 <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '6px' }}>Need Support?</p>
                 <p style={{ color: '#6B6966', fontSize: '13px', marginBottom: '12px' }}>Reach out to your contracting team for any questions or assistance.</p>
