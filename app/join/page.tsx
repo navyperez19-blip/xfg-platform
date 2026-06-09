@@ -85,12 +85,12 @@ export default function JoinPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {[
                   { title: 'Fully Remote', desc: 'Work from anywhere in the country, in any state.' },
-                  { title: 'Daily Training', desc: 'Learn and grow alongside top producers every day.' },
+                  { title: 'Daily Training', desc: "Led by one of the industry's top producers." },
+                  { title: '$2,000 Worth of Monthly Systems', desc: 'Fully covered by the company — no out of pocket costs.' },
                   { title: 'Free Leads', desc: 'We provide the leads so you can focus on closing.' },
-                  { title: 'Free Dialer', desc: 'No out of pocket costs — fully equipped on day one.' },
-                  { title: '$2,000 Worth of Software', desc: 'Industry leading tools included at no cost to you.' },
-                  { title: 'Live Support', desc: 'Never left on your own — we are with you every step.' },
-                  { title: 'Unmatched Training System', desc: 'A proven system designed to help you reach your goals.' },
+                  { title: 'Free Dialing System', desc: 'Fully equipped and ready to go on day one.' },
+                  { title: 'Free CRM', desc: 'Industry leading client management system included.' },
+                  { title: '24/7 Live Support', desc: 'Never left on your own — we are with you every step of the way.' },
                 ].map((item, i) => (
                   <div key={item.title} style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
                     <span style={{ color: '#C9A96E', fontSize: '12px', fontWeight: '700', minWidth: '24px', paddingTop: '2px' }}>0{i + 1}</span>
