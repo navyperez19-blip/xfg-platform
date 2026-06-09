@@ -55,8 +55,6 @@ export default function AnalyticsPage() {
   const independent = agents.filter(a => a.agent_model === 'independent').length
   const hasNPN = agents.filter(a => a.npn).length
   const hasXFGEmail = agents.filter(a => a.xfg_email).length
-  const hasEO = agents.filter(a => a.eo_document_url).length
-  const hasLicense = agents.filter(a => a.license_document_url).length
   const licensed = agents.filter(a => a.is_licensed === 'yes').length
   const notLicensed = agents.filter(a => a.is_licensed === 'no').length
 
@@ -113,8 +111,6 @@ export default function AnalyticsPage() {
             {[
               { label: 'Have NPN', value: hasNPN, color: '#2D6A4F' },
               { label: 'Have XFG Email', value: hasXFGEmail, color: '#2D6A4F' },
-              { label: 'E&O Uploaded', value: hasEO, color: '#2D6A4F' },
-              { label: 'License Uploaded', value: hasLicense, color: '#2D6A4F' },
               { label: 'Licensed', value: licensed, color: '#2D6A4F' },
               { label: 'Not Licensed', value: notLicensed, color: '#8B2635' },
             ].map(stat => (
