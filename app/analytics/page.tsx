@@ -196,6 +196,23 @@ export default function AnalyticsPage() {
 
         <div style={{ ...card, marginBottom: '1.25rem' }}>
           <p style={{ color: '#C9A96E', fontSize: '0.75rem', fontWeight: '600', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Carrier Contracting Status</p>
+          {(() => {
+            const contractingAgents = agents.filter(a => a.carriers && Object.values(a.carriers).some((v: any) => v === 'submitted' || v === 'active'))
+            const totalSubmitted = contractingAgents.filter(a => Object.values(a.carriers || {}).some((v: any) => v === 'submitted')).length
+            const totalActive = contractingAgents.filter(a => Object.values(a.carriers || {}).some((v: any) => v === 'active')).length
+            return contractingAgents.length > 0 ? (
+              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
+                <div style={{ background: '#FFFBF0', border: '1px solid #E8C87A', borderRadius: '8px', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ color: '#B5652A', fontSize: '20px', fontWeight: '700' }}>{totalSubmitted}</span>
+                  <span style={{ color: '#6B6966', fontSize: '13px', fontWeight: '500' }}>agents with submitted contracts</span>
+                </div>
+                <div style={{ background: '#F0FFF4', border: '1px solid #A8D5B5', borderRadius: '8px', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ color: '#2D6A4F', fontSize: '20px', fontWeight: '700' }}>{totalActive}</span>
+                  <span style={{ color: '#6B6966', fontSize: '13px', fontWeight: '500' }}>agents with active contracts</span>
+                </div>
+              </div>
+            ) : null
+          })()}
           {agents.filter(a => a.carriers && Object.keys(a.carriers).length > 0).length === 0 ? (
             <p style={{ color: '#9A9890', fontSize: '0.875rem' }}>No carrier contracting data yet.</p>
           ) : (
