@@ -185,21 +185,34 @@ export default function AgentPortalPage() {
             </div>
           </div>
 
-          <div style={{ background: '#1A1814', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.12)', marginBottom: '16px', textAlign: 'center' }}>
-            <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>Your Tools</p>
-            <p style={{ color: '#F5F2ED', fontSize: '15px', marginBottom: '20px' }}>Your CRM and dialer are ready. Start prospecting and closing deals.</p>
+          <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginBottom: '16px' }}>
+            <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>Your Tools & Support</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ background: '#242220', border: '1px solid #2E2C29', borderRadius: '10px', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#F5F2ED', fontSize: '15px', fontWeight: '600' }}>CRM Access</span>
-                <span style={{ background: '#2D6A4F', color: '#FFFFFF', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px' }}>Ready</span>
+              <div style={{ background: '#F5F2ED', border: '1px solid #EBE8E3', borderRadius: '10px', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '2px' }}>CRM Access</p>
+                  <p style={{ color: '#6B6966', fontSize: '13px' }}>Your client management system is ready</p>
+                </div>
+                <span style={{ background: '#F0FFF4', color: '#2D6A4F', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px', border: '1px solid #A8D5B5' }}>✓ Ready</span>
               </div>
-              <div style={{ background: '#242220', border: '1px solid #2E2C29', borderRadius: '10px', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#F5F2ED', fontSize: '15px', fontWeight: '600' }}>Dialer</span>
-                <span style={{ background: '#2D6A4F', color: '#FFFFFF', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px' }}>Ready</span>
+              <div style={{ background: '#F5F2ED', border: '1px solid #EBE8E3', borderRadius: '10px', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '2px' }}>Dialer</p>
+                  <p style={{ color: '#6B6966', fontSize: '13px' }}>Your dialer has been configured</p>
+                </div>
+                <span style={{ background: '#F0FFF4', color: '#2D6A4F', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px', border: '1px solid #A8D5B5' }}>✓ Ready</span>
               </div>
-              <div style={{ background: '#242220', border: '1px solid #2E2C29', borderRadius: '10px', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#F5F2ED', fontSize: '15px', fontWeight: '600' }}>Discord</span>
-                <a href="https://discord.gg/nCEWxbJPU2" target="_blank" rel="noopener noreferrer" style={{ background: '#5865F2', color: '#FFFFFF', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px', textDecoration: 'none' }}>Join →</a>
+              <div style={{ background: '#F5EDD9', border: '1px solid #E8C87A', borderRadius: '10px', padding: '14px 16px' }}>
+                <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '6px' }}>Need Support?</p>
+                <p style={{ color: '#6B6966', fontSize: '13px', marginBottom: '12px' }}>Reach out to your contracting team for any questions or assistance.</p>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <a href="tel:8587529085" style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', padding: '10px', borderRadius: '8px', textDecoration: 'none', textAlign: 'center', fontSize: '14px', fontWeight: '600' }}>
+                    📞 Finley
+                  </a>
+                  <a href="tel:9858691319" style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', padding: '10px', borderRadius: '8px', textDecoration: 'none', textAlign: 'center', fontSize: '14px', fontWeight: '600' }}>
+                    📞 Nick
+                  </a>
+                </div>
               </div>
             </div>
           </div>
