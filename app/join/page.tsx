@@ -59,38 +59,44 @@ export default function JoinPage() {
   }
 
   const inp = { width: '100%', background: '#F0EDE8', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '14px 16px', fontSize: '16px', fontFamily: 'Inter, sans-serif', outline: 'none', color: '#1A1814', boxSizing: 'border-box' as const }
-  const lbl = { color: '#6B6966', fontSize: '13px', fontWeight: '600' as const, display: 'block', marginBottom: '6px', textTransform: 'uppercase' as const, letterSpacing: '0.06em' }
+  const lbl = { color: '#6B6966', fontSize: '12px', fontWeight: '600' as const, display: 'block', marginBottom: '6px', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }
 
   return (
-    <main style={{ minHeight: '100vh', background: '#F5F2ED', padding: '24px 16px 40px' }}>
-      <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+    <main style={{ minHeight: '100vh', background: '#F5F2ED', fontFamily: 'Inter, sans-serif' }}>
 
-        <div style={{ textAlign: 'center', paddingTop: '16px', marginBottom: '40px' }}>
-          <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>XFG · X Financial Group</p>
-          <h1 style={{ color: '#1A1814', fontSize: '36px', fontWeight: '700', lineHeight: '1.2', marginBottom: '12px' }}>Welcome to XFG</h1>
-          <p style={{ color: '#6B6966', fontSize: '16px', maxWidth: '500px', margin: '0 auto', lineHeight: '1.6' }}>Build a successful business with a foundation provided for you. Join hundreds of agents building financial freedom.</p>
+      {/* Hero Section */}
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '60px 24px 40px' }}>
+        <div style={{ marginBottom: '8px' }}>
+          <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.15em', textTransform: 'uppercase' }}>XFG · X Financial Group</p>
         </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'start' }}>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'start' }}>
+          {/* Left — Offer */}
+          <div style={{ paddingTop: '8px' }}>
+            <h1 style={{ color: '#1A1814', fontSize: '48px', fontWeight: '700', lineHeight: '1.1', marginBottom: '20px', letterSpacing: '-0.02em' }}>
+              Build a successful business with a foundation provided for you.
+            </h1>
+            <p style={{ color: '#6B6966', fontSize: '17px', lineHeight: '1.7', marginBottom: '40px' }}>
+              Join hundreds of agents who have built financial freedom with XFG. Everything you need to succeed is already in place.
+            </p>
 
-          <div>
-            <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '28px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginBottom: '20px' }}>
-              <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '20px' }}>What You Get</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ borderTop: '1px solid #DDD9D2', paddingTop: '32px' }}>
+              <p style={{ color: '#9A9890', fontSize: '11px', fontWeight: '700', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '24px' }}>What You Get</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {[
-                  { title: 'Fully Remote', desc: 'Work from anywhere in the country' },
-                  { title: 'Daily Training', desc: 'Learn and grow with the team every day' },
-                  { title: 'Free Leads', desc: 'We provide the leads — you focus on closing' },
-                  { title: 'Free Dialer', desc: 'No out of pocket costs for your dialer' },
-                  { title: '$2,000 Worth of Software', desc: 'Industry leading tools included at no cost' },
-                  { title: 'Live Support', desc: 'Never left on your own — we are with you every step' },
-                  { title: 'Unmatched Training', desc: 'A proven system designed to help you reach your goals' },
-                ].map(item => (
-                  <div key={item.title} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#C9A96E', flexShrink: 0, marginTop: '6px' }} />
+                  { title: 'Fully Remote', desc: 'Work from anywhere in the country, in any state.' },
+                  { title: 'Daily Training', desc: 'Learn and grow alongside top producers every day.' },
+                  { title: 'Free Leads', desc: 'We provide the leads so you can focus on closing.' },
+                  { title: 'Free Dialer', desc: 'No out of pocket costs — fully equipped on day one.' },
+                  { title: '$2,000 Worth of Software', desc: 'Industry leading tools included at no cost to you.' },
+                  { title: 'Live Support', desc: 'Never left on your own — we are with you every step.' },
+                  { title: 'Unmatched Training System', desc: 'A proven system designed to help you reach your goals.' },
+                ].map((item, i) => (
+                  <div key={item.title} style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                    <span style={{ color: '#C9A96E', fontSize: '12px', fontWeight: '700', minWidth: '24px', paddingTop: '2px' }}>0{i + 1}</span>
                     <div>
-                      <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '2px' }}>{item.title}</p>
-                      <p style={{ color: '#9A9890', fontSize: '13px' }}>{item.desc}</p>
+                      <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '3px' }}>{item.title}</p>
+                      <p style={{ color: '#9A9890', fontSize: '14px', lineHeight: '1.5' }}>{item.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -98,10 +104,12 @@ export default function JoinPage() {
             </div>
           </div>
 
-          <div>
-            <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '28px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-              <h2 style={{ color: '#1A1814', fontSize: '22px', fontWeight: '700', marginBottom: '4px' }}>Create Your Account</h2>
-              <p style={{ color: '#6B6966', fontSize: '14px', marginBottom: '24px' }}>Join XFG and start building your business today.</p>
+          {/* Right — Form */}
+          <div style={{ position: 'sticky', top: '24px' }}>
+            <div style={{ background: '#FFFFFF', borderRadius: '20px', padding: '36px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}>
+              <h2 style={{ color: '#1A1814', fontSize: '24px', fontWeight: '700', marginBottom: '4px' }}>Start Your Application</h2>
+              <p style={{ color: '#9A9890', fontSize: '14px', marginBottom: '28px' }}>Every application is reviewed by our leadership team.</p>
+
               <form onSubmit={handleSubmit}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
                   <div>
@@ -138,23 +146,30 @@ export default function JoinPage() {
                   <label style={lbl}>Password</label>
                   <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required placeholder="Min. 8 characters" style={inp} />
                 </div>
-                <div style={{ marginBottom: '20px' }}>
+                <div style={{ marginBottom: '24px' }}>
                   <label style={lbl}>Confirm Password</label>
                   <input type="password" value={form.confirm_password} onChange={(e) => setForm({ ...form, confirm_password: e.target.value })} required placeholder="Re-enter password" style={inp} />
                 </div>
                 {error && <p style={{ color: '#8B2635', fontSize: '14px', marginBottom: '16px', background: '#FFF5F5', padding: '10px 14px', borderRadius: '8px' }}>{error}</p>}
-                <button type="submit" disabled={loading} style={{ width: '100%', background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, fontFamily: 'Inter, sans-serif' }}>
-                  {loading ? 'Creating Account...' : 'Join XFG — Get Started'}
+                <button type="submit" disabled={loading} style={{ width: '100%', background: '#1A1814', color: '#F5F2ED', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, fontFamily: 'Inter, sans-serif', letterSpacing: '0.02em' }}>
+                  {loading ? 'Creating Account...' : 'Join XFG →'}
                 </button>
               </form>
-              <p style={{ textAlign: 'center', color: '#6B6966', fontSize: '14px', marginTop: '16px' }}>
+              <p style={{ textAlign: 'center', color: '#9A9890', fontSize: '13px', marginTop: '16px' }}>
                 Already have an account?{' '}
                 <Link href="/login" style={{ color: '#C9A96E', fontWeight: '600', textDecoration: 'none' }}>Sign In</Link>
               </p>
             </div>
           </div>
+
         </div>
       </div>
+
+      {/* Footer */}
+      <div style={{ borderTop: '1px solid #EBE8E3', padding: '24px', textAlign: 'center', marginTop: '40px' }}>
+        <p style={{ color: '#9A9890', fontSize: '13px' }}>XFG Financial Group · All 50 States · We build financial freedom. We build leaders. We build legacy.</p>
+      </div>
+
     </main>
   )
 }
