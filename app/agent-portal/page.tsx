@@ -495,7 +495,20 @@ export default function AgentPortalPage() {
               {currentStep > 0 && (
                 <button onClick={goBack} disabled={saving} style={{ flex: 1, background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Back</button>
               )}
-              <button disabled={saving} onClick={() => saveAndNext({ is_licensed: 'yes' })} style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+              <button disabled={saving} onClick={async () => {
+                  setSaving(true)
+                  await supabase.from('agents').update({
+                    is_licensed: 'yes',
+                    wizard_step: 'contracting_info',
+                    current_stage: 'contracting',
+                    updated_at: new Date().toISOString()
+                  }).eq('id', agent.id)
+                  setAgent({ ...agent, is_licensed: 'yes', wizard_step: 'contracting_info', current_stage: 'contracting' })
+                  const licSteps = LICENSED_STEPS
+                  setCurrentStep(licSteps.findIndex(s => s.key === 'contracting_info'))
+                  setSaving(false)
+                  window.scrollTo(0, 0)
+                }} style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
                 {saving ? 'Saving...' : 'I have received my license →'}
               </button>
             </div>
