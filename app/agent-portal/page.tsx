@@ -158,19 +158,57 @@ export default function AgentPortalPage() {
       <main style={{ minHeight: '100vh', background: '#F5F2ED', padding: '16px' }}>
         <div style={{ maxWidth: '600px', margin: '0 auto', paddingTop: '40px' }}>
           <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-            <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>XFG · X Financial Group</p>
-            <h1 style={{ color: '#1A1814', fontSize: '28px', fontWeight: '700', marginBottom: '8px' }}>You're Active! 🎉</h1>
-            <p style={{ color: '#6B6966', fontSize: '15px' }}>Welcome to the XFG team. You're ready to start dialing.</p>
+            <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>XFG · X Financial Group</p>
+            <div style={{ fontSize: '60px', marginBottom: '16px' }}>🎉</div>
+            <h1 style={{ color: '#1A1814', fontSize: '32px', fontWeight: '700', marginBottom: '8px' }}>You Are Now Active!</h1>
+            <p style={{ color: '#6B6966', fontSize: '16px', marginBottom: '4px' }}>Welcome to the XFG team, {agent.full_name}.</p>
+            <p style={{ color: '#C9A96E', fontSize: '15px', fontWeight: '600', fontStyle: 'italic' }}>Let's get selling. 🚀</p>
           </div>
-          <div style={card}>
-            <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>Your Info</p>
-            <p style={{ color: '#1A1814', fontSize: '16px', fontWeight: '600', marginBottom: '4px' }}>{agent.full_name}</p>
-            <p style={{ color: '#C9A96E', fontSize: '14px', fontFamily: 'monospace', marginBottom: '4px' }}>{agent.xfg_id}</p>
-            <p style={{ color: '#6B6966', fontSize: '14px' }}>{agent.xfg_email}</p>
+
+          <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginBottom: '16px' }}>
+            <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>Your Agent Info</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ color: '#6B6966', fontSize: '14px' }}>Name</span>
+              <span style={{ color: '#1A1814', fontSize: '14px', fontWeight: '600' }}>{agent.full_name}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ color: '#6B6966', fontSize: '14px' }}>XFG ID</span>
+              <span style={{ color: '#C9A96E', fontSize: '14px', fontFamily: 'monospace', fontWeight: '600' }}>{agent.xfg_id}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ color: '#6B6966', fontSize: '14px' }}>XFG Email</span>
+              <span style={{ color: '#1A1814', fontSize: '14px', fontWeight: '600' }}>{agent.xfg_email || '—'}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#6B6966', fontSize: '14px' }}>State</span>
+              <span style={{ color: '#1A1814', fontSize: '14px', fontWeight: '600' }}>{agent.state}</span>
+            </div>
           </div>
-          <div style={card}>
+
+          <div style={{ background: '#1A1814', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.12)', marginBottom: '16px', textAlign: 'center' }}>
+            <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>Your Tools</p>
+            <p style={{ color: '#F5F2ED', fontSize: '15px', marginBottom: '20px' }}>Your CRM and dialer are ready. Start prospecting and closing deals.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ background: '#242220', border: '1px solid #2E2C29', borderRadius: '10px', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#F5F2ED', fontSize: '15px', fontWeight: '600' }}>CRM Access</span>
+                <span style={{ background: '#2D6A4F', color: '#FFFFFF', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px' }}>Ready</span>
+              </div>
+              <div style={{ background: '#242220', border: '1px solid #2E2C29', borderRadius: '10px', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#F5F2ED', fontSize: '15px', fontWeight: '600' }}>Dialer</span>
+                <span style={{ background: '#2D6A4F', color: '#FFFFFF', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px' }}>Ready</span>
+              </div>
+              <div style={{ background: '#242220', border: '1px solid #2E2C29', borderRadius: '10px', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#F5F2ED', fontSize: '15px', fontWeight: '600' }}>Discord</span>
+                <a href="https://discord.gg/nCEWxbJPU2" target="_blank" rel="noopener noreferrer" style={{ background: '#5865F2', color: '#FFFFFF', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px', textDecoration: 'none' }}>Join →</a>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginBottom: '16px' }}>
+            <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>Messages from Your Team</p>
             <AgentMessages agentId={agent.id} agentEmail={agent.email} agentName={agent.full_name} isAdminView={false} />
           </div>
+
           <button onClick={handleLogout} style={{ width: '100%', background: 'transparent', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '14px', fontSize: '15px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Sign Out</button>
         </div>
       </main>
@@ -553,7 +591,21 @@ export default function AgentPortalPage() {
                     ← Back
                   </button>
                 )}
-                <button onClick={() => saveAndNext({})} disabled={saving} style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                <button onClick={async () => {
+                  setSaving(true)
+                  const now = new Date().toISOString()
+                  await supabase.from('agents').update({
+                    current_stage: 'active',
+                    wizard_step: 'done',
+                    updated_at: now
+                  }).eq('id', agent.id)
+                  await supabase.from('stage_history').insert({ agent_id: agent.id, from_stage: agent.current_stage, to_stage: 'active', changed_by: agent.user_id })
+                  const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
+                  if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'activation', title: 'Agent is now Active!', message: `${agent.full_name} has completed system setup and is now an active XFG agent` })))
+                  setAgent({ ...agent, current_stage: 'active', wizard_step: 'done' })
+                  setSaving(false)
+                  window.scrollTo(0, 0)
+                }} disabled={saving} style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
                   {saving ? 'Saving...' : 'Next →'}
                 </button>
               </div>
