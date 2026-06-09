@@ -72,40 +72,28 @@ export default function JoinPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '40px', alignItems: 'start' }}>
 
           {/* Left — Offer */}
-          <div style={{ paddingTop: '8px' }}>
+          <div style={{ paddingTop: '8px', order: 2 }}>
             <h1 style={{ color: '#1A1814', fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: '700', lineHeight: '1.1', marginBottom: '20px', letterSpacing: '-0.02em' }}>
               Build a successful business with a foundation provided for you.
             </h1>
-            <p style={{ color: '#6B6966', fontSize: '17px', lineHeight: '1.7', marginBottom: '40px' }}>
-              Join hundreds of agents who have built financial freedom with XFG. Everything you need to succeed is already in place.
+            <p style={{ color: '#6B6966', fontSize: '16px', lineHeight: '1.6', marginBottom: '24px' }}>
+              Join hundreds of agents building financial freedom with XFG.
             </p>
 
-            <div style={{ borderTop: '1px solid #DDD9D2', paddingTop: '32px' }}>
-              <p style={{ color: '#9A9890', fontSize: '11px', fontWeight: '700', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '24px' }}>What You Get</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                {[
-                  { title: 'Fully Remote', desc: 'Work from anywhere in the country, in any state.' },
-                  { title: 'Daily Training', desc: 'Learn and grow alongside top producers every day.' },
-                  { title: 'Free Leads', desc: 'We provide the leads so you can focus on closing.' },
-                  { title: 'Free Dialer', desc: 'No out of pocket costs — fully equipped on day one.' },
-                  { title: '$2,000 Worth of Software', desc: 'Industry leading tools included at no cost to you.' },
-                  { title: 'Live Support', desc: 'Never left on your own — we are with you every step.' },
-                  { title: 'Unmatched Training System', desc: 'A proven system designed to help you reach your goals.' },
-                ].map((item, i) => (
-                  <div key={item.title} style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-                    <span style={{ color: '#C9A96E', fontSize: '12px', fontWeight: '700', minWidth: '24px', paddingTop: '2px' }}>0{i + 1}</span>
-                    <div>
-                      <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '3px' }}>{item.title}</p>
-                      <p style={{ color: '#9A9890', fontSize: '14px', lineHeight: '1.5' }}>{item.desc}</p>
-                    </div>
-                  </div>
+            <div style={{ borderTop: '1px solid #DDD9D2', paddingTop: '20px', marginBottom: '28px' }}>
+              <p style={{ color: '#9A9890', fontSize: '11px', fontWeight: '700', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '14px' }}>What You Get</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {['Fully Remote', 'Daily Training', 'Free Leads', 'Free Dialer', '$2K in Software', 'Live Support', 'Unmatched Training'].map(item => (
+                  <span key={item} style={{ background: '#F5EDD9', border: '1px solid #E8C87A', color: '#8B6A2E', fontSize: '13px', fontWeight: '600', padding: '6px 12px', borderRadius: '20px' }}>
+                    {item}
+                  </span>
                 ))}
               </div>
             </div>
           </div>
 
           {/* Right — Form */}
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: 'relative', order: 1 }}>
             <div style={{ background: '#FFFFFF', borderRadius: '20px', padding: '36px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}>
               <h2 style={{ color: '#1A1814', fontSize: '24px', fontWeight: '700', marginBottom: '4px' }}>Start Your Application</h2>
               <p style={{ color: '#9A9890', fontSize: '14px', marginBottom: '28px' }}>Every application is reviewed by our leadership team.</p>
