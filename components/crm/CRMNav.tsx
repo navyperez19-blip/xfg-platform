@@ -40,7 +40,7 @@ export default function CRMNav({
       backgroundColor: '#1A1A1A',
       display: 'flex',
       flexDirection: 'column',
-      zIndex: 100,
+      zIndex: 10,
       borderRight: '1px solid #2A2A2A',
     }}>
       {/* Logo */}
