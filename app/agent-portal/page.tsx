@@ -231,6 +231,42 @@ export default function AgentPortalPage() {
           </div>
 
           <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginBottom: '16px' }}>
+            <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>Carrier Contracting</p>
+            <p style={{ color: '#9A9890', fontSize: '13px', marginBottom: '14px' }}>Track the status of your carrier contracts below.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {['Aflac', 'Americo', 'Transamerica', 'UHL', 'AHL', 'Mutual of Omaha', 'Ethos'].map(carrier => {
+                const carriersObj = (agent.carriers as Record<string, string>) || {}
+                const status = carriersObj[carrier] || 'none'
+                return (
+                  <div key={carrier} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: status === 'active' ? '#F0FFF4' : status === 'submitted' ? '#FFFBF0' : '#F0EDE8', border: `1px solid ${status === 'active' ? '#A8D5B5' : status === 'submitted' ? '#E8C87A' : '#DDD9D2'}`, borderRadius: '10px', padding: '12px 16px' }}>
+                    <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600' }}>{carrier}</p>
+                    {status === 'active' && (
+                      <span style={{ background: '#2D6A4F', color: '#FFFFFF', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px' }}>✓ Active</span>
+                    )}
+                    {status === 'submitted' && (
+                      <span style={{ background: '#B5652A', color: '#FFFFFF', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px' }}>⏳ Submitted</span>
+                    )}
+                    {status === 'none' && (
+                      <button
+                        onClick={async () => {
+                          const updated = { ...carriersObj, [carrier]: 'submitted' }
+                          await supabase.from('agents').update({ carriers: updated, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                          setAgent({ ...agent, carriers: updated })
+                          const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
+                          if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'profile_update', title: `${carrier} contract submitted`, message: `${agent.full_name} has submitted their ${carrier} contract` })))
+                        }}
+                        style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', padding: '6px 14px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}
+                      >
+                        Mark Submitted
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginBottom: '16px' }}>
             <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>Messages from Your Team</p>
             <AgentMessages agentId={agent.id} agentEmail={agent.email} agentName={agent.full_name} isAdminView={false} />
           </div>
@@ -609,6 +645,41 @@ export default function AgentPortalPage() {
                   </div>
                 )
               })}
+            </div>
+            <div style={{ marginTop: '20px', borderTop: '1px solid #EBE8E3', paddingTop: '20px' }}>
+              <p style={{ color: '#6B6966', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '14px' }}>Carrier Contracting</p>
+              <p style={{ color: '#9A9890', fontSize: '13px', marginBottom: '14px' }}>As you submit each carrier contract externally, mark it below so your team knows.</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {['Aflac', 'Americo', 'Transamerica', 'UHL', 'AHL', 'Mutual of Omaha', 'Ethos'].map(carrier => {
+                  const carriersObj = (agent.carriers as Record<string, string>) || {}
+                  const status = carriersObj[carrier] || 'none'
+                  return (
+                    <div key={carrier} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: status === 'active' ? '#F0FFF4' : status === 'submitted' ? '#FFFBF0' : '#F0EDE8', border: `1px solid ${status === 'active' ? '#A8D5B5' : status === 'submitted' ? '#E8C87A' : '#DDD9D2'}`, borderRadius: '10px', padding: '12px 16px' }}>
+                      <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600' }}>{carrier}</p>
+                      {status === 'active' && (
+                        <span style={{ background: '#2D6A4F', color: '#FFFFFF', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px' }}>✓ Active</span>
+                      )}
+                      {status === 'submitted' && (
+                        <span style={{ background: '#B5652A', color: '#FFFFFF', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px' }}>⏳ Submitted</span>
+                      )}
+                      {status === 'none' && (
+                        <button
+                          onClick={async () => {
+                            const updated = { ...carriersObj, [carrier]: 'submitted' }
+                            await supabase.from('agents').update({ carriers: updated, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                            setAgent({ ...agent, carriers: updated })
+                            const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
+                            if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'profile_update', title: `${carrier} contract submitted`, message: `${agent.full_name} has submitted their ${carrier} contract` })))
+                          }}
+                          style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', padding: '6px 14px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}
+                        >
+                          Mark Submitted
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
             </div>
             {Object.values(agent.system_setup_items || {}).filter(Boolean).length === 4 ? (
               <div style={{ display: 'flex', gap: '12px' }}>
