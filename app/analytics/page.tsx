@@ -187,13 +187,14 @@ export default function AnalyticsPage() {
                           <p style={{ color: '#1A1814', fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>{agent.full_name}</p>
                           <p style={{ color: '#C9A96E', fontSize: '12px', fontFamily: 'monospace' }}>{agent.xfg_id}</p>
                         </td>
-                        {['Mutual of Omaha', 'Ethos', 'Instabrain', 'Corbridge', 'AHL'].map(carrier => {
-                          const status = agent.carriers?.[carrier] || 'none'
+                        {['Aflac', 'Americo', 'Transamerica', 'UHL', 'AHL', 'Mutual of Omaha', 'Ethos'].map(carrier => {
+                          const carriersObj = agent.carriers as Record<string, string> || {}
+                          const status = carriersObj[carrier] ?? 'none'
                           return (
                             <td key={carrier} style={{ padding: '10px 12px', textAlign: 'center' }}>
                               {status === 'active' && <span style={{ background: '#F0FFF4', color: '#2D6A4F', fontSize: '12px', fontWeight: '600', padding: '3px 10px', borderRadius: '20px' }}>✓ Active</span>}
                               {status === 'submitted' && <span style={{ background: '#FFFBF0', color: '#B5652A', fontSize: '12px', fontWeight: '600', padding: '3px 10px', borderRadius: '20px' }}>⏳ Submitted</span>}
-                              {status === 'none' && <span style={{ color: '#DDD9D2', fontSize: '12px' }}>—</span>}
+                              {status !== 'active' && status !== 'submitted' && <span style={{ color: '#DDD9D2', fontSize: '12px' }}>—</span>}
                             </td>
                           )
                         })}
