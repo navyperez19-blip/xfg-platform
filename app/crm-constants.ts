@@ -26,14 +26,15 @@ export const PRODUCT_TYPES = [
 ] as const
 
 export const POLICY_STATUSES = [
-  { value: 'pending',   label: 'Pending',   color: '#8B8B8B' },
-  { value: 'submitted', label: 'Submitted', color: '#C9A96E' },
-  { value: 'approved',  label: 'Approved',  color: '#4CAF50' },
-  { value: 'issued',    label: 'Issued',    color: '#2196F3' },
-  { value: 'active',    label: 'Active',    color: '#43A047' },
-  { value: 'declined',  label: 'Declined',  color: '#E53935' },
-  { value: 'lapsed',    label: 'Lapsed',    color: '#FF9800' },
-  { value: 'cancelled', label: 'Cancelled', color: '#B71C1C' },
+  { value: 'pending',    label: 'Pending',    color: '#8B8B8B' },
+  { value: 'submitted',  label: 'Submitted',  color: '#C9A96E' },
+  { value: 'approved',   label: 'Approved',   color: '#4CAF50' },
+  { value: 'issued',     label: 'Issued',     color: '#2196F3' },
+  { value: 'active',     label: 'Active',     color: '#43A047' },
+  { value: 'declined',   label: 'Declined',   color: '#E53935' },
+  { value: 'lapsed',     label: 'Lapsed',     color: '#FF9800' },
+  { value: 'cancelled',  label: 'Cancelled',  color: '#B71C1C' },
+  { value: 'chargeback', label: 'Chargeback', color: '#9C27B0' },
 ] as const
 
 export const HEALTH_STATUSES = [
