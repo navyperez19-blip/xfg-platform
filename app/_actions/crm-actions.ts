@@ -31,23 +31,32 @@ export type PolicyFormData = {
   notes?: string
 }
 
-export async function createCRMClient(formData: ClientFormData) {
+
+export async function createCRMClient(formData: ClientFormData, agentId?: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
-  const { data: agentRecord } = await supabase
-    .from('agents')
-    .select('id')
-    .eq('user_id', user.id)
-    .single()
+  let resolvedAgentId = agentId
 
-  if (!agentRecord) return { error: 'Agent record not found' }
+  if (!resolvedAgentId) {
+    const { data: agentRecord } = await supabase
+      .from('agents')
+      .select('id')
+      .eq('user_id', user.id)
+      .single()
+
+    resolvedAgentId = agentRecord?.id
+  }
+
+  if (!resolvedAgentId) {
+    return { error: 'No agent record found. Admins must select an agent to add clients for.' }
+  }
 
   const { data, error } = await supabase
     .from('crm_clients')
     .insert({
       ...formData,
-      agent_id: agentRecord.id,
+      agent_id: resolvedAgentId,
       tobacco_user: formData.tobacco_user ?? false,
       date_of_birth: formData.date_of_birth || null,
       email: formData.email || null,
@@ -61,23 +70,31 @@ export async function createCRMClient(formData: ClientFormData) {
   return { data }
 }
 
-export async function createCRMPolicy(formData: PolicyFormData) {
+export async function createCRMPolicy(formData: PolicyFormData, agentId?: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
-  const { data: agentRecord } = await supabase
-    .from('agents')
-    .select('id')
-    .eq('user_id', user.id)
-    .single()
+  let resolvedAgentId = agentId
 
-  if (!agentRecord) return { error: 'Agent record not found' }
+  if (!resolvedAgentId) {
+    const { data: agentRecord } = await supabase
+      .from('agents')
+      .select('id')
+      .eq('user_id', user.id)
+      .single()
+
+    resolvedAgentId = agentRecord?.id
+  }
+
+  if (!resolvedAgentId) {
+    return { error: 'No agent record found.' }
+  }
 
   const { data, error } = await supabase
     .from('crm_policies')
     .insert({
       ...formData,
-      agent_id: agentRecord.id,
+      agent_id: resolvedAgentId,
       face_amount: formData.face_amount || null,
       monthly_premium: formData.monthly_premium || null,
       annual_premium: formData.annual_premium || null,
