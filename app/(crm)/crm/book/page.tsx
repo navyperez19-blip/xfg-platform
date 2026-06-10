@@ -153,30 +153,62 @@ export default function BookOfBusinessPage() {
         </div>
 
         {/* Just Me / Downlines toggle — admin only */}
-        {isAdmin && (
-          <div style={{ display: 'flex', backgroundColor: '#1A1A1A', borderRadius: '8px', padding: '3px', gap: '2px' }}>
-            {(['me', 'downlines'] as const).map(mode => (
-              <button
-                key={mode}
-                onClick={() => handleViewMode(mode)}
-                style={{
-                  padding: '7px 18px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  fontFamily: 'inherit',
-                  backgroundColor: viewMode === mode ? '#C9A96E' : 'transparent',
-                  color: viewMode === mode ? '#1A1A1A' : '#888',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                {mode === 'me' ? 'Just Me' : 'All Agents'}
-              </button>
-            ))}
-          </div>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {isAdmin && (
+            <div style={{ display: 'flex', backgroundColor: '#1A1A1A', borderRadius: '8px', padding: '3px', gap: '2px' }}>
+              {(['me', 'downlines'] as const).map(mode => (
+                <button
+                  key={mode}
+                  onClick={() => handleViewMode(mode)}
+                  style={{
+                    padding: '7px 18px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    fontFamily: 'inherit',
+                    backgroundColor: viewMode === mode ? '#C9A96E' : 'transparent',
+                    color: viewMode === mode ? '#1A1A1A' : '#888',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  {mode === 'me' ? 'Just Me' : 'All Agents'}
+                </button>
+              ))}
+            </div>
+          )}
+          <button
+            onClick={() => {
+              const headers = ['Date Written', 'Effective Date', 'Client Name', 'State', 'Agent', 'Carrier', 'Product', 'Policy Number', 'Face Amount', 'Monthly Premium', 'Annual Premium', 'Status']
+              const rows = filtered.map(p => [
+                p.date_written ?? '',
+                p.effective_date ?? '',
+                p.crm_clients ? `${p.crm_clients.first_name} ${p.crm_clients.last_name}` : '',
+                p.crm_clients?.state ?? '',
+                p.agents?.full_name ?? '',
+                p.carrier ?? '',
+                p.product_type ?? '',
+                p.policy_number ?? '',
+                p.face_amount ?? '',
+                p.monthly_premium ?? '',
+                p.annual_premium ?? '',
+                p.status ?? '',
+              ])
+              const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n')
+              const blob = new Blob([csv], { type: 'text/csv' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `book-of-business-${new Date().toISOString().split('T')[0]}.csv`
+              a.click()
+              URL.revokeObjectURL(url)
+            }}
+            style={{ padding: '9px 18px', backgroundColor: '#FFFFFF', color: '#4A4A4A', border: '1px solid #E5E1DA', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            ↓ Export CSV
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
