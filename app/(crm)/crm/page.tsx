@@ -4,20 +4,26 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
-import { POLICY_STATUSES } from '@/app/crm-constants'
+import { POLICY_STATUSES, CARRIERS } from '@/app/crm-constants'
 
 export default function CRMDashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [firstName, setFirstName] = useState('')
   const [isAdmin, setIsAdmin] = useState(false)
+  const [agentId, setAgentId] = useState<string | null>(null)
   const [stats, setStats] = useState({
+    ytdPremium: 0,
+    mtdPremium: 0,
     totalClients: 0,
     activePolicies: 0,
     mtdPolicies: 0,
-    mtdPremium: 0,
+    totalPolicies: 0,
+    monthlyGoal: 5000,
   })
-  const [recentClients, setRecentClients] = useState<any[]>([])
+  const [carrierMix, setCarrierMix] = useState<{ carrier: string; count: number; premium: number }[]>([])
+  const [recentActivity, setRecentActivity] = useState<any[]>([])
+  const [monthlyTrend, setMonthlyTrend] = useState<{ month: string; premium: number; count: number }[]>([])
 
   useEffect(() => {
     const load = async () => {
@@ -25,75 +31,87 @@ export default function CRMDashboard() {
       if (!user) { router.push('/login'); return }
 
       const { data: userRecord } = await supabase
-        .from('users')
-        .select('id, full_name, role')
-        .eq('id', user.id)
-        .single()
+        .from('users').select('id, full_name, role').eq('id', user.id).single()
 
       const adminRoles = ['superadmin', 'executive']
       const admin = adminRoles.includes(userRecord?.role ?? '')
       setIsAdmin(admin)
 
       const { data: agentRecord } = await supabase
-        .from('agents')
-        .select('id, full_name')
-        .eq('user_id', user.id)
-        .single()
+        .from('agents').select('id, full_name').eq('user_id', user.id).single()
 
-      const agentId = agentRecord?.id
+      const aid = agentRecord?.id ?? null
+      setAgentId(aid)
+
       const displayName = agentRecord?.full_name ?? userRecord?.full_name ?? ''
       setFirstName(displayName.split(' ')[0])
 
       const now = new Date()
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-        .toISOString().split('T')[0]
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+      const startOfYear = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
 
-      const { data: clients } = await supabase
-        .from('crm_clients')
-        .select('id')
-        .eq('agent_id', agentId)
-
+      // Fetch all policies for this agent
       const { data: policies } = await supabase
         .from('crm_policies')
-        .select('id, status, annual_premium, date_written')
-        .eq('agent_id', agentId)
+        .select('id, status, annual_premium, monthly_premium, date_written, carrier, product_type, created_at, crm_clients(first_name, last_name)')
+        .eq('agent_id', aid)
+        .order('created_at', { ascending: false })
 
-      const activePolicies = policies?.filter(p =>
-        ['active', 'issued', 'approved'].includes(p.status)
-      ) ?? []
+      const allPolicies = policies ?? []
+      const activePols = allPolicies.filter(p => ['active', 'issued', 'approved'].includes(p.status))
+      const mtdPols = allPolicies.filter(p => p.date_written >= startOfMonth)
+      const ytdPols = allPolicies.filter(p => p.date_written >= startOfYear)
 
-      const mtdPolicies = policies?.filter(p =>
-        p.date_written >= startOfMonth
-      ) ?? []
+      const mtdPremium = mtdPols.reduce((s, p) => s + (Number(p.annual_premium) || 0), 0)
+      const ytdPremium = ytdPols.reduce((s, p) => s + (Number(p.annual_premium) || 0), 0)
 
-      const mtdPremium = mtdPolicies.reduce((sum, p) =>
-        sum + (Number(p.annual_premium) || 0), 0
-      )
+      // Fetch client count
+      const { data: clients } = await supabase
+        .from('crm_clients').select('id').eq('agent_id', aid)
 
       setStats({
-        totalClients: clients?.length ?? 0,
-        activePolicies: activePolicies.length,
-        mtdPolicies: mtdPolicies.length,
+        ytdPremium,
         mtdPremium,
+        totalClients: clients?.length ?? 0,
+        activePolicies: activePols.length,
+        mtdPolicies: mtdPols.length,
+        totalPolicies: allPolicies.length,
+        monthlyGoal: 5000,
       })
 
-      const { data: recent } = await supabase
-        .from('crm_clients')
-        .select(`
-          id, first_name, last_name, state, created_at,
-          crm_policies (
-            id, carrier, product_type, status,
-            monthly_premium, annual_premium
-          )
-        `)
-        .eq('agent_id', agentId)
-        .order('created_at', { ascending: false })
-        .limit(5)
+      // Carrier Mix
+      const carrierMap: Record<string, { count: number; premium: number }> = {}
+      activePols.forEach(p => {
+        if (!p.carrier) return
+        if (!carrierMap[p.carrier]) carrierMap[p.carrier] = { count: 0, premium: 0 }
+        carrierMap[p.carrier].count++
+        carrierMap[p.carrier].premium += Number(p.annual_premium) || 0
+      })
+      const mix = Object.entries(carrierMap)
+        .map(([carrier, data]) => ({ carrier, ...data }))
+        .sort((a, b) => b.count - a.count)
+      setCarrierMix(mix)
 
-      setRecentClients(recent ?? [])
+      // Monthly Trend — last 6 months
+      const trend: { month: string; premium: number; count: number }[] = []
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+        const monthStart = d.toISOString().split('T')[0]
+        const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0]
+        const monthPols = allPolicies.filter(p => p.date_written >= monthStart && p.date_written <= monthEnd)
+        trend.push({
+          month: d.toLocaleDateString('en-US', { month: 'short' }),
+          premium: monthPols.reduce((s, p) => s + (Number(p.annual_premium) || 0), 0),
+          count: monthPols.length,
+        })
+      }
+      setMonthlyTrend(trend)
+
+      // Recent Activity — last 5 policies
+      setRecentActivity(allPolicies.slice(0, 5))
+
       setLoading(false)
     }
-
     load()
   }, [router])
 
@@ -104,6 +122,12 @@ export default function CRMDashboard() {
     return 'evening'
   }
 
+  const goalPct = Math.min(Math.round((stats.mtdPremium / stats.monthlyGoal) * 100), 100)
+  const circumference = 2 * Math.PI * 40
+  const strokeDash = (goalPct / 100) * circumference
+
+  const maxTrendPremium = Math.max(...monthlyTrend.map(m => m.premium), 1)
+
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
@@ -112,110 +136,221 @@ export default function CRMDashboard() {
     )
   }
 
-  const statCards = [
-    { label: 'Total Clients', value: stats.totalClients, icon: '◈', color: '#C9A96E' },
-    { label: 'Active Policies', value: stats.activePolicies, icon: '◉', color: '#27AE60' },
-    { label: 'MTD Policies', value: stats.mtdPolicies, icon: '◆', color: '#2196F3' },
-    {
-      label: 'MTD Premium',
-      value: `$${stats.mtdPremium.toLocaleString('en-US', { minimumFractionDigits: 0 })}`,
-      icon: '$',
-      color: '#9C27B0',
-    },
-  ]
-
   return (
     <div>
-      <div style={{ marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#1A1A1A', marginBottom: '4px', letterSpacing: '-0.02em' }}>
-          Good {getGreeting()}, {firstName} 👋
-        </h1>
-        <p style={{ fontSize: '14px', color: '#7A7A7A' }}>
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-        </p>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
-        {statCards.map((card) => (
-          <div key={card.label} style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', padding: '20px', border: '1px solid #E5E1DA', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-            <div style={{ fontSize: '22px', color: card.color, marginBottom: '8px' }}>{card.icon}</div>
-            <div style={{ fontSize: '28px', fontWeight: '700', color: '#1A1A1A', letterSpacing: '-0.02em', marginBottom: '4px' }}>{card.value}</div>
-            <div style={{ fontSize: '11px', color: '#7A7A7A', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{card.label}</div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '32px' }}>
-        <Link href="/crm/clients/new" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#C9A96E', color: '#1A1A1A', borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: '600' }}>
-          + Add New Client
-        </Link>
-        <Link href="/crm/clients" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#FFFFFF', color: '#1A1A1A', borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: '600', border: '1px solid #E5E1DA' }}>
-          View All Clients
-        </Link>
-        {isAdmin && (
-          <Link href="/crm/admin" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#1A1A1A', color: '#FFFFFF', borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: '600' }}>
-            Agent Overview →
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
+        <div>
+          <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#1A1A1A', marginBottom: '4px', letterSpacing: '-0.02em' }}>
+            Good {getGreeting()}, {firstName} 👋
+          </h1>
+          <p style={{ fontSize: '14px', color: '#7A7A7A' }}>
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <Link href="/crm/clients/new" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 20px', backgroundColor: '#C9A96E', color: '#1A1A1A', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700' }}>
+            + Add Client
           </Link>
-        )}
+          {isAdmin && (
+            <Link href="/crm/admin" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 20px', backgroundColor: '#1A1A1A', color: '#FFFFFF', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700' }}>
+              Agent Overview →
+            </Link>
+          )}
+        </div>
       </div>
 
-      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'hidden' }}>
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid #E5E1DA', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1A1A1A' }}>Recent Clients</h2>
-          <Link href="/crm/clients" style={{ fontSize: '12px', color: '#C9A96E', textDecoration: 'none', fontWeight: '600' }}>View all →</Link>
+      {/* Top Row — YTD Goal Ring + KPI Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '16px', marginBottom: '16px' }}>
+
+        {/* YTD Production + Goal Ring */}
+        <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <p style={{ fontSize: '11px', fontWeight: '700', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>MTD Goal</p>
+          <div style={{ position: 'relative', width: '100px', height: '100px', marginBottom: '16px' }}>
+            <svg width="100" height="100" style={{ transform: 'rotate(-90deg)' }}>
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#F0EDE8" strokeWidth="8" />
+              <circle
+                cx="50" cy="50" r="40" fill="none"
+                stroke={goalPct >= 100 ? '#27AE60' : '#C9A96E'}
+                strokeWidth="8"
+                strokeDasharray={`${strokeDash} ${circumference}`}
+                strokeLinecap="round"
+                style={{ transition: 'stroke-dasharray 0.5s ease' }}
+              />
+            </svg>
+            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+              <div style={{ fontSize: '20px', fontWeight: '700', color: '#1A1A1A', lineHeight: 1 }}>{goalPct}%</div>
+            </div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '22px', fontWeight: '700', color: '#1A1A1A', letterSpacing: '-0.02em' }}>
+              ${stats.mtdPremium.toLocaleString()}
+            </div>
+            <div style={{ fontSize: '12px', color: '#7A7A7A', marginTop: '2px' }}>
+              of ${stats.monthlyGoal.toLocaleString()} goal
+            </div>
+          </div>
+          <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #F0EDE8', width: '100%', textAlign: 'center' }}>
+            <div style={{ fontSize: '18px', fontWeight: '700', color: '#9C27B0' }}>
+              ${stats.ytdPremium.toLocaleString()}
+            </div>
+            <div style={{ fontSize: '11px', color: '#7A7A7A', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em' }}>YTD Premium</div>
+          </div>
         </div>
 
-        {recentClients.length > 0 ? (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#F9F7F4' }}>
-                {['Client', 'State', 'Carrier', 'Product', 'Premium', 'Status', 'Date Added'].map(h => (
-                  <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.08em', borderBottom: '1px solid #E5E1DA' }}>{h}</th>
+        {/* KPI Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gridTemplateRows: '1fr 1fr', gap: '16px' }}>
+          {[
+            { label: 'Total Clients', value: stats.totalClients, color: '#C9A96E', icon: '◈' },
+            { label: 'Active Policies', value: stats.activePolicies, color: '#27AE60', icon: '◉' },
+            { label: 'Total Policies', value: stats.totalPolicies, color: '#2196F3', icon: '◆' },
+            { label: 'MTD Policies', value: stats.mtdPolicies, color: '#FF9800', icon: '◇' },
+            { label: 'Carriers Used', value: carrierMix.length, color: '#E91E63', icon: '◎' },
+            { label: 'Avg Policy', value: stats.activePolicies > 0 ? `$${Math.round(stats.ytdPremium / stats.activePolicies).toLocaleString()}` : '$0', color: '#9C27B0', icon: '$' },
+          ].map(card => (
+            <div key={card.label} style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', padding: '16px 18px', border: '1px solid #E5E1DA' }}>
+              <div style={{ fontSize: '18px', color: card.color, marginBottom: '6px' }}>{card.icon}</div>
+              <div style={{ fontSize: '22px', fontWeight: '700', color: '#1A1A1A', letterSpacing: '-0.02em', marginBottom: '3px' }}>{card.value}</div>
+              <div style={{ fontSize: '11px', color: '#7A7A7A', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{card.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Second Row — Revenue Trend + Carrier Mix */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+
+        {/* Revenue Trend */}
+        <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '20px' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', fontWeight: '700', color: '#1A1A1A', marginBottom: '2px' }}>Revenue Trend</p>
+            <p style={{ fontSize: '12px', color: '#7A7A7A' }}>Monthly production — last 6 months</p>
+          </div>
+          {monthlyTrend.some(m => m.premium > 0) ? (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '100px', marginBottom: '8px' }}>
+                {monthlyTrend.map((m, i) => (
+                  <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                    <div style={{ fontSize: '10px', color: '#7A7A7A', fontWeight: '600' }}>
+                      {m.count > 0 ? m.count : ''}
+                    </div>
+                    <div
+                      style={{
+                        width: '100%',
+                        backgroundColor: i === monthlyTrend.length - 1 ? '#C9A96E' : '#E5E1DA',
+                        borderRadius: '4px 4px 0 0',
+                        height: `${Math.max((m.premium / maxTrendPremium) * 80, m.premium > 0 ? 4 : 0)}px`,
+                        transition: 'height 0.3s ease',
+                        minHeight: m.premium > 0 ? '4px' : '0',
+                      }}
+                    />
+                  </div>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {recentClients.map((client, i) => {
-                const latestPolicy = client.crm_policies?.[0]
-                const statusInfo = POLICY_STATUSES.find(s => s.value === latestPolicy?.status)
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {monthlyTrend.map((m, i) => (
+                  <div key={i} style={{ flex: 1, textAlign: 'center', fontSize: '11px', color: '#7A7A7A', fontWeight: '600' }}>
+                    {m.month}
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #F0EDE8', display: 'flex', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#C9A96E' }}>${stats.ytdPremium.toLocaleString()}</div>
+                  <div style={{ fontSize: '11px', color: '#7A7A7A' }}>YTD Total</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#1A1A1A' }}>{stats.mtdPolicies} deals</div>
+                  <div style={{ fontSize: '11px', color: '#7A7A7A' }}>This month</div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '120px', flexDirection: 'column', gap: '8px' }}>
+              <p style={{ fontSize: '13px', color: '#7A7A7A' }}>No production recorded yet</p>
+              <Link href="/crm/clients/new" style={{ fontSize: '12px', color: '#C9A96E', fontWeight: '600', textDecoration: 'none' }}>Add a policy to see trends →</Link>
+            </div>
+          )}
+        </div>
+
+        {/* Carrier Mix */}
+        <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '20px' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', fontWeight: '700', color: '#1A1A1A', marginBottom: '2px' }}>Carrier Mix</p>
+            <p style={{ fontSize: '12px', color: '#7A7A7A' }}>Active policies by carrier</p>
+          </div>
+          {carrierMix.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {carrierMix.map((c, i) => {
+                const maxCount = carrierMix[0].count
+                const pct = Math.round((c.count / maxCount) * 100)
+                const colors = ['#C9A96E', '#2196F3', '#27AE60', '#9C27B0', '#FF9800', '#E91E63', '#00BCD4']
                 return (
-                  <tr key={client.id} style={{ borderBottom: i < recentClients.length - 1 ? '1px solid #F0EDE8' : 'none' }}>
-                    <td style={{ padding: '14px 16px' }}>
-                      <Link href={`/crm/clients/${client.id}`} style={{ fontWeight: '600', fontSize: '14px', color: '#1A1A1A', textDecoration: 'none' }}>
-                        {client.first_name} {client.last_name}
-                      </Link>
-                    </td>
-                    <td style={{ padding: '14px 16px', fontSize: '13px', color: '#4A4A4A' }}>{client.state || '—'}</td>
-                    <td style={{ padding: '14px 16px', fontSize: '13px', color: '#4A4A4A' }}>{latestPolicy?.carrier || '—'}</td>
-                    <td style={{ padding: '14px 16px', fontSize: '13px', color: '#4A4A4A' }}>{latestPolicy?.product_type || '—'}</td>
-                    <td style={{ padding: '14px 16px', fontSize: '13px', color: '#4A4A4A' }}>
-                      {latestPolicy?.annual_premium ? `$${Number(latestPolicy.annual_premium).toLocaleString()}/yr` : latestPolicy?.monthly_premium ? `$${Number(latestPolicy.monthly_premium).toLocaleString()}/mo` : '—'}
-                    </td>
-                    <td style={{ padding: '14px 16px' }}>
-                      {latestPolicy ? (
-                        <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700', backgroundColor: `${statusInfo?.color}18`, color: statusInfo?.color ?? '#888', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                          {statusInfo?.label ?? latestPolicy.status}
-                        </span>
-                      ) : (
-                        <span style={{ fontSize: '12px', color: '#BBB' }}>No policy</span>
-                      )}
-                    </td>
-                    <td style={{ padding: '14px 16px', fontSize: '12px', color: '#7A7A7A' }}>
-                      {new Date(client.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    </td>
-                  </tr>
+                  <div key={c.carrier}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '13px', fontWeight: '600', color: '#1A1A1A' }}>{c.carrier}</span>
+                      <span style={{ fontSize: '12px', color: '#7A7A7A' }}>{c.count} polic{c.count !== 1 ? 'ies' : 'y'} · ${c.premium.toLocaleString()}</span>
+                    </div>
+                    <div style={{ height: '6px', backgroundColor: '#F0EDE8', borderRadius: '3px', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${pct}%`, backgroundColor: colors[i % colors.length], borderRadius: '3px', transition: 'width 0.3s ease' }} />
+                    </div>
+                  </div>
                 )
               })}
-            </tbody>
-          </table>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '120px' }}>
+              <p style={{ fontSize: '13px', color: '#7A7A7A' }}>No active policies yet</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Third Row — Recent Activity */}
+      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'hidden' }}>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid #E5E1DA', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <p style={{ fontSize: '13px', fontWeight: '700', color: '#1A1A1A', marginBottom: '2px' }}>Recent Activity</p>
+            <p style={{ fontSize: '12px', color: '#7A7A7A' }}>Latest policy updates</p>
+          </div>
+          <Link href="/crm/book" style={{ fontSize: '12px', color: '#C9A96E', textDecoration: 'none', fontWeight: '600' }}>View all →</Link>
+        </div>
+        {recentActivity.length > 0 ? (
+          <div>
+            {recentActivity.map((policy, i) => {
+              const statusInfo = POLICY_STATUSES.find(s => s.value === policy.status)
+              const client = policy.crm_clients
+              return (
+                <div key={policy.id} style={{ padding: '14px 20px', borderBottom: i < recentActivity.length - 1 ? '1px solid #F0EDE8' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: `${statusInfo?.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', color: statusInfo?.color ?? '#888', flexShrink: 0 }}>
+                      ◆
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#1A1A1A' }}>
+                        {client ? `${client.first_name} ${client.last_name}` : 'Unknown Client'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#7A7A7A', marginTop: '1px' }}>
+                        {policy.carrier} · {policy.product_type}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ display: 'inline-block', padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700', backgroundColor: `${statusInfo?.color}18`, color: statusInfo?.color ?? '#888', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {statusInfo?.label ?? policy.status}
+                    </span>
+                    <div style={{ fontSize: '11px', color: '#AAA', marginTop: '3px' }}>
+                      {policy.date_written ? new Date(policy.date_written).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         ) : (
-          <div style={{ padding: '48px', textAlign: 'center' }}>
-            <div style={{ fontSize: '32px', marginBottom: '12px' }}>◈</div>
-            <p style={{ fontSize: '15px', color: '#7A7A7A', marginBottom: '4px', fontWeight: '500' }}>No clients yet</p>
-            <p style={{ fontSize: '13px', color: '#AAA', marginBottom: '20px' }}>Start tracking your book of business</p>
-            <Link href="/crm/clients/new" style={{ display: 'inline-block', padding: '10px 24px', backgroundColor: '#C9A96E', color: '#1A1A1A', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '600' }}>
-              Add Your First Client
-            </Link>
+          <div style={{ padding: '40px', textAlign: 'center' }}>
+            <p style={{ fontSize: '14px', color: '#7A7A7A' }}>No recent activity</p>
+            <p style={{ fontSize: '12px', color: '#AAA', marginTop: '4px' }}>Policy updates will appear here</p>
           </div>
         )}
       </div>
