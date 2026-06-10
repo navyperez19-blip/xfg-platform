@@ -20,6 +20,10 @@ export default function ClientDetailPage() {
   const [editingClient, setEditingClient] = useState(false)
   const [editingPolicyId, setEditingPolicyId] = useState<string | null>(null)
   const [showAddPolicy, setShowAddPolicy] = useState(false)
+  const [notes, setNotes] = useState<any[]>([])
+  const [showAddNote, setShowAddNote] = useState(false)
+  const [noteForm, setNoteForm] = useState({ note_type: 'call', content: '', follow_up_date: '' })
+  const [savingNote, setSavingNote] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
@@ -65,6 +69,14 @@ export default function ClientDetailPage() {
         .order('created_at', { ascending: false })
 
       setPolicies(policyData ?? [])
+
+      const { data: notesData } = await supabase
+        .from('crm_notes')
+        .select('*, agents!crm_notes_agent_id_fkey(full_name)')
+        .eq('client_id', clientId)
+        .order('created_at', { ascending: false })
+
+      setNotes(notesData ?? [])
       setLoading(false)
     }
     load()
@@ -460,6 +472,155 @@ export default function ClientDetailPage() {
           <div style={{ padding: '40px', textAlign: 'center' }}>
             <p style={{ fontSize: '14px', color: '#7A7A7A', marginBottom: '4px' }}>No policies yet</p>
             <p style={{ fontSize: '12px', color: '#AAA' }}>Click "Add Policy" to log a policy for this client</p>
+          </div>
+        )}
+      </div>
+
+      {/* Notes & Activity Section */}
+      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'hidden', marginTop: '20px' }}>
+        <div style={{ padding: '18px 24px', borderBottom: '1px solid #E5E1DA', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1A1A1A' }}>
+            Activity Log ({notes.length})
+          </h2>
+          <button
+            onClick={() => setShowAddNote(!showAddNote)}
+            style={{ padding: '8px 18px', backgroundColor: showAddNote ? '#FFFFFF' : '#C9A96E', color: showAddNote ? '#4A4A4A' : '#1A1A1A', border: '1px solid #E5E1DA', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', fontFamily: 'inherit' }}
+          >
+            {showAddNote ? 'Cancel' : '+ Log Activity'}
+          </button>
+        </div>
+
+        {/* Add Note Form */}
+        {showAddNote && (
+          <div style={{ padding: '20px 24px', borderBottom: '1px solid #E5E1DA', backgroundColor: '#FAFAF8' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '4px' }}>Activity Type</label>
+                  <select
+                    value={noteForm.note_type}
+                    onChange={e => setNoteForm({ ...noteForm, note_type: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', fontSize: '13px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', backgroundColor: '#FFFFFF', cursor: 'pointer' }}
+                  >
+                    <option value="call">📞 Phone Call</option>
+                    <option value="text">💬 Text Message</option>
+                    <option value="email">✉️ Email</option>
+                    <option value="meeting">🤝 Meeting</option>
+                    <option value="follow_up">🔔 Follow Up</option>
+                    <option value="note">📝 Note</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '4px' }}>Follow-up Date (optional)</label>
+                  <input
+                    type="date"
+                    value={noteForm.follow_up_date}
+                    onChange={e => setNoteForm({ ...noteForm, follow_up_date: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', fontSize: '13px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', backgroundColor: '#FFFFFF', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '4px' }}>Notes *</label>
+                <textarea
+                  value={noteForm.content}
+                  onChange={e => setNoteForm({ ...noteForm, content: e.target.value })}
+                  placeholder="What happened? What was discussed? Any next steps?"
+                  rows={3}
+                  style={{ width: '100%', padding: '9px 12px', fontSize: '13px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', backgroundColor: '#FFFFFF', resize: 'vertical', boxSizing: 'border-box' }}
+                />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <button
+                  onClick={async () => {
+                    if (!noteForm.content.trim()) return
+                    setSavingNote(true)
+                    const { data: agentRec } = await supabase.from('agents').select('id').eq('user_id', (await supabase.auth.getUser()).data.user?.id ?? '').single()
+                    const { data: newNote, error } = await supabase
+                      .from('crm_notes')
+                      .insert({
+                        client_id: clientId,
+                        agent_id: agentRec?.id,
+                        note_type: noteForm.note_type,
+                        content: noteForm.content,
+                        follow_up_date: noteForm.follow_up_date || null,
+                      })
+                      .select('*, agents!crm_notes_agent_id_fkey(full_name)')
+                      .single()
+                    if (!error && newNote) {
+                      setNotes([newNote, ...notes])
+                      setNoteForm({ note_type: 'call', content: '', follow_up_date: '' })
+                      setShowAddNote(false)
+                    }
+                    setSavingNote(false)
+                  }}
+                  disabled={savingNote || !noteForm.content.trim()}
+                  style={{ padding: '10px 24px', backgroundColor: '#C9A96E', color: '#1A1A1A', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '700', fontFamily: 'inherit', opacity: savingNote || !noteForm.content.trim() ? 0.6 : 1 }}
+                >
+                  {savingNote ? 'Saving...' : 'Save Activity'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Notes List */}
+        {notes.length > 0 ? (
+          <div>
+            {notes.map((note, i) => {
+              const typeConfig: Record<string, { icon: string; color: string; label: string }> = {
+                call:      { icon: '📞', color: '#2196F3', label: 'Phone Call' },
+                text:      { icon: '💬', color: '#27AE60', label: 'Text' },
+                email:     { icon: '✉️', color: '#C9A96E', label: 'Email' },
+                meeting:   { icon: '🤝', color: '#9C27B0', label: 'Meeting' },
+                follow_up: { icon: '🔔', color: '#FF9800', label: 'Follow Up' },
+                note:      { icon: '📝', color: '#7A7A7A', label: 'Note' },
+              }
+              const config = typeConfig[note.note_type] ?? typeConfig.note
+              return (
+                <div key={note.id} style={{ padding: '16px 24px', borderBottom: i < notes.length - 1 ? '1px solid #F0EDE8' : 'none', display: 'flex', gap: '14px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: `${config.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', flexShrink: 0 }}>
+                    {config.icon}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '13px', fontWeight: '700', color: config.color }}>{config.label}</span>
+                        {note.agents?.full_name && (
+                          <span style={{ fontSize: '11px', color: '#AAA' }}>by {note.agents.full_name}</span>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '11px', color: '#AAA' }}>
+                          {new Date(note.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                        </span>
+                        <button
+                          onClick={async () => {
+                            if (!confirm('Delete this activity?')) return
+                            await supabase.from('crm_notes').delete().eq('id', note.id)
+                            setNotes(notes.filter(n => n.id !== note.id))
+                          }}
+                          style={{ background: 'none', border: 'none', color: '#CCC', cursor: 'pointer', fontSize: '14px', padding: '0', lineHeight: 1 }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                    <p style={{ fontSize: '13px', color: '#4A4A4A', lineHeight: 1.5, margin: 0 }}>{note.content}</p>
+                    {note.follow_up_date && (
+                      <div style={{ marginTop: '8px', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 10px', backgroundColor: '#FFF8E1', border: '1px solid #FFE082', borderRadius: '4px', fontSize: '11px', fontWeight: '600', color: '#F57F17' }}>
+                        🔔 Follow up: {new Date(note.follow_up_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div style={{ padding: '40px', textAlign: 'center' }}>
+            <p style={{ fontSize: '14px', color: '#7A7A7A', marginBottom: '4px' }}>No activity logged yet</p>
+            <p style={{ fontSize: '12px', color: '#AAA' }}>Log calls, texts, emails, and follow-ups to track your client interactions</p>
           </div>
         )}
       </div>
