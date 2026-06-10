@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
-import { POLICY_STATUSES, CARRIERS } from '@/app/crm-constants'
+import { POLICY_STATUSES } from '@/app/crm-constants'
 
 export default function AgentDetailPage() {
   const router = useRouter()
@@ -26,6 +26,10 @@ export default function AgentDetailPage() {
   })
   const [carrierMix, setCarrierMix] = useState<{ carrier: string; count: number; premium: number }[]>([])
   const [activeTab, setActiveTab] = useState<'clients' | 'policies'>('policies')
+  const [monthlyGoal, setMonthlyGoal] = useState<number>(5000)
+  const [editingGoal, setEditingGoal] = useState(false)
+  const [goalInput, setGoalInput] = useState('')
+  const [savingGoal, setSavingGoal] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -114,6 +118,21 @@ export default function AgentDetailPage() {
         .sort((a, b) => b.count - a.count)
       setCarrierMix(mix)
 
+      // Fetch goal from crm_goals table
+      const now2 = new Date()
+      const { data: goalData } = await supabase
+        .from('crm_goals')
+        .select('premium_target')
+        .eq('agent_id', agentId)
+        .eq('period_type', 'monthly')
+        .eq('period_year', now2.getFullYear())
+        .eq('period_number', now2.getMonth() + 1)
+        .single()
+
+      if (goalData?.premium_target) {
+        setMonthlyGoal(Number(goalData.premium_target))
+      }
+
       setLoading(false)
     }
     load()
@@ -166,6 +185,85 @@ export default function AgentDetailPage() {
               {agent.npn && <span style={{ fontSize: '12px', color: '#AAA' }}>NPN: {agent.npn}</span>}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Goal Card */}
+      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '20px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div>
+            <p style={{ fontSize: '11px', fontWeight: '700', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>Monthly Goal</p>
+            {editingGoal ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '16px', color: '#7A7A7A' }}>$</span>
+                <input
+                  type="number"
+                  value={goalInput}
+                  onChange={e => setGoalInput(e.target.value)}
+                  style={{ width: '120px', padding: '6px 10px', fontSize: '16px', fontWeight: '700', border: '1px solid #C9A96E', borderRadius: '6px', outline: 'none', fontFamily: 'inherit' }}
+                  autoFocus
+                />
+              </div>
+            ) : (
+              <p style={{ fontSize: '22px', fontWeight: '700', color: '#1A1A1A' }}>${monthlyGoal.toLocaleString()}</p>
+            )}
+          </div>
+          <div style={{ width: '1px', height: '40px', backgroundColor: '#E5E1DA' }} />
+          <div>
+            <p style={{ fontSize: '11px', fontWeight: '700', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>MTD Progress</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '120px', height: '8px', backgroundColor: '#F0EDE8', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${Math.min((stats.mtdPremium / monthlyGoal) * 100, 100)}%`, backgroundColor: stats.mtdPremium >= monthlyGoal ? '#27AE60' : '#C9A96E', borderRadius: '4px', transition: 'width 0.3s ease' }} />
+              </div>
+              <span style={{ fontSize: '13px', fontWeight: '700', color: '#1A1A1A' }}>
+                {Math.min(Math.round((stats.mtdPremium / monthlyGoal) * 100), 100)}%
+              </span>
+            </div>
+            <p style={{ fontSize: '12px', color: '#7A7A7A', marginTop: '3px' }}>${stats.mtdPremium.toLocaleString()} of ${monthlyGoal.toLocaleString()}</p>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {editingGoal ? (
+            <>
+              <button
+                onClick={() => { setEditingGoal(false); setGoalInput('') }}
+                style={{ padding: '8px 16px', backgroundColor: '#FFFFFF', color: '#4A4A4A', border: '1px solid #E5E1DA', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (!goalInput) return
+                  setSavingGoal(true)
+                  const now3 = new Date()
+                  await supabase
+                    .from('crm_goals')
+                    .upsert({
+                      agent_id: agentId,
+                      period_type: 'monthly',
+                      period_year: now3.getFullYear(),
+                      period_number: now3.getMonth() + 1,
+                      premium_target: Number(goalInput),
+                    }, { onConflict: 'agent_id,period_type,period_year,period_number' })
+                  setMonthlyGoal(Number(goalInput))
+                  setEditingGoal(false)
+                  setGoalInput('')
+                  setSavingGoal(false)
+                }}
+                disabled={savingGoal}
+                style={{ padding: '8px 16px', backgroundColor: '#C9A96E', color: '#1A1A1A', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit', opacity: savingGoal ? 0.6 : 1 }}
+              >
+                {savingGoal ? 'Saving...' : 'Save Goal'}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => { setEditingGoal(true); setGoalInput(String(monthlyGoal)) }}
+              style={{ padding: '8px 18px', backgroundColor: '#FFFFFF', color: '#4A4A4A', border: '1px solid #E5E1DA', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', fontFamily: 'inherit' }}
+            >
+              Set Goal
+            </button>
+          )}
         </div>
       </div>
 
