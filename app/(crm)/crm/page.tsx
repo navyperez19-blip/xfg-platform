@@ -20,6 +20,10 @@ export default function CRMDashboard() {
     mtdPolicies: 0,
     totalPolicies: 0,
     monthlyGoal: 5000,
+    chargebackCount: 0,
+    chargebackPremium: 0,
+    persistencyRate: 100,
+    atRiskCount: 0,
   })
   const [carrierMix, setCarrierMix] = useState<{ carrier: string; count: number; premium: number }[]>([])
   const [recentActivity, setRecentActivity] = useState<any[]>([])
@@ -69,6 +73,15 @@ export default function CRMDashboard() {
       const { data: clients } = await supabase
         .from('crm_clients').select('id').eq('agent_id', aid)
 
+      const now2 = new Date()
+      const nineMonthsAgo = new Date(now2.getFullYear(), now2.getMonth() - 9, now2.getDate()).toISOString().split('T')[0]
+      const chargebacks = allPolicies.filter(p => p.status === 'chargeback')
+      const cbPremium = chargebacks.reduce((s, p) => s + (Number(p.annual_premium) || 0), 0)
+      const olderThan9 = allPolicies.filter(p => p.date_written < nineMonthsAgo && ['active','cancelled','lapsed','chargeback'].includes(p.status))
+      const stillActive = olderThan9.filter(p => p.status === 'active')
+      const persistency = olderThan9.length > 0 ? Math.round((stillActive.length / olderThan9.length) * 100) : 100
+      const atRisk = allPolicies.filter(p => p.status === 'active' && p.date_written >= nineMonthsAgo)
+
       setStats({
         ytdPremium,
         mtdPremium,
@@ -77,6 +90,10 @@ export default function CRMDashboard() {
         mtdPolicies: mtdPols.length,
         totalPolicies: allPolicies.length,
         monthlyGoal: 5000,
+        chargebackCount: chargebacks.length,
+        chargebackPremium: cbPremium,
+        persistencyRate: persistency,
+        atRiskCount: atRisk.length,
       })
 
       // Carrier Mix
@@ -203,10 +220,10 @@ export default function CRMDashboard() {
           {[
             { label: 'Total Clients', value: stats.totalClients, color: '#C9A96E', icon: '◈' },
             { label: 'Active Policies', value: stats.activePolicies, color: '#27AE60', icon: '◉' },
-            { label: 'Total Policies', value: stats.totalPolicies, color: '#2196F3', icon: '◆' },
-            { label: 'MTD Policies', value: stats.mtdPolicies, color: '#FF9800', icon: '◇' },
-            { label: 'Carriers Used', value: carrierMix.length, color: '#E91E63', icon: '◎' },
-            { label: 'Avg Policy', value: stats.activePolicies > 0 ? `$${Math.round(stats.ytdPremium / stats.activePolicies).toLocaleString()}` : '$0', color: '#9C27B0', icon: '$' },
+            { label: 'Persistency', value: `${stats.persistencyRate}%`, color: stats.persistencyRate >= 80 ? '#27AE60' : stats.persistencyRate >= 60 ? '#FF9800' : '#E53935', icon: '◎' },
+            { label: 'At Risk', value: stats.atRiskCount, color: '#FF9800', icon: '◇' },
+            { label: 'Chargebacks', value: stats.chargebackCount, color: '#9C27B0', icon: '⚠' },
+            { label: 'CB Premium', value: `$${stats.chargebackPremium.toLocaleString()}`, color: '#E53935', icon: '$' },
           ].map(card => (
             <div key={card.label} style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', padding: '16px 18px', border: '1px solid #E5E1DA' }}>
               <div style={{ fontSize: '18px', color: card.color, marginBottom: '6px' }}>{card.icon}</div>
