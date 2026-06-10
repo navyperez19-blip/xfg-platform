@@ -56,7 +56,8 @@ export default async function CRMLayout({
     .eq('user_id', session.user.id)
     .single()
 
-  if (!agentRecord || agentRecord.current_stage !== 'active') {
+  const crmEligibleStages = ['system_setup', 'training', 'activation', 'active']
+  if (!agentRecord || !crmEligibleStages.includes(agentRecord.current_stage)) {
     redirect('/pipeline')
   }
 

@@ -26,7 +26,8 @@ export default function LoginPage() {
       if (profile?.role === 'agent') {
         router.push('/agent-portal')
       } else {
-        router.push('/dashboard')
+        const redirectTo = new URLSearchParams(window.location.search).get('redirectTo')
+        router.push(redirectTo || '/dashboard')
       }
     }
   }
