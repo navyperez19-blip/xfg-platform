@@ -1,7 +1,6 @@
-'use server'
+'use client'
 
-import { createClient as createSupabase } from '@/app/lib/supabase-server'
-import { revalidatePath } from 'next/cache'
+import { supabase } from '@/app/lib/supabase'
 
 export type ClientFormData = {
   first_name: string
@@ -32,135 +31,63 @@ export type PolicyFormData = {
   notes?: string
 }
 
-async function getAgentRecord(supabase: Awaited<ReturnType<typeof createSupabase>>) {
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) throw new Error('Not authenticated')
+export async function createCRMClient(formData: ClientFormData) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
 
-  const { data: agent } = await supabase
+  const { data: agentRecord } = await supabase
     .from('agents')
-    .select('id, agent_model')
-    .eq('user_id', session.user.id)
+    .select('id')
+    .eq('user_id', user.id)
     .single()
 
-  if (!agent) throw new Error('Agent record not found')
-  return agent
-}
-
-export async function createCRMClient(formData: ClientFormData) {
-  const supabase = await createSupabase()
-  const agent = await getAgentRecord(supabase)
+  if (!agentRecord) return { error: 'Agent record not found' }
 
   const { data, error } = await supabase
     .from('crm_clients')
     .insert({
       ...formData,
-      agent_id: agent.id,
+      agent_id: agentRecord.id,
       tobacco_user: formData.tobacco_user ?? false,
+      date_of_birth: formData.date_of_birth || null,
+      email: formData.email || null,
+      phone: formData.phone || null,
+      health_status: formData.health_status || null,
     })
     .select()
     .single()
 
-  if (error) {
-    console.error('createCRMClient error:', error)
-    return { error: error.message }
-  }
-
-  revalidatePath('/crm')
-  revalidatePath('/crm/clients')
-  return { data }
-}
-
-export async function updateCRMClient(id: string, formData: Partial<ClientFormData>) {
-  const supabase = await createSupabase()
-  await getAgentRecord(supabase)
-
-  const { data, error } = await supabase
-    .from('crm_clients')
-    .update(formData)
-    .eq('id', id)
-    .select()
-    .single()
-
   if (error) return { error: error.message }
-
-  revalidatePath('/crm')
-  revalidatePath('/crm/clients')
-  revalidatePath(`/crm/clients/${id}`)
   return { data }
-}
-
-export async function deleteCRMClient(id: string) {
-  const supabase = await createSupabase()
-  await getAgentRecord(supabase)
-
-  const { error } = await supabase
-    .from('crm_clients')
-    .delete()
-    .eq('id', id)
-
-  if (error) return { error: error.message }
-
-  revalidatePath('/crm')
-  revalidatePath('/crm/clients')
-  return { success: true }
 }
 
 export async function createCRMPolicy(formData: PolicyFormData) {
-  const supabase = await createSupabase()
-  const agent = await getAgentRecord(supabase)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { data: agentRecord } = await supabase
+    .from('agents')
+    .select('id')
+    .eq('user_id', user.id)
+    .single()
+
+  if (!agentRecord) return { error: 'Agent record not found' }
 
   const { data, error } = await supabase
     .from('crm_policies')
     .insert({
       ...formData,
-      agent_id: agent.id,
+      agent_id: agentRecord.id,
       face_amount: formData.face_amount || null,
       monthly_premium: formData.monthly_premium || null,
       annual_premium: formData.annual_premium || null,
+      effective_date: formData.effective_date || null,
+      policy_number: formData.policy_number || null,
+      notes: formData.notes || null,
     })
     .select()
     .single()
 
-  if (error) {
-    console.error('createCRMPolicy error:', error)
-    return { error: error.message }
-  }
-
-  revalidatePath('/crm')
-  revalidatePath('/crm/clients')
-  revalidatePath(`/crm/clients/${formData.client_id}`)
-  return { data }
-}
-
-export async function updateCRMPolicy(id: string, formData: Partial<PolicyFormData>) {
-  const supabase = await createSupabase()
-  await getAgentRecord(supabase)
-
-  const { data, error } = await supabase
-    .from('crm_policies')
-    .update(formData)
-    .eq('id', id)
-    .select()
-    .single()
-
   if (error) return { error: error.message }
-
-  revalidatePath('/crm')
-  revalidatePath('/crm/clients')
   return { data }
-}
-
-export async function deleteCRMPolicy(id: string) {
-  const supabase = await createSupabase()
-  await getAgentRecord(supabase)
-
-  const { error } = await supabase
-    .from('crm_policies')
-    .delete()
-    .eq('id', id)
-
-  if (error) return { error: error.message }
-
-  revalidatePath('/crm')
-  return { success: true }
 }
