@@ -172,7 +172,7 @@ export default function AnalyticsPage() {
                 <thead>
                   <tr style={{ borderBottom: '2px solid #EBE8E3' }}>
                     <th style={{ padding: '10px 12px', textAlign: 'left', color: '#6B6966', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Agent</th>
-                    {['Mutual of Omaha', 'Ethos', 'Instabrain', 'Corbridge', 'AHL'].map(carrier => (
+                    {['Aflac', 'Americo', 'Transamerica', 'UHL', 'AHL', 'Mutual of Omaha', 'Ethos'].map(carrier => (
                       <th key={carrier} style={{ padding: '10px 12px', textAlign: 'center', color: '#6B6966', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{carrier}</th>
                     ))}
                   </tr>

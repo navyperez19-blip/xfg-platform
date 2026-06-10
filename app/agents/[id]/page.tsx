@@ -251,7 +251,7 @@ export default function AgentDetailPage() {
             <div style={card}>
               <p style={sectionTitle}>Carrier Contracting</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {['Mutual of Omaha', 'Ethos', 'Instabrain', 'Corbridge', 'AHL'].map(carrier => {
+                {['Aflac', 'Americo', 'Transamerica', 'UHL', 'AHL', 'Mutual of Omaha', 'Ethos'].map(carrier => {
                   const carriers = agent.carriers || {}
                   const status = carriers[carrier] || 'none'
                   return (
