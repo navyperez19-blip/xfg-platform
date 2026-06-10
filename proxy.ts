@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/crm/:path*'],
+  matcher: []
 }
