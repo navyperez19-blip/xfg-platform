@@ -271,6 +271,9 @@ export default function AgentPortalPage() {
             <AgentMessages agentId={agent.id} agentEmail={agent.email} agentName={agent.full_name} isAdminView={false} />
           </div>
 
+          {['system_setup', 'training', 'activation', 'active'].includes(agent.current_stage) && (
+            <button onClick={() => router.push('/crm')} style={{ width: '100%', background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '14px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif', marginBottom: '12px' }}>Production CRM</button>
+          )}
           <button onClick={handleLogout} style={{ width: '100%', background: 'transparent', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '14px', fontSize: '15px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Sign Out</button>
         </div>
       </main>

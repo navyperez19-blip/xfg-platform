@@ -94,18 +94,6 @@ export default function DashboardPage() {
               <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Move agents through licensing</p>
             </div>
           )}
-          {profile.role === 'joe' && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Verify contracts</p>
-              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Confirm dialer and CRM setup</p>
-            </div>
-          )}
-          {profile.role === 'jesse' && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Verify training completions</p>
-              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Move agents through training</p>
-            </div>
-          )}
           {['executive', 'superadmin'].includes(profile.role) && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
               <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Full access to all stages</p>
