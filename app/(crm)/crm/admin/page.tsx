@@ -150,7 +150,7 @@ export default function AdminOverviewPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ backgroundColor: '#F9F7F4' }}>
-                {['Rank', 'Agent', 'Model', 'Clients', 'Total Policies', 'Active Policies', 'MTD Policies', 'MTD Premium', 'Total Premium'].map(h => (
+                {['Rank', 'Agent', 'Model', 'Clients', 'Total Policies', 'Active Policies', 'MTD Policies', 'MTD Premium', 'Total Premium', ''].map(h => (
                   <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.07em', borderBottom: '1px solid #E5E1DA', whiteSpace: 'nowrap' }}>
                     {h}
                   </th>
@@ -183,9 +183,17 @@ export default function AdminOverviewPage() {
                     </span>
                   </td>
                   <td style={{ padding: '14px 16px' }}>
-                    <span style={{ fontSize: '14px', fontWeight: '600', color: agent.totalPremium > 0 ? '#1A1A1A' : '#CCC' }}>
+                    <span style={{
+                      fontSize: '15px', fontWeight: '700',
+                      color: agent.totalPremium > 0 ? '#1A1A1A' : '#CCC',
+                    }}>
                       ${agent.totalPremium.toLocaleString('en-US', { minimumFractionDigits: 0 })}
                     </span>
+                  </td>
+                  <td style={{ padding: '14px 16px' }}>
+                    <a href={`/crm/admin/agents/${agent.id}`} style={{ fontSize: '12px', color: '#C9A96E', textDecoration: 'none', fontWeight: '600', whiteSpace: 'nowrap' }}>
+                      View Details →
+                    </a>
                   </td>
                 </tr>
               ))}
