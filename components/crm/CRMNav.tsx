@@ -22,6 +22,7 @@ export default function CRMNav({
     { href: '/crm', label: 'Dashboard', icon: '⬡', exact: true },
     { href: '/crm/clients', label: 'My Clients', icon: '◈' },
     { href: '/crm/clients/new', label: 'Add Client', icon: '+' },
+    { href: '/crm/book', label: 'Book of Business', icon: '◆' },
     ...(isAdmin ? [{ href: '/crm/admin', label: 'All Agents', icon: '◉' }] : []),
   ]
 
