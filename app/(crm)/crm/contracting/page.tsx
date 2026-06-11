@@ -10,7 +10,7 @@ const CARRIERS = [
   { name: 'Transamerica',           description: 'Life & health insurance',       surelcLink: null },
   { name: 'UHL (United Home Life)', description: 'Life insurance',                surelcLink: null },
   { name: 'AHL (American Home Life)', description: 'Life insurance',              surelcLink: null },
-  { name: 'Mutual of Omaha',        description: 'Life & Medicare supplements',   surelcLink: null },
+  { name: 'Mutual of Omaha',        description: 'Life & Medicare supplements',   surelcLink: 'https://surelc.surancebay.com/sbweb/login.jsp?branch=Family%20Capital%20Agency&branchEditable=off&branchRequired=on&branchVisible=on&gaId=1279&gaName=Supreme%20Life%20Brokerage' },
   { name: 'Ethos',                  description: 'Term life insurance',           surelcLink: null },
 ]
 
