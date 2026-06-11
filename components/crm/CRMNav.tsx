@@ -36,10 +36,10 @@ export default function CRMNav({
   return (
     <aside style={{
       position: 'fixed',
-      top: 0,
+      top: '48px',
       left: 0,
       width: '240px',
-      height: '100vh',
+      height: 'calc(100vh - 48px)',
       backgroundColor: '#1A1A1A',
       display: 'flex',
       flexDirection: 'column',

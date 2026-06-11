@@ -99,6 +99,7 @@ export default function CRMLayout({
         minHeight: '100vh',
         position: 'relative',
         zIndex: 1,
+        marginTop: '48px',
       }}>
         {children}
       </main>
