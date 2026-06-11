@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
 
 const CARRIERS = [
-  { name: 'Aflac',              description: 'Supplemental insurance' },
-  { name: 'Americo',            description: 'Life insurance' },
-  { name: 'Transamerica',       description: 'Life & health insurance' },
-  { name: 'UHL (United Home Life)', description: 'Life insurance' },
-  { name: 'AHL (American Home Life)', description: 'Life insurance' },
-  { name: 'Mutual of Omaha',    description: 'Life & Medicare supplements' },
-  { name: 'Ethos',              description: 'Term life insurance' },
+  { name: 'Aflac',                  description: 'Supplemental insurance',        surelcLink: null },
+  { name: 'Americo',                description: 'Life insurance',                surelcLink: 'https://surelc.surancebay.com/sbweb/login.jsp?branch=Joseph%20P%20James&branchEditable=off&branchRequired=on&branchVisible=on&gaId=233&gaName=Quility%20Sales' },
+  { name: 'Transamerica',           description: 'Life & health insurance',       surelcLink: null },
+  { name: 'UHL (United Home Life)', description: 'Life insurance',                surelcLink: null },
+  { name: 'AHL (American Home Life)', description: 'Life insurance',              surelcLink: null },
+  { name: 'Mutual of Omaha',        description: 'Life & Medicare supplements',   surelcLink: null },
+  { name: 'Ethos',                  description: 'Term life insurance',           surelcLink: null },
 ]
 
 const STATUS_CONFIG = {
@@ -26,28 +26,25 @@ export default function ContractingPage() {
   const [saving, setSaving] = useState<string | null>(null)
   const [agentRecord, setAgentRecord] = useState<any>(null)
   const [carriers, setCarriers] = useState<Record<string, string>>({})
-  const [, setIsAdmin] = useState(false)
+  const [americoFormSubmitted, setAmericoFormSubmitted] = useState(false)
+  const [americoSurelcUnlocked, setAmericoSurelcUnlocked] = useState(false)
 
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
-      const { data: userRecord } = await supabase
-        .from('users').select('role').eq('id', user.id).single()
-
-      const adminRoles = ['superadmin', 'executive']
-      setIsAdmin(adminRoles.includes(userRecord?.role ?? ''))
-
       const { data: agent } = await supabase
         .from('agents')
-        .select('id, full_name, carriers, current_stage')
+        .select('id, full_name, carriers, current_stage, americo_form_submitted, americo_surelc_unlocked')
         .eq('user_id', user.id)
         .single()
 
       if (!agent) { router.push('/crm'); return }
       setAgentRecord(agent)
       setCarriers(agent.carriers ?? {})
+      setAmericoFormSubmitted(agent.americo_form_submitted ?? false)
+      setAmericoSurelcUnlocked(agent.americo_surelc_unlocked ?? false)
       setLoading(false)
     }
     load()
@@ -65,7 +62,6 @@ export default function ContractingPage() {
     if (!error) {
       setCarriers(updatedCarriers)
 
-      // If at least one carrier is submitted or active and agent is not yet active — promote them
       const hasContractingStarted = Object.values(updatedCarriers).some(s => s === 'submitted' || s === 'active')
 
       if (hasContractingStarted && agentRecord.current_stage !== 'active') {
@@ -77,7 +73,6 @@ export default function ContractingPage() {
         if (!stageError) {
           setAgentRecord({ ...agentRecord, current_stage: 'active' })
 
-          // Notify all admins
           const { data: admins } = await supabase
             .from('users')
             .select('id')
@@ -85,10 +80,12 @@ export default function ContractingPage() {
 
           if (admins && admins.length > 0) {
             const notifications = admins.map((admin: any) => ({
-              user_id: admin.id,
+              recipient_id: admin.id,
+              agent_id: agentRecord.id,
               type: 'agent_activated',
               title: 'Agent Activated',
               message: `${agentRecord.full_name} has been automatically activated — they submitted their first carrier contract.`,
+              is_read: false,
             }))
             await supabase.from('notifications').insert(notifications)
           }
@@ -112,7 +109,6 @@ export default function ContractingPage() {
 
   return (
     <div style={{ maxWidth: '700px' }}>
-      {/* Header */}
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1A1A1A', letterSpacing: '-0.02em', marginBottom: '4px' }}>
           Carrier Contracting
@@ -125,9 +121,9 @@ export default function ContractingPage() {
       {/* Summary Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', marginBottom: '24px' }}>
         {[
-          { label: 'Active Contracts', value: activeCount, color: '#27AE60', bg: '#E8F5E9' },
-          { label: 'Submitted', value: submittedCount, color: '#C9A96E', bg: '#FEF3C7' },
-          { label: 'Not Started', value: notStartedCount, color: '#7A7A7A', bg: '#F5F5F5' },
+          { label: 'Active Contracts', value: activeCount, color: '#27AE60' },
+          { label: 'Submitted', value: submittedCount, color: '#C9A96E' },
+          { label: 'Not Started', value: notStartedCount, color: '#7A7A7A' },
         ].map(card => (
           <div key={card.label} style={{ backgroundColor: '#FFFFFF', borderRadius: '10px', padding: '16px 20px', border: '1px solid #E5E1DA' }}>
             <div style={{ fontSize: '28px', fontWeight: '700', color: card.color, marginBottom: '4px' }}>{card.value}</div>
@@ -142,10 +138,11 @@ export default function ContractingPage() {
           const currentStatus = carriers[carrier.name] || 'none'
           const config = STATUS_CONFIG[currentStatus as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.none
           const isSaving = saving === carrier.name
+          const isAmerico = carrier.name === 'Americo'
 
           return (
             <div key={carrier.name} style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '18px 20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                   <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: config.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', color: config.color, fontWeight: '700', flexShrink: 0 }}>
                     {config.icon}
@@ -156,14 +153,63 @@ export default function ContractingPage() {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', backgroundColor: config.bg, color: config.color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                  <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', backgroundColor: config.bg, color: config.color, textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
                     {config.label}
                   </span>
 
-                  {/* Status buttons */}
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    {currentStatus === 'none' && (
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    {/* Americo special flow */}
+                    {isAmerico && !americoFormSubmitted && (
+                      <a
+                        href="https://form.jotform.com/261608640967062"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={async () => {
+                          await supabase
+                            .from('agents')
+                            .update({ americo_form_submitted: true, americo_form_submitted_at: new Date().toISOString() })
+                            .eq('id', agentRecord.id)
+                          setAmericoFormSubmitted(true)
+                          await updateCarrierStatus('Americo', 'submitted')
+                        }}
+                        style={{ display: 'inline-block', padding: '6px 14px', backgroundColor: '#EDE9FE', color: '#5B21B6', border: '1px solid #C4B5FD', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', textDecoration: 'none', whiteSpace: 'nowrap' }}
+                      >
+                        Complete Americo Form →
+                      </a>
+                    )}
+
+                    {isAmerico && americoFormSubmitted && !americoSurelcUnlocked && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '6px' }}>
+                        <span style={{ fontSize: '12px', color: '#92400E', fontWeight: '600' }}>⏳ Awaiting admin approval</span>
+                      </div>
+                    )}
+
+                    {isAmerico && americoSurelcUnlocked && carrier.surelcLink && (
+                      <a
+                        href={carrier.surelcLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ display: 'inline-block', padding: '6px 14px', backgroundColor: '#E8F5E9', color: '#1B5E20', border: '1px solid #A5D6A7', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', textDecoration: 'none', whiteSpace: 'nowrap' }}
+                      >
+                        Start Contracting on SureLC →
+                      </a>
+                    )}
+
+                    {/* Non-Americo carriers */}
+                    {!isAmerico && carrier.surelcLink && (
+                      <a
+                        href={carrier.surelcLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ display: 'inline-block', padding: '6px 14px', backgroundColor: '#E8F5E9', color: '#1B5E20', border: '1px solid #A5D6A7', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', textDecoration: 'none', whiteSpace: 'nowrap' }}
+                      >
+                        Start Contracting on SureLC →
+                      </a>
+                    )}
+
+                    {/* Status buttons */}
+                    {currentStatus === 'none' && !isAmerico && (
                       <button
                         onClick={() => updateCarrierStatus(carrier.name, 'submitted')}
                         disabled={isSaving}
@@ -218,7 +264,7 @@ export default function ContractingPage() {
         </div>
         {activeCount === CARRIERS.length && (
           <p style={{ fontSize: '13px', color: '#27AE60', fontWeight: '600', marginTop: '10px', textAlign: 'center' }}>
-            ✓ All carriers active — you're fully contracted!
+            ✓ All carriers active — you are fully contracted!
           </p>
         )}
       </div>

@@ -27,6 +27,8 @@ export default function AgentDetailPage() {
   const [carrierMix, setCarrierMix] = useState<{ carrier: string; count: number; premium: number }[]>([])
   const [activeTab, setActiveTab] = useState<'clients' | 'policies' | 'contracting' | 'leads' | 'activity'>('policies')
   const [agentCarriers, setAgentCarriers] = useState<Record<string, string>>({})
+  const [americoFormSubmitted, setAmericoFormSubmitted] = useState(false)
+  const [americoSurelcUnlocked, setAmericoSurelcUnlocked] = useState(false)
   const [agentLeads, setAgentLeads] = useState<any[]>([])
   const [agentActivity, setAgentActivity] = useState<any[]>([])
   const [monthlyGoal, setMonthlyGoal] = useState<number>(5000)
@@ -51,13 +53,15 @@ export default function AgentDetailPage() {
       // Get agent info
       const { data: agentData } = await supabase
         .from('agents')
-        .select('id, full_name, email, agent_model, current_stage, created_at, states_licensed, npn, carriers')
+        .select('id, full_name, email, agent_model, current_stage, created_at, states_licensed, npn, carriers, americo_form_submitted, americo_surelc_unlocked')
         .eq('id', agentId)
         .single()
 
       if (!agentData) { router.push('/crm/admin'); return }
       setAgent(agentData)
       setAgentCarriers(agentData.carriers ?? {})
+      setAmericoFormSubmitted(agentData.americo_form_submitted ?? false)
+      setAmericoSurelcUnlocked(agentData.americo_surelc_unlocked ?? false)
 
       const now = new Date()
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
@@ -558,6 +562,39 @@ export default function AgentDetailPage() {
         {/* Contracting Tab */}
         {activeTab === 'contracting' && (
           <div style={{ padding: '20px 24px' }}>
+            {americoFormSubmitted && !americoSurelcUnlocked && (
+              <div style={{ padding: '14px 16px', backgroundColor: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '8px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <p style={{ fontSize: '13px', fontWeight: '700', color: '#92400E', marginBottom: '2px' }}>⏳ Americo Form Submitted</p>
+                  <p style={{ fontSize: '12px', color: '#92400E' }}>This agent has completed the Americo form and is waiting for their SureLC link to be unlocked.</p>
+                </div>
+                <button
+                  onClick={async () => {
+                    const { data: { user } } = await supabase.auth.getUser()
+                    const { error } = await supabase
+                      .from('agents')
+                      .update({
+                        americo_surelc_unlocked: true,
+                        americo_surelc_unlocked_at: new Date().toISOString(),
+                        americo_surelc_unlocked_by: user?.id,
+                        updated_at: new Date().toISOString(),
+                      })
+                      .eq('id', agentId)
+                    if (!error) {
+                      setAmericoSurelcUnlocked(true)
+                    }
+                  }}
+                  style={{ padding: '8px 18px', backgroundColor: '#27AE60', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit', whiteSpace: 'nowrap', marginLeft: '16px' }}
+                >
+                  🔓 Unlock SureLC Link
+                </button>
+              </div>
+            )}
+            {americoSurelcUnlocked && (
+              <div style={{ padding: '12px 16px', backgroundColor: '#E8F5E9', border: '1px solid #A5D6A7', borderRadius: '8px', marginBottom: '16px' }}>
+                <p style={{ fontSize: '13px', fontWeight: '700', color: '#1B5E20' }}>✓ Americo SureLC link has been unlocked for this agent</p>
+              </div>
+            )}
             {[
               { name: 'Aflac' },
               { name: 'Americo' },
@@ -592,7 +629,6 @@ export default function AgentDetailPage() {
                               .eq('id', agentId)
                             if (!error) {
                               setAgentCarriers(updatedCarriers)
-                              // Auto promote if not already active
                               const hasContractingStarted = Object.values(updatedCarriers).some(s => s === 'submitted' || s === 'active')
                               if (hasContractingStarted && agent.current_stage !== 'active') {
                                 await supabase
@@ -616,9 +652,7 @@ export default function AgentDetailPage() {
                               .from('agents')
                               .update({ carriers: updatedCarriers, updated_at: new Date().toISOString() })
                               .eq('id', agentId)
-                            if (!error) {
-                              setAgentCarriers(updatedCarriers)
-                            }
+                            if (!error) setAgentCarriers(updatedCarriers)
                           }}
                           style={{ padding: '5px 12px', backgroundColor: '#E8F5E9', color: '#1B5E20', border: '1px solid #A5D6A7', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit' }}
                         >
