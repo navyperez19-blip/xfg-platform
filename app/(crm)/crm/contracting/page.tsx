@@ -156,6 +156,7 @@ export default function ContractingPage() {
           const isSaving = saving === carrier.name
           const isAmerico = carrier.name === 'Americo'
           const isMutualOmaha = carrier.name === 'Mutual of Omaha'
+          console.log('Carrier:', carrier.name, 'isMutualOmaha:', isMutualOmaha, 'requested:', mutualOmahaRequested, 'unlocked:', mutualOmahaSurelcUnlocked)
 
           return (
             <div key={carrier.name} style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '18px 20px' }}>
