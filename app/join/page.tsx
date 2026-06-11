@@ -49,8 +49,6 @@ export default function JoinPage() {
     // Step 3: Check if agent record already exists before inserting
     const { data: existingAgent } = await supabase.from('agents').select('id').eq('user_id', userId).single()
     if (!existingAgent) {
-      // Generate unique XFG ID using timestamp to avoid race conditions
-      const timestamp = Date.now()
       const { data: counterData } = await supabase.from('agents').select('xfg_id').order('created_at', { ascending: false }).limit(1)
       let nextNumber = 1
       if (counterData && counterData.length > 0) {
