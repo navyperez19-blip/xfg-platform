@@ -4,14 +4,14 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
-import { POLICY_STATUSES, CARRIERS } from '@/app/crm-constants'
+import { POLICY_STATUSES } from '@/app/crm-constants'
 
 export default function CRMDashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [firstName, setFirstName] = useState('')
   const [isAdmin, setIsAdmin] = useState(false)
-  const [agentId, setAgentId] = useState<string | null>(null)
+  const [, setAgentId] = useState<string | null>(null)
   const [stats, setStats] = useState({
     ytdPremium: 0,
     mtdPremium: 0,
@@ -28,6 +28,7 @@ export default function CRMDashboard() {
   const [carrierMix, setCarrierMix] = useState<{ carrier: string; count: number; premium: number }[]>([])
   const [recentActivity, setRecentActivity] = useState<any[]>([])
   const [monthlyTrend, setMonthlyTrend] = useState<{ month: string; premium: number; count: number }[]>([])
+  const [followUpsToday, setFollowUpsToday] = useState<any[]>([])
 
   useEffect(() => {
     const load = async () => {
@@ -126,6 +127,19 @@ export default function CRMDashboard() {
 
       // Recent Activity — last 5 policies
       setRecentActivity(allPolicies.slice(0, 5))
+
+      // Follow-ups due today or overdue
+      const todayStr = new Date().toISOString().split('T')[0]
+      const { data: followUps } = await supabase
+        .from('crm_notes')
+        .select('id, follow_up_date, content, note_type, crm_clients(id, first_name, last_name, phone)')
+        .eq('agent_id', aid)
+        .lte('follow_up_date', todayStr)
+        .not('follow_up_date', 'is', null)
+        .order('follow_up_date', { ascending: true })
+        .limit(10)
+
+      setFollowUpsToday(followUps ?? [])
 
       setLoading(false)
     }
@@ -322,6 +336,54 @@ export default function CRMDashboard() {
           )}
         </div>
       </div>
+
+      {/* Follow-ups Due */}
+      {followUpsToday.length > 0 && (
+        <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #FDE68A', overflow: 'hidden', marginBottom: '16px' }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid #FDE68A', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FFFBEB' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '18px' }}>🔔</span>
+              <div>
+                <p style={{ fontSize: '14px', fontWeight: '700', color: '#92400E' }}>
+                  {followUpsToday.length} Follow-up{followUpsToday.length !== 1 ? 's' : ''} Due
+                </p>
+                <p style={{ fontSize: '12px', color: '#B45309' }}>These clients are waiting to hear from you</p>
+              </div>
+            </div>
+            <Link href="/crm/activity" style={{ fontSize: '12px', color: '#92400E', textDecoration: 'none', fontWeight: '600' }}>
+              View all →
+            </Link>
+          </div>
+          <div>
+            {followUpsToday.map((item, i) => {
+              const client = item.crm_clients
+              const isOverdue = item.follow_up_date < new Date().toISOString().split('T')[0]
+              return (
+                <div key={item.id} style={{ padding: '12px 20px', borderBottom: i < followUpsToday.length - 1 ? '1px solid #FEF3C7' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    {client && (
+                      <Link href={`/crm/clients/${client.id}`} style={{ fontSize: '14px', fontWeight: '600', color: '#1A1A1A', textDecoration: 'none', display: 'block', marginBottom: '2px' }}>
+                        {client.first_name} {client.last_name}
+                      </Link>
+                    )}
+                    <p style={{ fontSize: '12px', color: '#7A7A7A', margin: 0 }}>{item.content}</p>
+                  </div>
+                  <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: '16px' }}>
+                    {client?.phone && (
+                      <a href={`tel:${client.phone}`} style={{ display: 'inline-block', padding: '5px 12px', backgroundColor: '#C9A96E', color: '#1A1A1A', borderRadius: '6px', fontSize: '12px', fontWeight: '700', textDecoration: 'none', marginBottom: '4px' }}>
+                        📞 Call
+                      </a>
+                    )}
+                    <div style={{ fontSize: '11px', color: isOverdue ? '#E53935' : '#F57F17', fontWeight: '600', marginTop: '3px' }}>
+                      {isOverdue ? '⚠ Overdue' : '📅 Today'}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Third Row — Recent Activity */}
       <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'hidden' }}>
