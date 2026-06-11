@@ -52,6 +52,7 @@ export default function NewAgentPage() {
         xfg_id,
         current_stage: 'contacted',
         is_locked: false,
+        agent_model: 'supported',
       })
 
     if (insertError) {
