@@ -25,7 +25,8 @@ export default function AgentDetailPage() {
     totalPremium: 0,
   })
   const [carrierMix, setCarrierMix] = useState<{ carrier: string; count: number; premium: number }[]>([])
-  const [activeTab, setActiveTab] = useState<'clients' | 'policies'>('policies')
+  const [activeTab, setActiveTab] = useState<'clients' | 'policies' | 'contracting'>('policies')
+  const [agentCarriers, setAgentCarriers] = useState<Record<string, string>>({})
   const [monthlyGoal, setMonthlyGoal] = useState<number>(5000)
   const [editingGoal, setEditingGoal] = useState(false)
   const [goalInput, setGoalInput] = useState('')
@@ -48,12 +49,13 @@ export default function AgentDetailPage() {
       // Get agent info
       const { data: agentData } = await supabase
         .from('agents')
-        .select('id, full_name, email, agent_model, current_stage, created_at, states_licensed, npn')
+        .select('id, full_name, email, agent_model, current_stage, created_at, states_licensed, npn, carriers')
         .eq('id', agentId)
         .single()
 
       if (!agentData) { router.push('/crm/admin'); return }
       setAgent(agentData)
+      setAgentCarriers(agentData.carriers ?? {})
 
       const now = new Date()
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
@@ -304,7 +306,7 @@ export default function AgentDetailPage() {
       {/* Tabs */}
       <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'hidden' }}>
         <div style={{ display: 'flex', borderBottom: '1px solid #E5E1DA' }}>
-          {(['policies', 'clients'] as const).map(tab => (
+          {(['policies', 'clients', 'contracting'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -321,7 +323,7 @@ export default function AgentDetailPage() {
                 textTransform: 'capitalize',
               }}
             >
-              {tab === 'policies' ? `Policies (${policies.length})` : `Clients (${clients.length})`}
+              {tab === 'policies' ? `Policies (${policies.length})` : tab === 'clients' ? `Clients (${clients.length})` : 'Contracting'}
             </button>
           ))}
         </div>
@@ -427,6 +429,36 @@ export default function AgentDetailPage() {
               <p style={{ fontSize: '14px', color: '#7A7A7A' }}>No clients yet</p>
             </div>
           )
+        )}
+
+        {/* Contracting Tab */}
+        {activeTab === 'contracting' && (
+          <div style={{ padding: '20px 24px' }}>
+            {[
+              { name: 'Aflac' },
+              { name: 'Americo' },
+              { name: 'Transamerica' },
+              { name: 'UHL (United Home Life)' },
+              { name: 'AHL (American Home Life)' },
+              { name: 'Mutual of Omaha' },
+              { name: 'Ethos' },
+            ].map((carrier, i, arr) => {
+              const status = agentCarriers[carrier.name] || 'none'
+              const config = {
+                none:      { label: 'Not Started', color: '#7A7A7A', bg: '#F5F5F5' },
+                submitted: { label: 'Submitted',   color: '#C9A96E', bg: '#FEF3C7' },
+                active:    { label: 'Active',      color: '#27AE60', bg: '#E8F5E9' },
+              }[status] ?? { label: 'Not Started', color: '#7A7A7A', bg: '#F5F5F5' }
+              return (
+                <div key={carrier.name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: i < arr.length - 1 ? '1px solid #F0EDE8' : 'none' }}>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#1A1A1A' }}>{carrier.name}</span>
+                  <span style={{ display: 'inline-block', padding: '4px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', backgroundColor: config.bg, color: config.color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {config.label}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
         )}
       </div>
     </div>
