@@ -24,7 +24,18 @@ export default function LoginPage() {
       const { data: { user } } = await supabase.auth.getUser()
       const { data: profile } = await supabase.from('users').select('role').eq('id', user?.id || '').single()
       if (profile?.role === 'agent') {
-        router.push('/agent-portal')
+        // Check if agent is active — if so send to CRM
+        const { data: agentRecord } = await supabase
+          .from('agents')
+          .select('current_stage')
+          .eq('user_id', user?.id || '')
+          .single()
+
+        if (agentRecord?.current_stage === 'active') {
+          router.push('/crm')
+        } else {
+          router.push('/agent-portal')
+        }
       } else {
         const redirectTo = new URLSearchParams(window.location.search).get('redirectTo')
         router.push(redirectTo || '/dashboard')
