@@ -26,7 +26,7 @@ export default function ContractingPage() {
   const [saving, setSaving] = useState<string | null>(null)
   const [agentRecord, setAgentRecord] = useState<any>(null)
   const [carriers, setCarriers] = useState<Record<string, string>>({})
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [, setIsAdmin] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -133,7 +133,7 @@ export default function ContractingPage() {
 
                   {/* Status buttons */}
                   <div style={{ display: 'flex', gap: '6px' }}>
-                    {currentStatus !== 'submitted' && currentStatus !== 'active' && (
+                    {currentStatus === 'none' && (
                       <button
                         onClick={() => updateCarrierStatus(carrier.name, 'submitted')}
                         disabled={isSaving}
@@ -143,15 +143,24 @@ export default function ContractingPage() {
                       </button>
                     )}
                     {currentStatus === 'submitted' && (
-                      <button
-                        onClick={() => updateCarrierStatus(carrier.name, 'active')}
-                        disabled={isSaving}
-                        style={{ padding: '6px 14px', backgroundColor: '#E8F5E9', color: '#1B5E20', border: '1px solid #A5D6A7', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit', opacity: isSaving ? 0.6 : 1 }}
-                      >
-                        Mark Active
-                      </button>
+                      <>
+                        <button
+                          onClick={() => updateCarrierStatus(carrier.name, 'active')}
+                          disabled={isSaving}
+                          style={{ padding: '6px 14px', backgroundColor: '#E8F5E9', color: '#1B5E20', border: '1px solid #A5D6A7', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit', opacity: isSaving ? 0.6 : 1 }}
+                        >
+                          Mark Active
+                        </button>
+                        <button
+                          onClick={() => updateCarrierStatus(carrier.name, 'none')}
+                          disabled={isSaving}
+                          style={{ padding: '6px 12px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit', opacity: isSaving ? 0.6 : 1 }}
+                        >
+                          Reset
+                        </button>
+                      </>
                     )}
-                    {currentStatus !== 'none' && (
+                    {currentStatus === 'active' && (
                       <button
                         onClick={() => updateCarrierStatus(carrier.name, 'none')}
                         disabled={isSaving}
