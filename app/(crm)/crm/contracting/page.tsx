@@ -10,7 +10,7 @@ const CARRIERS = [
   { name: 'Transamerica',           description: 'Life & health insurance',       surelcLink: null },
   { name: 'UHL (United Home Life)', description: 'Life insurance',                surelcLink: null },
   { name: 'AHL (American Home Life)', description: 'Life insurance',              surelcLink: null },
-  { name: 'Mutual of Omaha',        description: 'Life & Medicare supplements',   surelcLink: 'https://surelc.surancebay.com/sbweb/login.jsp?branch=Family%20Capital%20Agency&branchEditable=off&branchRequired=on&branchVisible=on&gaId=1279&gaName=Supreme%20Life%20Brokerage' },
+  { name: 'Mutual of Omaha',        description: 'Life & Medicare supplements',   surelcLink: 'https://surelc.surancebay.com/sbweb/login.jsp?branch=Family%20Capital%20Agency&branchEditable=off&branchRequired=on&branchVisible=on&gaId=1279&gaName=Supreme%20Life%20Brokerage', requiresUnlock: true },
   { name: 'Ethos',                  description: 'Term life insurance',           surelcLink: null },
 ]
 
@@ -28,6 +28,8 @@ export default function ContractingPage() {
   const [carriers, setCarriers] = useState<Record<string, string>>({})
   const [americoFormSubmitted, setAmericoFormSubmitted] = useState(false)
   const [americoSurelcUnlocked, setAmericoSurelcUnlocked] = useState(false)
+  const [mutualOmahaRequested, setMutualOmahaRequested] = useState(false)
+  const [mutualOmahaSurelcUnlocked, setMutualOmahaSurelcUnlocked] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -36,7 +38,7 @@ export default function ContractingPage() {
 
       const { data: agent } = await supabase
         .from('agents')
-        .select('id, full_name, carriers, current_stage, americo_form_submitted, americo_surelc_unlocked')
+        .select('id, full_name, carriers, current_stage, americo_form_submitted, americo_surelc_unlocked, mutual_omaha_requested, mutual_omaha_surelc_unlocked')
         .eq('user_id', user.id)
         .single()
 
@@ -45,6 +47,8 @@ export default function ContractingPage() {
       setCarriers(agent.carriers ?? {})
       setAmericoFormSubmitted(agent.americo_form_submitted ?? false)
       setAmericoSurelcUnlocked(agent.americo_surelc_unlocked ?? false)
+      setMutualOmahaRequested((agent as any).mutual_omaha_requested ?? false)
+      setMutualOmahaSurelcUnlocked((agent as any).mutual_omaha_surelc_unlocked ?? false)
       setLoading(false)
     }
     load()
@@ -139,6 +143,7 @@ export default function ContractingPage() {
           const config = STATUS_CONFIG[currentStatus as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.none
           const isSaving = saving === carrier.name
           const isAmerico = carrier.name === 'Americo'
+          const isMutualOmaha = carrier.name === 'Mutual of Omaha'
 
           return (
             <div key={carrier.name} style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '18px 20px' }}>
@@ -196,8 +201,59 @@ export default function ContractingPage() {
                       </a>
                     )}
 
-                    {/* Non-Americo carriers */}
-                    {!isAmerico && carrier.surelcLink && (
+                    {/* Mutual of Omaha special flow */}
+                    {isMutualOmaha && !mutualOmahaRequested && (
+                      <button
+                        onClick={async () => {
+                          await supabase
+                            .from('agents')
+                            .update({ mutual_omaha_requested: true, mutual_omaha_requested_at: new Date().toISOString() })
+                            .eq('id', agentRecord.id)
+                          setMutualOmahaRequested(true)
+
+                          // Notify admins
+                          const { data: admins } = await supabase
+                            .from('users')
+                            .select('id')
+                            .in('role', ['superadmin', 'executive'])
+
+                          if (admins && admins.length > 0) {
+                            const notifications = admins.map((admin: any) => ({
+                              recipient_id: admin.id,
+                              agent_id: agentRecord.id,
+                              type: 'mutual_omaha_requested',
+                              title: 'Mutual of Omaha Access Requested',
+                              message: `${agentRecord.full_name} has requested access to the Mutual of Omaha SureLC contracting link.`,
+                              is_read: false,
+                            }))
+                            await supabase.from('notifications').insert(notifications)
+                          }
+                        }}
+                        style={{ display: 'inline-block', padding: '6px 14px', backgroundColor: '#EDE9FE', color: '#5B21B6', border: '1px solid #C4B5FD', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit', whiteSpace: 'nowrap' }}
+                      >
+                        Request Access
+                      </button>
+                    )}
+
+                    {isMutualOmaha && mutualOmahaRequested && !mutualOmahaSurelcUnlocked && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '6px' }}>
+                        <span style={{ fontSize: '12px', color: '#92400E', fontWeight: '600' }}>⏳ Awaiting admin approval</span>
+                      </div>
+                    )}
+
+                    {isMutualOmaha && mutualOmahaSurelcUnlocked && carrier.surelcLink && (
+                      <a
+                        href={carrier.surelcLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ display: 'inline-block', padding: '6px 14px', backgroundColor: '#E8F5E9', color: '#1B5E20', border: '1px solid #A5D6A7', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', textDecoration: 'none', whiteSpace: 'nowrap' }}
+                      >
+                        Start Contracting on SureLC →
+                      </a>
+                    )}
+
+                    {/* All other non-Americo, non-MutualOmaha carriers */}
+                    {!isAmerico && !isMutualOmaha && carrier.surelcLink && (
                       <a
                         href={carrier.surelcLink}
                         target="_blank"

@@ -29,6 +29,8 @@ export default function AgentDetailPage() {
   const [agentCarriers, setAgentCarriers] = useState<Record<string, string>>({})
   const [americoFormSubmitted, setAmericoFormSubmitted] = useState(false)
   const [americoSurelcUnlocked, setAmericoSurelcUnlocked] = useState(false)
+  const [mutualOmahaRequested, setMutualOmahaRequested] = useState(false)
+  const [mutualOmahaSurelcUnlocked, setMutualOmahaSurelcUnlocked] = useState(false)
   const [agentLeads, setAgentLeads] = useState<any[]>([])
   const [agentActivity, setAgentActivity] = useState<any[]>([])
   const [monthlyGoal, setMonthlyGoal] = useState<number>(5000)
@@ -53,7 +55,7 @@ export default function AgentDetailPage() {
       // Get agent info
       const { data: agentData } = await supabase
         .from('agents')
-        .select('id, full_name, email, agent_model, current_stage, created_at, states_licensed, npn, carriers, americo_form_submitted, americo_surelc_unlocked')
+        .select('id, full_name, email, agent_model, current_stage, created_at, states_licensed, npn, carriers, americo_form_submitted, americo_surelc_unlocked, mutual_omaha_requested, mutual_omaha_surelc_unlocked')
         .eq('id', agentId)
         .single()
 
@@ -62,6 +64,8 @@ export default function AgentDetailPage() {
       setAgentCarriers(agentData.carriers ?? {})
       setAmericoFormSubmitted(agentData.americo_form_submitted ?? false)
       setAmericoSurelcUnlocked(agentData.americo_surelc_unlocked ?? false)
+      setMutualOmahaRequested((agentData as any).mutual_omaha_requested ?? false)
+      setMutualOmahaSurelcUnlocked((agentData as any).mutual_omaha_surelc_unlocked ?? false)
 
       const now = new Date()
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
@@ -593,6 +597,39 @@ export default function AgentDetailPage() {
             {americoSurelcUnlocked && (
               <div style={{ padding: '12px 16px', backgroundColor: '#E8F5E9', border: '1px solid #A5D6A7', borderRadius: '8px', marginBottom: '16px' }}>
                 <p style={{ fontSize: '13px', fontWeight: '700', color: '#1B5E20' }}>✓ Americo SureLC link has been unlocked for this agent</p>
+              </div>
+            )}
+
+            {mutualOmahaRequested && !mutualOmahaSurelcUnlocked && (
+              <div style={{ padding: '14px 16px', backgroundColor: '#EDE9FE', border: '1px solid #C4B5FD', borderRadius: '8px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <p style={{ fontSize: '13px', fontWeight: '700', color: '#5B21B6', marginBottom: '2px' }}>⏳ Mutual of Omaha Access Requested</p>
+                  <p style={{ fontSize: '12px', color: '#5B21B6' }}>This agent has requested access to the Mutual of Omaha SureLC contracting link.</p>
+                </div>
+                <button
+                  onClick={async () => {
+                    const { data: { user } } = await supabase.auth.getUser()
+                    const { error } = await supabase
+                      .from('agents')
+                      .update({
+                        mutual_omaha_surelc_unlocked: true,
+                        mutual_omaha_surelc_unlocked_at: new Date().toISOString(),
+                        mutual_omaha_surelc_unlocked_by: user?.id,
+                        updated_at: new Date().toISOString(),
+                      })
+                      .eq('id', agentId)
+                    if (!error) setMutualOmahaSurelcUnlocked(true)
+                  }}
+                  style={{ padding: '8px 18px', backgroundColor: '#5B21B6', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit', whiteSpace: 'nowrap', marginLeft: '16px' }}
+                >
+                  🔓 Unlock SureLC Link
+                </button>
+              </div>
+            )}
+
+            {mutualOmahaSurelcUnlocked && (
+              <div style={{ padding: '12px 16px', backgroundColor: '#E8F5E9', border: '1px solid #A5D6A7', borderRadius: '8px', marginBottom: '16px' }}>
+                <p style={{ fontSize: '13px', fontWeight: '700', color: '#1B5E20' }}>✓ Mutual of Omaha SureLC link has been unlocked for this agent</p>
               </div>
             )}
             {[
