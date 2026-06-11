@@ -142,8 +142,28 @@ export default function CRMNav({
         })}
       </nav>
 
-      {/* Back to pipeline */}
-      <div style={{ padding: '16px 12px', borderTop: '1px solid #2A2A2A' }}>
+      {/* Bottom links */}
+      <div style={{ padding: '12px', borderTop: '1px solid #2A2A2A' }}>
+        <a
+          href="https://app.readymode.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            padding: '10px 12px',
+            borderRadius: '8px',
+            textDecoration: 'none',
+            marginBottom: '2px',
+            backgroundColor: '#C9A96E18',
+            border: '1px solid #C9A96E30',
+          }}
+        >
+          <span style={{ fontSize: '14px', color: '#C9A96E' }}>☎</span>
+          <span style={{ fontSize: '13px', color: '#C9A96E', fontWeight: '600' }}>Open Dialer</span>
+          <span style={{ fontSize: '10px', color: '#555', marginLeft: 'auto' }}>↗</span>
+        </a>
         <Link
           href="/pipeline"
           style={{
