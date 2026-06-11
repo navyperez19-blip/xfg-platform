@@ -36,13 +36,25 @@ export default function ContractingPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
+      // First check users table for role
+      const { data: userRecord } = await supabase
+        .from('users')
+        .select('id, role')
+        .eq('id', user.id)
+        .single()
+
+      // Look up agent record by user_id for ALL users including admins
       const { data: agent } = await supabase
         .from('agents')
         .select('id, full_name, carriers, current_stage, americo_form_submitted, americo_surelc_unlocked, mutual_omaha_requested, mutual_omaha_surelc_unlocked')
         .eq('user_id', user.id)
         .single()
 
-      if (!agent) { router.push('/crm'); return }
+      if (!agent) {
+        // Admin with no agent record — nothing to show
+        router.push('/crm')
+        return
+      }
       setAgentRecord(agent)
       setCarriers(agent.carriers ?? {})
       setAmericoFormSubmitted(agent.americo_form_submitted ?? false)
