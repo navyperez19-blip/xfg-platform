@@ -83,6 +83,18 @@ export default function CRMDashboard() {
       const persistency = olderThan9.length > 0 ? Math.round((stillActive.length / olderThan9.length) * 100) : 100
       const atRisk = allPolicies.filter(p => p.status === 'active' && p.date_written >= nineMonthsAgo)
 
+      // Fetch monthly goal from crm_goals table
+      const { data: goalData } = await supabase
+        .from('crm_goals')
+        .select('premium_target')
+        .eq('agent_id', aid)
+        .eq('period_type', 'monthly')
+        .eq('period_year', now.getFullYear())
+        .eq('period_number', now.getMonth() + 1)
+        .single()
+
+      const monthlyGoal = Number(goalData?.premium_target) || 12500
+
       setStats({
         ytdPremium,
         mtdPremium,
@@ -90,7 +102,7 @@ export default function CRMDashboard() {
         activePolicies: activePols.length,
         mtdPolicies: mtdPols.length,
         totalPolicies: allPolicies.length,
-        monthlyGoal: 12500,
+        monthlyGoal,
         chargebackCount: chargebacks.length,
         chargebackPremium: cbPremium,
         persistencyRate: persistency,
