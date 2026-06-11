@@ -54,6 +54,7 @@ export default function AgentDetailPage() {
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [stageHistory, setStageHistory] = useState<any[]>([])
   const [contactLogs, setContactLogs] = useState<any[]>([])
+  const [crmSnapshot, setCrmSnapshot] = useState<any>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -66,6 +67,38 @@ export default function AgentDetailPage() {
         setStageHistory(history || [])
         const { data: logs } = await supabase.from('contact_logs').select('*').eq('agent_id', params.id).order('created_at', { ascending: false })
         setContactLogs(logs || [])
+
+        // Fetch CRM snapshot
+        const { data: crmClients } = await supabase
+          .from('crm_clients')
+          .select('id')
+          .eq('agent_id', data.id)
+
+        const { data: crmPolicies } = await supabase
+          .from('crm_policies')
+          .select('id, status, annual_premium, date_written')
+          .eq('agent_id', data.id)
+
+        const { data: crmLeads } = await supabase
+          .from('crm_leads')
+          .select('id, status')
+          .eq('agent_id', data.id)
+
+        const now = new Date()
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+        const mtdPols = (crmPolicies ?? []).filter(p => p.date_written >= startOfMonth)
+        const mtdPremium = mtdPols.reduce((s, p) => s + (Number(p.annual_premium) || 0), 0)
+        const activePolicies = (crmPolicies ?? []).filter(p => ['active','issued','approved'].includes(p.status))
+        const openLeads = (crmLeads ?? []).filter(l => !['converted','not_interested','lost'].includes(l.status))
+
+        setCrmSnapshot({
+          totalClients: crmClients?.length ?? 0,
+          totalPolicies: crmPolicies?.length ?? 0,
+          activePolicies: activePolicies.length,
+          mtdPolicies: mtdPols.length,
+          mtdPremium,
+          openLeads: openLeads.length,
+        })
       }
       const user2 = await getCurrentUser()
       setCurrentUser(user2)
@@ -270,6 +303,36 @@ export default function AgentDetailPage() {
                 })}
               </div>
             </div>
+
+            {/* CRM Snapshot */}
+            {crmSnapshot && (
+              <div style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '12px', overflow: 'hidden', marginBottom: '20px' }}>
+                <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #EEE', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <p style={{ color: '#C9A96E', fontSize: '0.7rem', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '2px' }}>CRM Production</p>
+                    <h3 style={{ color: '#1A1814', fontSize: '1rem', fontWeight: '700' }}>Book of Business Snapshot</h3>
+                  </div>
+                  <a href={`/crm/admin/agents/${agent.id}`} style={{ fontSize: '12px', color: '#C9A96E', textDecoration: 'none', fontWeight: '600' }}>
+                    View Full CRM →
+                  </a>
+                </div>
+                <div style={{ padding: '1.25rem', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                  {[
+                    { label: 'Total Clients', value: crmSnapshot.totalClients, color: '#C9A96E' },
+                    { label: 'Active Policies', value: crmSnapshot.activePolicies, color: '#27AE60' },
+                    { label: 'MTD Policies', value: crmSnapshot.mtdPolicies, color: '#2196F3' },
+                    { label: 'MTD Premium', value: `$${crmSnapshot.mtdPremium.toLocaleString()}`, color: '#9C27B0' },
+                    { label: 'Total Policies', value: crmSnapshot.totalPolicies, color: '#FF9800' },
+                    { label: 'Open Leads', value: crmSnapshot.openLeads, color: '#E91E63' },
+                  ].map(card2 => (
+                    <div key={card2.label} style={{ background: '#F5F2ED', borderRadius: '8px', padding: '0.875rem 1rem' }}>
+                      <p style={{ fontSize: '1.25rem', fontWeight: '700', color: card2.color, marginBottom: '2px' }}>{card2.value}</p>
+                      <p style={{ fontSize: '0.7rem', fontWeight: '600', color: '#6B6966', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{card2.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Last Contact */}
             <div style={card}>

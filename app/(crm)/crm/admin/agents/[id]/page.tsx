@@ -25,8 +25,10 @@ export default function AgentDetailPage() {
     totalPremium: 0,
   })
   const [carrierMix, setCarrierMix] = useState<{ carrier: string; count: number; premium: number }[]>([])
-  const [activeTab, setActiveTab] = useState<'clients' | 'policies' | 'contracting'>('policies')
+  const [activeTab, setActiveTab] = useState<'clients' | 'policies' | 'contracting' | 'leads' | 'activity'>('policies')
   const [agentCarriers, setAgentCarriers] = useState<Record<string, string>>({})
+  const [agentLeads, setAgentLeads] = useState<any[]>([])
+  const [agentActivity, setAgentActivity] = useState<any[]>([])
   const [monthlyGoal, setMonthlyGoal] = useState<number>(5000)
   const [editingGoal, setEditingGoal] = useState(false)
   const [goalInput, setGoalInput] = useState('')
@@ -134,6 +136,25 @@ export default function AgentDetailPage() {
       if (goalData?.premium_target) {
         setMonthlyGoal(Number(goalData.premium_target))
       }
+
+      // Fetch leads for this agent
+      const { data: leadsData } = await supabase
+        .from('crm_leads')
+        .select('id, first_name, last_name, phone, status, lead_source, follow_up_date, created_at')
+        .eq('agent_id', agentId)
+        .order('created_at', { ascending: false })
+
+      setAgentLeads(leadsData ?? [])
+
+      // Fetch activity for this agent
+      const { data: activityData } = await supabase
+        .from('crm_notes')
+        .select('id, note_type, content, follow_up_date, created_at, crm_clients(first_name, last_name)')
+        .eq('agent_id', agentId)
+        .order('created_at', { ascending: false })
+        .limit(50)
+
+      setAgentActivity(activityData ?? [])
 
       setLoading(false)
     }
@@ -305,13 +326,13 @@ export default function AgentDetailPage() {
 
       {/* Tabs */}
       <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'hidden' }}>
-        <div style={{ display: 'flex', borderBottom: '1px solid #E5E1DA' }}>
-          {(['policies', 'clients', 'contracting'] as const).map(tab => (
+        <div style={{ display: 'flex', borderBottom: '1px solid #E5E1DA', overflowX: 'auto' }}>
+          {(['policies', 'clients', 'leads', 'activity', 'contracting'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               style={{
-                padding: '14px 24px',
+                padding: '14px 20px',
                 border: 'none',
                 backgroundColor: 'transparent',
                 fontSize: '13px',
@@ -320,10 +341,14 @@ export default function AgentDetailPage() {
                 cursor: 'pointer',
                 borderBottom: activeTab === tab ? '2px solid #C9A96E' : '2px solid transparent',
                 fontFamily: 'inherit',
-                textTransform: 'capitalize',
+                whiteSpace: 'nowrap',
               }}
             >
-              {tab === 'policies' ? `Policies (${policies.length})` : tab === 'clients' ? `Clients (${clients.length})` : 'Contracting'}
+              {tab === 'policies' ? `Policies (${policies.length})`
+                : tab === 'clients' ? `Clients (${clients.length})`
+                : tab === 'leads' ? `Leads (${agentLeads.length})`
+                : tab === 'activity' ? `Activity (${agentActivity.length})`
+                : 'Contracting'}
             </button>
           ))}
         </div>
@@ -427,6 +452,105 @@ export default function AgentDetailPage() {
           ) : (
             <div style={{ padding: '40px', textAlign: 'center' }}>
               <p style={{ fontSize: '14px', color: '#7A7A7A' }}>No clients yet</p>
+            </div>
+          )
+        )}
+
+        {/* Leads Tab */}
+        {activeTab === 'leads' && (
+          agentLeads.length > 0 ? (
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#F9F7F4' }}>
+                  {['Name', 'Phone', 'Source', 'Status', 'Follow-up', 'Added'].map(h => (
+                    <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.07em', borderBottom: '1px solid #E5E1DA', whiteSpace: 'nowrap' }}>
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {agentLeads.map((lead, i) => {
+                  const statusColors: Record<string, string> = {
+                    new: '#7A7A7A', attempted: '#2196F3', contacted: '#C9A96E',
+                    interested: '#9C27B0', quoted: '#FF9800', applied: '#27AE60',
+                    converted: '#43A047', not_interested: '#E53935', lost: '#B71C1C'
+                  }
+                  const color = statusColors[lead.status] ?? '#7A7A7A'
+                  const isOverdue = lead.follow_up_date && lead.follow_up_date < new Date().toISOString().split('T')[0]
+                  return (
+                    <tr key={lead.id} style={{ borderBottom: i < agentLeads.length - 1 ? '1px solid #F0EDE8' : 'none' }}>
+                      <td style={{ padding: '12px 16px', fontSize: '13px', fontWeight: '600', color: '#1A1A1A' }}>
+                        {lead.first_name} {lead.last_name}
+                      </td>
+                      <td style={{ padding: '12px 16px', fontSize: '13px', color: '#4A4A4A' }}>{lead.phone || '—'}</td>
+                      <td style={{ padding: '12px 16px', fontSize: '12px', color: '#7A7A7A', textTransform: 'capitalize' }}>
+                        {lead.lead_source?.replace('_', ' ') || '—'}
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <span style={{ display: 'inline-block', padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700', backgroundColor: `${color}18`, color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          {lead.status?.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px 16px', fontSize: '12px', color: isOverdue ? '#E53935' : '#4A4A4A', fontWeight: isOverdue ? '700' : '400' }}>
+                        {lead.follow_up_date ? new Date(lead.follow_up_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
+                      </td>
+                      <td style={{ padding: '12px 16px', fontSize: '12px', color: '#7A7A7A' }}>
+                        {new Date(lead.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          ) : (
+            <div style={{ padding: '40px', textAlign: 'center' }}>
+              <p style={{ fontSize: '14px', color: '#7A7A7A' }}>No leads added yet</p>
+            </div>
+          )
+        )}
+
+        {/* Activity Tab */}
+        {activeTab === 'activity' && (
+          agentActivity.length > 0 ? (
+            <div>
+              {agentActivity.map((note, i) => {
+                const typeConfig: Record<string, { icon: string; color: string; label: string }> = {
+                  call:      { icon: '📞', color: '#2196F3', label: 'Phone Call' },
+                  text:      { icon: '💬', color: '#27AE60', label: 'Text' },
+                  email:     { icon: '✉️', color: '#C9A96E', label: 'Email' },
+                  meeting:   { icon: '🤝', color: '#9C27B0', label: 'Meeting' },
+                  follow_up: { icon: '🔔', color: '#FF9800', label: 'Follow Up' },
+                  note:      { icon: '📝', color: '#7A7A7A', label: 'Note' },
+                }
+                const config = typeConfig[note.note_type] ?? typeConfig.note
+                const client = note.crm_clients
+                return (
+                  <div key={note.id} style={{ padding: '14px 20px', borderBottom: i < agentActivity.length - 1 ? '1px solid #F0EDE8' : 'none', display: 'flex', gap: '12px' }}>
+                    <div style={{ width: '34px', height: '34px', borderRadius: '50%', backgroundColor: `${config.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', flexShrink: 0 }}>
+                      {config.icon}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '13px', fontWeight: '700', color: config.color }}>{config.label}</span>
+                          {client && (
+                            <span style={{ fontSize: '12px', color: '#7A7A7A' }}>· {client.first_name} {client.last_name}</span>
+                          )}
+                        </div>
+                        <span style={{ fontSize: '11px', color: '#AAA' }}>
+                          {new Date(note.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: '13px', color: '#4A4A4A', lineHeight: 1.5, margin: 0 }}>{note.content}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div style={{ padding: '40px', textAlign: 'center' }}>
+              <p style={{ fontSize: '14px', color: '#7A7A7A' }}>No activity logged yet</p>
             </div>
           )
         )}
