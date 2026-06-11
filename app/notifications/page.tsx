@@ -15,6 +15,7 @@ export default function NotificationsPage() {
     const load = async () => {
       const user = await getCurrentUser()
       if (!user) { router.push('/login'); return }
+      if (user.role === 'sales_director') { router.push('/pipeline'); return }
       setUserId(user.id)
 
       const { data } = await supabase

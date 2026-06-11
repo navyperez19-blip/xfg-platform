@@ -24,6 +24,7 @@ export default function AnalyticsPage() {
     const load = async () => {
       const user = await getCurrentUser()
       if (!user) { router.push('/login'); return }
+      if (user.role === 'sales_director') { router.push('/pipeline'); return }
       if (!['executive', 'superadmin'].includes(user.role)) {
         router.push('/dashboard')
         return

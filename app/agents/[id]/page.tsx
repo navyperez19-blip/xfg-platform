@@ -430,17 +430,19 @@ export default function AgentDetailPage() {
                   </span>
                 ))}
               </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button onClick={() => moveStage('backward')} disabled={saving || currentStageIndex === 0} style={{ flex: 1, background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', padding: '10px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', fontFamily: 'Inter, sans-serif', opacity: (saving || currentStageIndex === 0) ? 0.4 : 1 }}>
-                  ← Back
-                </button>
-                <button onClick={() => moveStage('forward')} disabled={saving || currentStageIndex === STAGES.length - 1 || agent.is_locked} style={{ flex: 1, background: '#C9A96E', border: 'none', color: '#FFFFFF', padding: '10px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', fontFamily: 'Inter, sans-serif', opacity: (saving || currentStageIndex === STAGES.length - 1 || agent.is_locked) ? 0.4 : 1 }}>
-                  Forward →
-                </button>
-                <button onClick={toggleLock} disabled={saving || !canLockAgent(currentUser?.role || '')} style={{ background: agent.is_locked ? '#F5EDD9' : '#FFFFFF', border: `1px solid ${agent.is_locked ? '#C9A96E' : '#DDD9D2'}`, color: agent.is_locked ? '#8B6A2E' : '#6B6966', padding: '10px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', fontFamily: 'Inter, sans-serif', opacity: (saving || !canLockAgent(currentUser?.role || '')) ? 0.4 : 1 }}>
-                  {agent.is_locked ? '🔒' : '🔓'}
-                </button>
-              </div>
+              {currentUser?.role !== 'sales_director' && (
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={() => moveStage('backward')} disabled={saving || currentStageIndex === 0} style={{ flex: 1, background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', padding: '10px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', fontFamily: 'Inter, sans-serif', opacity: (saving || currentStageIndex === 0) ? 0.4 : 1 }}>
+                    ← Back
+                  </button>
+                  <button onClick={() => moveStage('forward')} disabled={saving || currentStageIndex === STAGES.length - 1 || agent.is_locked} style={{ flex: 1, background: '#C9A96E', border: 'none', color: '#FFFFFF', padding: '10px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', fontFamily: 'Inter, sans-serif', opacity: (saving || currentStageIndex === STAGES.length - 1 || agent.is_locked) ? 0.4 : 1 }}>
+                    Forward →
+                  </button>
+                  <button onClick={toggleLock} disabled={saving || !canLockAgent(currentUser?.role || '')} style={{ background: agent.is_locked ? '#F5EDD9' : '#FFFFFF', border: `1px solid ${agent.is_locked ? '#C9A96E' : '#DDD9D2'}`, color: agent.is_locked ? '#8B6A2E' : '#6B6966', padding: '10px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', fontFamily: 'Inter, sans-serif', opacity: (saving || !canLockAgent(currentUser?.role || '')) ? 0.4 : 1 }}>
+                    {agent.is_locked ? '🔒' : '🔓'}
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Executive Override */}
@@ -479,10 +481,12 @@ export default function AgentDetailPage() {
             )}
 
             {/* Notes */}
-            <div style={card}>
-              <p style={sectionTitle}>Internal Notes</p>
-              <Notes agentId={agent.id} />
-            </div>
+            {currentUser?.role !== 'sales_director' && (
+              <div style={card}>
+                <p style={sectionTitle}>Internal Notes</p>
+                <Notes agentId={agent.id} />
+              </div>
+            )}
 
             {/* Messages */}
             <div style={card}>

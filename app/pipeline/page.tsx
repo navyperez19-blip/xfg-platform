@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
+import { getCurrentUser } from '../lib/auth'
 
 const STAGES = [
   { key: 'contacted', label: 'Contacted' },
@@ -26,11 +27,14 @@ export default function PipelinePage() {
   const [view, setView] = useState<'list' | 'board'>('list')
   const [sortKey, setSortKey] = useState<SortKey>('days')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [currentUser, setCurrentUser] = useState<any>(null)
 
   useEffect(() => {
     const getAgents = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+      const profile = await getCurrentUser()
+      setCurrentUser(profile)
       const { data } = await supabase.from('agents').select('*').order('created_at', { ascending: false })
       setAgents(data || [])
       setLoading(false)
@@ -115,7 +119,9 @@ export default function PipelinePage() {
               <button onClick={() => setView('list')} style={{ padding: '0.5rem 1rem', border: 'none', background: view === 'list' ? '#F5EDD9' : 'transparent', color: view === 'list' ? '#8B6A2E' : '#6B6966', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>List</button>
               <button onClick={() => setView('board')} style={{ padding: '0.5rem 1rem', border: 'none', background: view === 'board' ? '#F5EDD9' : 'transparent', color: view === 'board' ? '#8B6A2E' : '#6B6966', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>Board</button>
             </div>
-            <button onClick={() => router.push('/agents/new')} style={{ background: '#C9A96E', border: 'none', color: '#FFFFFF', padding: '0.6rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600' }}>+ New Agent</button>
+            {currentUser?.role !== 'sales_director' && (
+              <button onClick={() => router.push('/agents/new')} style={{ background: '#C9A96E', border: 'none', color: '#FFFFFF', padding: '0.6rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600' }}>+ New Agent</button>
+            )}
           </div>
         </div>
 
