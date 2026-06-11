@@ -73,7 +73,7 @@ export default function CRMLayout({
           period_type: 'monthly',
           period_year: now.getFullYear(),
           period_number: now.getMonth() + 1,
-          premium_target: 12000,
+          premium_target: 12500,
         })
       }
 
