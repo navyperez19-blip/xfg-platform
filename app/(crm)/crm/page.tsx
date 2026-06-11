@@ -90,7 +90,7 @@ export default function CRMDashboard() {
         activePolicies: activePols.length,
         mtdPolicies: mtdPols.length,
         totalPolicies: allPolicies.length,
-        monthlyGoal: 5000,
+        monthlyGoal: 12000,
         chargebackCount: chargebacks.length,
         chargebackPremium: cbPremium,
         persistencyRate: persistency,

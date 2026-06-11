@@ -56,6 +56,27 @@ export default function CRMLayout({
         return
       }
 
+      // Auto-create monthly goal of $12,000 if not already set
+      const now = new Date()
+      const { data: existingGoal } = await supabase
+        .from('crm_goals')
+        .select('id')
+        .eq('agent_id', agentRecord.id)
+        .eq('period_type', 'monthly')
+        .eq('period_year', now.getFullYear())
+        .eq('period_number', now.getMonth() + 1)
+        .single()
+
+      if (!existingGoal) {
+        await supabase.from('crm_goals').insert({
+          agent_id: agentRecord.id,
+          period_type: 'monthly',
+          period_year: now.getFullYear(),
+          period_number: now.getMonth() + 1,
+          premium_target: 12000,
+        })
+      }
+
       setIsAdmin(false)
       setNavAgent({
         id: agentRecord.id,
