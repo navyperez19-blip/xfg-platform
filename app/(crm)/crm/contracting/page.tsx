@@ -50,6 +50,8 @@ export default function ContractingPage() {
         .eq('user_id', user.id)
         .single()
 
+      console.log('Agent record found:', agent?.id, agent?.full_name, 'mutual_omaha_requested:', agent?.mutual_omaha_requested)
+
       if (!agent) {
         // Admin with no agent record — nothing to show
         router.push('/crm')
