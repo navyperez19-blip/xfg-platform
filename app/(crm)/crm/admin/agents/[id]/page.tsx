@@ -573,12 +573,75 @@ export default function AgentDetailPage() {
                 submitted: { label: 'Submitted',   color: '#C9A96E', bg: '#FEF3C7' },
                 active:    { label: 'Active',      color: '#27AE60', bg: '#E8F5E9' },
               }[status] ?? { label: 'Not Started', color: '#7A7A7A', bg: '#F5F5F5' }
+
               return (
                 <div key={carrier.name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: i < arr.length - 1 ? '1px solid #F0EDE8' : 'none' }}>
                   <span style={{ fontSize: '14px', fontWeight: '600', color: '#1A1A1A' }}>{carrier.name}</span>
-                  <span style={{ display: 'inline-block', padding: '4px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', backgroundColor: config.bg, color: config.color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    {config.label}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ display: 'inline-block', padding: '4px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', backgroundColor: config.bg, color: config.color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {config.label}
+                    </span>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      {status === 'none' && (
+                        <button
+                          onClick={async () => {
+                            const updatedCarriers = { ...agentCarriers, [carrier.name]: 'submitted' }
+                            const { error } = await supabase
+                              .from('agents')
+                              .update({ carriers: updatedCarriers, updated_at: new Date().toISOString() })
+                              .eq('id', agentId)
+                            if (!error) {
+                              setAgentCarriers(updatedCarriers)
+                              // Auto promote if not already active
+                              const hasContractingStarted = Object.values(updatedCarriers).some(s => s === 'submitted' || s === 'active')
+                              if (hasContractingStarted && agent.current_stage !== 'active') {
+                                await supabase
+                                  .from('agents')
+                                  .update({ current_stage: 'active', updated_at: new Date().toISOString() })
+                                  .eq('id', agentId)
+                                setAgent({ ...agent, current_stage: 'active' })
+                              }
+                            }
+                          }}
+                          style={{ padding: '5px 12px', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit' }}
+                        >
+                          Mark Submitted
+                        </button>
+                      )}
+                      {status === 'submitted' && (
+                        <button
+                          onClick={async () => {
+                            const updatedCarriers = { ...agentCarriers, [carrier.name]: 'active' }
+                            const { error } = await supabase
+                              .from('agents')
+                              .update({ carriers: updatedCarriers, updated_at: new Date().toISOString() })
+                              .eq('id', agentId)
+                            if (!error) {
+                              setAgentCarriers(updatedCarriers)
+                            }
+                          }}
+                          style={{ padding: '5px 12px', backgroundColor: '#E8F5E9', color: '#1B5E20', border: '1px solid #A5D6A7', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit' }}
+                        >
+                          Mark Active
+                        </button>
+                      )}
+                      {status !== 'none' && (
+                        <button
+                          onClick={async () => {
+                            const updatedCarriers = { ...agentCarriers, [carrier.name]: 'none' }
+                            const { error } = await supabase
+                              .from('agents')
+                              .update({ carriers: updatedCarriers, updated_at: new Date().toISOString() })
+                              .eq('id', agentId)
+                            if (!error) setAgentCarriers(updatedCarriers)
+                          }}
+                          style={{ padding: '5px 10px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}
+                        >
+                          Reset
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )
             })}
