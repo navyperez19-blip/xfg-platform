@@ -10,6 +10,8 @@ export default function BookOfBusinessPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [policies, setPolicies] = useState<any[]>([])
+  const [page, setPage] = useState(0)
+  const [totalCount, setTotalCount] = useState(0)
   const [isAdmin, setIsAdmin] = useState(false)
   const [viewMode, setViewMode] = useState<'me' | 'downlines'>('me')
   const [agentId, setAgentId] = useState<string | null>(null)
@@ -53,7 +55,20 @@ export default function BookOfBusinessPage() {
     load()
   }, [router])
 
-  async function fetchPolicies(aid: string | null, admin: boolean, mode: 'me' | 'downlines') {
+  const PAGE_SIZE = 50
+
+  async function fetchPolicies(aid: string | null, admin: boolean, mode: 'me' | 'downlines', pageNum = 0) {
+    let countQuery = supabase
+      .from('crm_policies')
+      .select('id', { count: 'exact', head: true })
+
+    if (!admin || mode === 'me') {
+      countQuery = countQuery.eq('agent_id', aid)
+    }
+
+    const { count } = await countQuery
+    setTotalCount(count ?? 0)
+
     let query = supabase
       .from('crm_policies')
       .select(`
@@ -69,6 +84,7 @@ export default function BookOfBusinessPage() {
         )
       `)
       .order('date_written', { ascending: false })
+      .range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1)
 
     if (!admin || mode === 'me') {
       query = query.eq('agent_id', aid)
@@ -76,11 +92,13 @@ export default function BookOfBusinessPage() {
 
     const { data } = await query
     setPolicies(data ?? [])
+    setPage(pageNum)
   }
 
   async function handleViewMode(mode: 'me' | 'downlines') {
     setViewMode(mode)
-    await fetchPolicies(agentId, isAdmin, mode)
+    setPage(0)
+    await fetchPolicies(agentId, isAdmin, mode, 0)
   }
 
   function handleSort(field: string) {
@@ -411,6 +429,29 @@ export default function BookOfBusinessPage() {
                 Add First Client
               </Link>
             )}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalCount > 50 && (
+          <div style={{ padding: '16px 24px', borderTop: '1px solid #E5E1DA', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FFFFFF' }}>
+            <button
+              onClick={() => fetchPolicies(agentId, isAdmin, viewMode, page - 1)}
+              disabled={page === 0}
+              style={{ padding: '8px 20px', backgroundColor: '#FFFFFF', color: page === 0 ? '#CCC' : '#1A1A1A', border: '1px solid #E5E1DA', borderRadius: '8px', cursor: page === 0 ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '600', fontFamily: 'inherit' }}
+            >
+              ← Previous
+            </button>
+            <span style={{ fontSize: '13px', color: '#7A7A7A' }}>
+              Showing {page * 50 + 1}–{Math.min((page + 1) * 50, totalCount)} of {totalCount} policies
+            </span>
+            <button
+              onClick={() => fetchPolicies(agentId, isAdmin, viewMode, page + 1)}
+              disabled={(page + 1) * 50 >= totalCount}
+              style={{ padding: '8px 20px', backgroundColor: '#FFFFFF', color: (page + 1) * 50 >= totalCount ? '#CCC' : '#1A1A1A', border: '1px solid #E5E1DA', borderRadius: '8px', cursor: (page + 1) * 50 >= totalCount ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '600', fontFamily: 'inherit' }}
+            >
+              Next →
+            </button>
           </div>
         )}
       </div>
