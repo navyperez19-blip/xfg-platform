@@ -14,7 +14,7 @@ const STAGES = [
   { key: 'active', label: 'Active' },
 ]
 
-type SortKey = 'full_name' | 'current_stage' | 'state' | 'days' | 'agent_model'
+type SortKey = 'full_name' | 'current_stage' | 'state' | 'days' | 'agent_model' | 'npn' | 'xfg_email'
 
 export default function PipelinePage() {
   const router = useRouter()
@@ -167,6 +167,8 @@ export default function PipelinePage() {
                     { label: 'State', key: 'state' },
                     { label: 'Model', key: 'agent_model' },
                     { label: 'Licensed', key: 'is_licensed' },
+                    { label: 'NPN', key: 'npn' },
+                    { label: 'XFG Email', key: 'xfg_email' },
                     { label: 'Days in Stage', key: 'days' },
                     { label: 'Last Contact', key: 'last_contact_at' },
                   ].map(col => (
@@ -197,6 +199,12 @@ export default function PipelinePage() {
                         {agent.is_licensed === 'no' && <span style={{ background: '#FFF5F5', color: '#8B2635', fontSize: '0.72rem', fontWeight: '600', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>Not Licensed</span>}
                         {agent.is_licensed === 'expired' && <span style={{ background: '#FFFBF0', color: '#B5652A', fontSize: '0.72rem', fontWeight: '600', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>Expired</span>}
                         {!agent.is_licensed && <span style={{ color: '#9A9890', fontSize: '0.72rem' }}>—</span>}
+                      </td>
+                      <td style={{ padding: '0.875rem 1rem' }}>
+                        <p style={{ color: '#6B6966', fontSize: '0.8rem' }}>{agent.npn || '—'}</p>
+                      </td>
+                      <td style={{ padding: '0.875rem 1rem' }}>
+                        <p style={{ color: '#6B6966', fontSize: '0.8rem' }}>{agent.xfg_email || '—'}</p>
                       </td>
                       <td style={{ padding: '0.875rem 1rem' }}>
                         <span style={{ color: getDaysColor(days), fontSize: '0.875rem', fontWeight: '600' }}>{days}d</span>
