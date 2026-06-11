@@ -172,9 +172,11 @@ export default function AnalyticsPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid #EBE8E3' }}>
-                    <th style={{ padding: '10px 12px', textAlign: 'left', color: '#6B6966', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Agent</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'left', color: '#6B6966', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Agent</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'left', color: '#6B6966', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em' }}>XFG Email</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'left', color: '#6B6966', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em' }}>NPN</th>
                     {['Aflac', 'Americo', 'Transamerica', 'UHL', 'AHL', 'Mutual of Omaha', 'Ethos'].map(carrier => (
-                      <th key={carrier} style={{ padding: '10px 12px', textAlign: 'center', color: '#6B6966', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{carrier}</th>
+                      <th key={carrier} style={{ padding: '8px 6px', textAlign: 'center', color: '#6B6966', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{carrier}</th>
                     ))}
                   </tr>
                 </thead>
@@ -184,9 +186,15 @@ export default function AnalyticsPage() {
                     .sort((a, b) => a.full_name.localeCompare(b.full_name))
                     .map((agent, index) => (
                       <tr key={agent.id} style={{ borderBottom: '1px solid #F5F2ED', background: index % 2 === 0 ? '#FFFFFF' : '#FAFAF9', cursor: 'pointer' }} onClick={() => router.push(`/agents/${agent.id}`)}>
-                        <td style={{ padding: '10px 12px' }}>
-                          <p style={{ color: '#1A1814', fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>{agent.full_name}</p>
-                          <p style={{ color: '#C9A96E', fontSize: '12px', fontFamily: 'monospace' }}>{agent.xfg_id}</p>
+                        <td style={{ padding: '8px 10px' }}>
+                          <p style={{ color: '#1A1814', fontSize: '13px', fontWeight: '600', marginBottom: '2px' }}>{agent.full_name}</p>
+                          <p style={{ color: '#C9A96E', fontSize: '11px', fontFamily: 'monospace' }}>{agent.xfg_id}</p>
+                        </td>
+                        <td style={{ padding: '8px 10px' }}>
+                          <p style={{ color: '#6B6966', fontSize: '12px' }}>{agent.xfg_email || '—'}</p>
+                        </td>
+                        <td style={{ padding: '8px 10px' }}>
+                          <p style={{ color: '#6B6966', fontSize: '12px' }}>{agent.npn || '—'}</p>
                         </td>
                         {['Aflac', 'Americo', 'Transamerica', 'UHL', 'AHL', 'Mutual of Omaha', 'Ethos'].map(carrier => {
                           const carriersObj = agent.carriers as Record<string, string> || {}
