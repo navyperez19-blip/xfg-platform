@@ -89,6 +89,7 @@ export default function CRMLayout({
       minHeight: '100vh',
       backgroundColor: '#F5F2ED',
       fontFamily: "'Inter', sans-serif",
+      isolation: 'isolate',
     }}>
       <CRMNav agent={navAgent} isAdmin={isAdmin} />
       <main style={{
@@ -96,6 +97,8 @@ export default function CRMLayout({
         marginLeft: '240px',
         padding: '32px',
         minHeight: '100vh',
+        position: 'relative',
+        zIndex: 1,
       }}>
         {children}
       </main>
