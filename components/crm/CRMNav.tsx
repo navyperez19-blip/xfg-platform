@@ -64,7 +64,7 @@ export default function CRMNav({
           color: '#FFFFFF',
           letterSpacing: '0.02em',
         }}>
-          Production CRM
+          XFG CRM
         </div>
       </div>
 
