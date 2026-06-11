@@ -32,27 +32,52 @@ export default function JoinPage() {
 
     const full_name = form.first_name.trim() + ' ' + form.last_name.trim()
 
+    // Step 1: Create auth account
     const { data: authData, error: authError } = await supabase.auth.signUp({ email: form.email, password: form.password })
     if (authError) { setError(authError.message); setLoading(false); return }
 
     const userId = authData.user?.id
     if (!userId) { setError('Account creation failed. Please try again.'); setLoading(false); return }
 
-    const { error: userError } = await supabase.from('users').insert({ id: userId, email: form.email, full_name, role: 'agent' })
-    if (userError) { setError('Profile creation failed: ' + userError.message); setLoading(false); return }
-
-    const { data: counterData } = await supabase.from('agents').select('xfg_id').order('created_at', { ascending: false }).limit(1)
-    let nextNumber = 1
-    if (counterData && counterData.length > 0) {
-      const lastNumber = parseInt(counterData[0].xfg_id.replace('XFG-', ''))
-      nextNumber = lastNumber + 1
+    // Step 2: Check if user record already exists before inserting
+    const { data: existingUser } = await supabase.from('users').select('id').eq('id', userId).single()
+    if (!existingUser) {
+      const { error: userError } = await supabase.from('users').insert({ id: userId, email: form.email, full_name, role: 'agent' })
+      if (userError) { setError('Profile creation failed: ' + userError.message); setLoading(false); return }
     }
-    const xfg_id = 'XFG-' + String(nextNumber).padStart(6, '0')
 
-    const { error: agentError } = await supabase.from('agents').insert({ user_id: userId, xfg_id, full_name, email: form.email, phone: form.phone, state: form.state, current_stage: 'contacted', is_locked: false })
-    if (agentError) { setError('Agent profile creation failed: ' + agentError.message); setLoading(false); return }
+    // Step 3: Check if agent record already exists before inserting
+    const { data: existingAgent } = await supabase.from('agents').select('id').eq('user_id', userId).single()
+    if (!existingAgent) {
+      // Generate unique XFG ID using timestamp to avoid race conditions
+      const timestamp = Date.now()
+      const { data: counterData } = await supabase.from('agents').select('xfg_id').order('created_at', { ascending: false }).limit(1)
+      let nextNumber = 1
+      if (counterData && counterData.length > 0) {
+        const lastNumber = parseInt(counterData[0].xfg_id.replace('XFG-', ''))
+        nextNumber = isNaN(lastNumber) ? 1 : lastNumber + 1
+      }
+      const xfg_id = 'XFG-' + String(nextNumber).padStart(6, '0')
 
-    await fetch('/api/send-welcome', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ full_name, email: form.email, xfg_id, state: form.state }) })
+      const { error: agentError } = await supabase.from('agents').insert({
+        user_id: userId,
+        xfg_id,
+        full_name,
+        email: form.email,
+        phone: form.phone,
+        state: form.state,
+        current_stage: 'contacted',
+        is_locked: false,
+        wizard_step: 'xfg_email'
+      })
+      if (agentError) { setError('Agent profile creation failed: ' + agentError.message); setLoading(false); return }
+
+      await fetch('/api/send-welcome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name, email: form.email, xfg_id, state: form.state })
+      })
+    }
 
     router.push('/agent-portal')
     setLoading(false)
