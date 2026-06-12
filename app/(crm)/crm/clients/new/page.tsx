@@ -182,6 +182,18 @@ export default function NewClientPage() {
       {/* STEP 1 — CLIENT INFO */}
       {step === 'client' && (
         <form onSubmit={handleClientSubmit}>
+          {/* Info Banner */}
+          <div style={{ padding: '14px 18px', backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', marginBottom: '16px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '18px', flexShrink: 0 }}>💡</span>
+            <div>
+              <p style={{ fontSize: '13px', fontWeight: '700', color: '#1E40AF', marginBottom: '3px' }}>Quick Tip — Two Ways to Use This Form</p>
+              <p style={{ fontSize: '13px', color: '#1E40AF', lineHeight: 1.6 }}>
+                <strong>For a quote:</strong> Just fill out the basic information at the top — name, date of birth, phone, email, location, and health status. That&apos;s all you need to move to Policy Details.<br />
+                <strong>For a full application:</strong> Complete the entire worksheet below including employment, beneficiaries, medications, and bank information before submitting.
+              </p>
+            </div>
+          </div>
+
           <Card title="Personal Information">
             <div style={grid2}>
               <Field label="First Name *">
@@ -249,7 +261,255 @@ export default function NewClientPage() {
 
           <Card title="General Notes" style={{ marginTop: '16px' }}>
             <Field label="Notes">
-              <Textarea value={client.notes} onChange={v => updateClient('notes', v)} placeholder="Any additional notes about this client..." />
+              <Textarea
+                value={client.notes}
+                onChange={v => updateClient('notes', v)}
+                placeholder="Any additional notes about this client..."
+              />
+            </Field>
+          </Card>
+
+          {/* Pre-Fill Worksheet Divider */}
+          <div style={{ marginTop: '28px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ flex: 1, height: '1px', backgroundColor: '#E5E1DA' }} />
+            <span style={{ fontSize: '12px', fontWeight: '700', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.1em', whiteSpace: 'nowrap' }}>Full Application Worksheet (Optional)</span>
+            <div style={{ flex: 1, height: '1px', backgroundColor: '#E5E1DA' }} />
+          </div>
+
+          {/* Section 1 Extended - Additional Personal Info */}
+          <Card title="Additional Personal Information" style={{ marginTop: '16px' }}>
+            <div style={grid3}>
+              <Field label="Middle Name">
+                <Input value={client.middle_name ?? ''} onChange={v => updateClient('middle_name', v)} placeholder="Middle name" />
+              </Field>
+              <Field label="Gender">
+                <Select value={client.gender ?? ''} onChange={v => updateClient('gender', v)} placeholder="Select" options={[{value:'M',label:'Male'},{value:'F',label:'Female'}]} />
+              </Field>
+              <Field label="Best Time to Call">
+                <Input value={client.best_time_to_call ?? ''} onChange={v => updateClient('best_time_to_call', v)} placeholder="e.g. Mornings" />
+              </Field>
+            </div>
+            <Field label="Street Address">
+              <Input value={client.address_line1 ?? ''} onChange={v => updateClient('address_line1', v)} placeholder="123 Main St" />
+            </Field>
+            <div style={grid2}>
+              <Field label="SSN">
+                <Input value={client.ssn ?? ''} onChange={v => updateClient('ssn', v)} placeholder="XXX-XX-XXXX" />
+              </Field>
+              <Field label="Driver's License #">
+                <Input value={client.drivers_license_number ?? ''} onChange={v => updateClient('drivers_license_number', v)} />
+              </Field>
+            </div>
+            <div style={grid3}>
+              <Field label="DL Expiration">
+                <Input type="date" value={client.drivers_license_expiration ?? ''} onChange={v => updateClient('drivers_license_expiration', v)} />
+              </Field>
+              <Field label="DL State">
+                <Input value={client.drivers_license_state ?? ''} onChange={v => updateClient('drivers_license_state', v)} maxLength={2} />
+              </Field>
+              <Field label="U.S. Citizen?">
+                <Select value={client.us_citizen === true ? 'yes' : client.us_citizen === false ? 'no' : ''} onChange={v => updateClient('us_citizen', v === 'yes')} placeholder="Select" options={[{value:'yes',label:'Yes'},{value:'no',label:'No'}]} />
+              </Field>
+            </div>
+            <Field label="Country of Birth">
+              <Input value={client.country_of_birth ?? ''} onChange={v => updateClient('country_of_birth', v)} placeholder="U.S." />
+            </Field>
+          </Card>
+
+          {/* Section 2 - Employment & Financial */}
+          <Card title="Employment & Financial Information" style={{ marginTop: '16px' }}>
+            <div style={grid2}>
+              <Field label="Employer Name">
+                <Input value={client.employer_name ?? ''} onChange={v => updateClient('employer_name', v)} />
+              </Field>
+              <Field label="Employer Street Address">
+                <Input value={client.employer_address ?? ''} onChange={v => updateClient('employer_address', v)} />
+              </Field>
+            </div>
+            <div style={grid3}>
+              <Field label="Employer City">
+                <Input value={client.employer_city ?? ''} onChange={v => updateClient('employer_city', v)} />
+              </Field>
+              <Field label="Employer State">
+                <Input value={client.employer_state ?? ''} onChange={v => updateClient('employer_state', v)} maxLength={2} />
+              </Field>
+              <Field label="Employer ZIP">
+                <Input value={client.employer_zip ?? ''} onChange={v => updateClient('employer_zip', v)} maxLength={5} />
+              </Field>
+            </div>
+            <div style={grid2}>
+              <Field label="Annual Income">
+                <InputWithPrefix prefix="$" value={client.annual_income ?? ''} onChange={v => updateClient('annual_income', v)} placeholder="0" type="number" />
+              </Field>
+              <Field label="Estimated Net Worth">
+                <InputWithPrefix prefix="$" value={client.estimated_net_worth ?? ''} onChange={v => updateClient('estimated_net_worth', v)} placeholder="0" type="number" />
+              </Field>
+            </div>
+            <div style={grid2}>
+              <Field label="# of Dependents">
+                <Input type="number" value={client.num_dependents ?? ''} onChange={v => updateClient('num_dependents', v)} />
+              </Field>
+              <Field label="Dependent Ages (comma separated)">
+                <Input value={client.dependent_ages ?? ''} onChange={v => updateClient('dependent_ages', v)} placeholder="5, 8, 12" />
+              </Field>
+            </div>
+          </Card>
+
+          {/* Section 3 - Health & Lifestyle Questions */}
+          <Card title="Health & Lifestyle Questions" style={{ marginTop: '16px' }}>
+            <p style={{ fontSize: '12px', color: '#7A7A7A', fontStyle: 'italic', marginBottom: '8px' }}>Answer all questions honestly. A &apos;Yes&apos; answer does not automatically disqualify coverage.</p>
+            {[
+              { key: 'health_q1', label: '1. Within the last 90 days, have you been recommended by a physician or medical practitioner to undergo diagnostic procedures or tests for any symptoms, illnesses, or conditions?' },
+              { key: 'health_q2', label: '2. Within the last 2 years, have you been unable to work, attend school, or perform normal activities for 30 days or more?' },
+              { key: 'health_q3', label: '3. Within the last 2 years, have you been admitted to a hospital or other medical facility for more than 2 consecutive days?' },
+              { key: 'health_q4', label: "4. In the last 5 years, has your driver's license been suspended or revoked? Or have you been declined for issue, reinstatement, or renewal of any type of life or health insurance?" },
+              { key: 'health_q5', label: '5. In the last 10 years, have you pled guilty to, or been convicted of, any felony or misdemeanor, or are any such charges currently pending?' },
+              { key: 'health_q6', label: '6. In the next 12 months, do you plan to travel or reside outside of the U.S. or Canada?' },
+              { key: 'health_q7', label: '7. In the last or next 12 months, have you been engaged in, or intend to engage in, any hazardous activity (skydiving, racing, rock climbing, etc.)?' },
+              { key: 'health_q8', label: '8. Are you a homeowner?' },
+              { key: 'health_q9', label: '9. Have you used tobacco, nicotine, or any nicotine substitution product in the last 12 months?' },
+            ].map(q => (
+              <div key={q.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '10px 0', borderBottom: '1px solid #F9F7F4' }}>
+                <p style={{ fontSize: '13px', color: '#1A1A1A', lineHeight: 1.5, flex: 1, paddingRight: '20px' }}>{q.label}</p>
+                <div style={{ display: 'flex', gap: '12px', flexShrink: 0 }}>
+                  {['Yes', 'No'].map(opt => (
+                    <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', color: '#4A4A4A' }}>
+                      <input type="radio" name={q.key} checked={(client as any)[q.key] === (opt === 'Yes')} onChange={() => updateClient(q.key, opt === 'Yes')} style={{ cursor: 'pointer' }} />
+                      {opt}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+            {(client as any).health_q9 === true && (
+              <div style={{ ...grid2, marginTop: '12px', padding: '12px', backgroundColor: '#FEF3C7', borderRadius: '8px' }}>
+                <Field label="Tobacco Product Type">
+                  <Input value={(client as any).tobacco_product_type ?? ''} onChange={v => updateClient('tobacco_product_type', v)} placeholder="e.g. Cigarettes, Vape" />
+                </Field>
+                <Field label="Date of Last Use">
+                  <Input value={(client as any).tobacco_last_use ?? ''} onChange={v => updateClient('tobacco_last_use', v)} placeholder="MM/YYYY" />
+                </Field>
+              </div>
+            )}
+          </Card>
+
+          {/* Section 4 - Beneficiaries */}
+          <Card title="Beneficiary Information" style={{ marginTop: '16px' }}>
+            {[
+              { label: 'Primary Beneficiary 1', prefix: 'beneficiary_primary1' },
+              { label: 'Primary Beneficiary 2', prefix: 'beneficiary_primary2' },
+              { label: 'Contingent Beneficiary', prefix: 'beneficiary_contingent' },
+            ].map(b => (
+              <div key={b.prefix} style={{ marginBottom: '16px' }}>
+                <p style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{b.label}</p>
+                <div style={grid2}>
+                  <Field label="Full Legal Name">
+                    <Input value={(client as any)[`${b.prefix}_name`] ?? ''} onChange={v => updateClient(`${b.prefix}_name`, v)} />
+                  </Field>
+                  <Field label="Relationship">
+                    <Input value={(client as any)[`${b.prefix}_relationship`] ?? ''} onChange={v => updateClient(`${b.prefix}_relationship`, v)} />
+                  </Field>
+                </div>
+                <div style={{ ...grid2, marginTop: '8px' }}>
+                  <Field label="Phone Number">
+                    <Input value={(client as any)[`${b.prefix}_phone`] ?? ''} onChange={v => updateClient(`${b.prefix}_phone`, v)} />
+                  </Field>
+                  <Field label="% Share">
+                    <Input type="number" value={(client as any)[`${b.prefix}_share`] ?? ''} onChange={v => updateClient(`${b.prefix}_share`, v)} placeholder="0" />
+                  </Field>
+                </div>
+              </div>
+            ))}
+          </Card>
+
+          {/* Section 5 - Medications */}
+          <Card title="Current Medications" style={{ marginTop: '16px' }}>
+            <p style={{ fontSize: '12px', color: '#7A7A7A', fontStyle: 'italic', marginBottom: '12px' }}>List all current prescription medications, OTC drugs, and supplements.</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+              <input type="checkbox" checked={(client as any).no_current_medications ?? false} onChange={e => updateClient('no_current_medications', e.target.checked)} style={{ cursor: 'pointer' }} />
+              <label style={{ fontSize: '13px', color: '#4A4A4A' }}>Client reports NO current medications</label>
+            </div>
+            {!(client as any).no_current_medications && (
+              <div>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 2fr 2fr 1fr', gap: '8px', marginBottom: '6px' }}>
+                  {['Medication Name', 'Dosage & Frequency', 'Condition / Reason', 'Prescribing Doctor', 'How Long'].map(h => (
+                    <div key={h} style={{ fontSize: '10px', fontWeight: '700', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{h}</div>
+                  ))}
+                </div>
+                {[0,1,2,3,4].map(i => {
+                  const meds = (client as any).medications ?? []
+                  const med = meds[i] ?? {}
+                  const updateMed = (field: string, value: string) => {
+                    const updated = [...((client as any).medications ?? [])]
+                    updated[i] = { ...(updated[i] ?? {}), [field]: value }
+                    updateClient('medications', updated)
+                  }
+                  return (
+                    <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 2fr 2fr 1fr', gap: '8px', marginBottom: '8px' }}>
+                      <input style={inputStyle} value={med.name ?? ''} onChange={e => updateMed('name', e.target.value)} placeholder={`Med ${i+1}`} />
+                      <input style={inputStyle} value={med.dosage ?? ''} onChange={e => updateMed('dosage', e.target.value)} placeholder="e.g. 10mg daily" />
+                      <input style={inputStyle} value={med.condition ?? ''} onChange={e => updateMed('condition', e.target.value)} placeholder="e.g. Blood pressure" />
+                      <input style={inputStyle} value={med.doctor ?? ''} onChange={e => updateMed('doctor', e.target.value)} placeholder="Dr. Smith" />
+                      <input style={inputStyle} value={med.duration ?? ''} onChange={e => updateMed('duration', e.target.value)} placeholder="2 yrs" />
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </Card>
+
+          {/* Section 6 - Existing Insurance */}
+          <Card title="Existing Life Insurance Coverage" style={{ marginTop: '16px' }}>
+            {[0,1].map(i => {
+              const ins = ((client as any).existing_insurance ?? [])[i] ?? {}
+              const updateIns = (field: string, value: string) => {
+                const updated = [...((client as any).existing_insurance ?? [])]
+                updated[i] = { ...(updated[i] ?? {}), [field]: value }
+                updateClient('existing_insurance', updated)
+              }
+              return (
+                <div key={i} style={grid3}>
+                  <Field label={`Insurance Company ${i+1}`}>
+                    <Input value={ins.company ?? ''} onChange={v => updateIns('company', v)} />
+                  </Field>
+                  <Field label="Policy Type">
+                    <Input value={ins.type ?? ''} onChange={v => updateIns('type', v)} />
+                  </Field>
+                  <Field label="Coverage Amount">
+                    <InputWithPrefix prefix="$" value={ins.amount ?? ''} onChange={v => updateIns('amount', v)} type="number" />
+                  </Field>
+                </div>
+              )
+            })}
+          </Card>
+
+          {/* Section 7 - Bank Info */}
+          <Card title="Bank / Payment Information" style={{ marginTop: '16px' }}>
+            <div style={grid3}>
+              <Field label="Bank Name">
+                <Input value={(client as any).bank_name ?? ''} onChange={v => updateClient('bank_name', v)} />
+              </Field>
+              <Field label="City">
+                <Input value={(client as any).bank_city ?? ''} onChange={v => updateClient('bank_city', v)} />
+              </Field>
+              <Field label="State">
+                <Input value={(client as any).bank_state ?? ''} onChange={v => updateClient('bank_state', v)} maxLength={2} />
+              </Field>
+            </div>
+            <div style={grid2}>
+              <Field label="Routing Number">
+                <Input value={(client as any).bank_routing_number ?? ''} onChange={v => updateClient('bank_routing_number', v)} />
+              </Field>
+              <Field label="Account Number">
+                <Input value={(client as any).bank_account_number ?? ''} onChange={v => updateClient('bank_account_number', v)} />
+              </Field>
+            </div>
+          </Card>
+
+          {/* Section 8 - Agent Notes */}
+          <Card title="Agent Notes / Additional Information" style={{ marginTop: '16px' }}>
+            <Field label="Notes">
+              <Textarea value={(client as any).agent_notes ?? ''} onChange={v => updateClient('agent_notes', v)} placeholder="Any additional notes about this client for the application..." />
             </Field>
           </Card>
 
