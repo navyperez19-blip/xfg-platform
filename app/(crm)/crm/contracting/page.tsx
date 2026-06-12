@@ -278,39 +278,97 @@ export default function ContractingPage() {
                       </a>
                     )}
 
-                    {/* Status buttons */}
-                    {currentStatus === 'none' && !isAmerico && !isMutualOmaha && (
+                    {/* Americo reset */}
+                    {isAmerico && (americoFormSubmitted || currentStatus !== 'none') && (
+                      <button
+                        onClick={async () => {
+                          setSaving('Americo')
+                          const updatedCarriers = { ...carriers, Americo: 'none' }
+                          await supabase
+                            .from('agents')
+                            .update({
+                              carriers: updatedCarriers,
+                              americo_form_submitted: false,
+                              americo_form_submitted_at: null,
+                              americo_surelc_unlocked: false,
+                              americo_surelc_unlocked_at: null,
+                              updated_at: new Date().toISOString(),
+                            })
+                            .eq('id', agentRecord.id)
+                          setCarriers(updatedCarriers)
+                          setAmericoFormSubmitted(false)
+                          setAmericoSurelcUnlocked(false)
+                          setSaving(null)
+                        }}
+                        disabled={isSaving === 'Americo'}
+                        style={{ padding: '6px 12px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}
+                      >
+                        Reset
+                      </button>
+                    )}
+
+                    {/* Mutual of Omaha reset */}
+                    {isMutualOmaha && (mutualOmahaRequested || currentStatus !== 'none') && (
+                      <button
+                        onClick={async () => {
+                          setSaving('Mutual of Omaha')
+                          const updatedCarriers = { ...carriers, 'Mutual of Omaha': 'none' }
+                          await supabase
+                            .from('agents')
+                            .update({
+                              carriers: updatedCarriers,
+                              mutual_omaha_requested: false,
+                              mutual_omaha_requested_at: null,
+                              mutual_omaha_surelc_unlocked: false,
+                              mutual_omaha_surelc_unlocked_at: null,
+                              updated_at: new Date().toISOString(),
+                            })
+                            .eq('id', agentRecord.id)
+                          setCarriers(updatedCarriers)
+                          setMutualOmahaRequested(false)
+                          setMutualOmahaSurelcUnlocked(false)
+                          setSaving(null)
+                        }}
+                        disabled={isSaving === 'Mutual of Omaha'}
+                        style={{ padding: '6px 12px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}
+                      >
+                        Reset
+                      </button>
+                    )}
+
+                    {/* Standard carrier status buttons */}
+                    {!isAmerico && !isMutualOmaha && currentStatus === 'none' && (
                       <button
                         onClick={() => updateCarrierStatus(carrier.name, 'submitted')}
-                        disabled={isSaving}
-                        style={{ padding: '6px 14px', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit', opacity: isSaving ? 0.6 : 1 }}
+                        disabled={isSaving === carrier.name}
+                        style={{ padding: '6px 14px', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit' }}
                       >
                         Mark Submitted
                       </button>
                     )}
-                    {currentStatus === 'submitted' && (
+                    {!isAmerico && !isMutualOmaha && currentStatus === 'submitted' && (
                       <>
                         <button
                           onClick={() => updateCarrierStatus(carrier.name, 'active')}
-                          disabled={isSaving}
-                          style={{ padding: '6px 14px', backgroundColor: '#E8F5E9', color: '#1B5E20', border: '1px solid #A5D6A7', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit', opacity: isSaving ? 0.6 : 1 }}
+                          disabled={isSaving === carrier.name}
+                          style={{ padding: '6px 14px', backgroundColor: '#E8F5E9', color: '#1B5E20', border: '1px solid #A5D6A7', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit' }}
                         >
                           Mark Active
                         </button>
                         <button
                           onClick={() => updateCarrierStatus(carrier.name, 'none')}
-                          disabled={isSaving}
-                          style={{ padding: '6px 12px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit', opacity: isSaving ? 0.6 : 1 }}
+                          disabled={isSaving === carrier.name}
+                          style={{ padding: '6px 12px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}
                         >
                           Reset
                         </button>
                       </>
                     )}
-                    {currentStatus === 'active' && (
+                    {!isAmerico && !isMutualOmaha && currentStatus === 'active' && (
                       <button
                         onClick={() => updateCarrierStatus(carrier.name, 'none')}
-                        disabled={isSaving}
-                        style={{ padding: '6px 12px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit', opacity: isSaving ? 0.6 : 1 }}
+                        disabled={isSaving === carrier.name}
+                        style={{ padding: '6px 12px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}
                       >
                         Reset
                       </button>
