@@ -564,74 +564,159 @@ export default function AgentDetailPage() {
         )}
 
         {/* Contracting Tab */}
+        {/* Contracting Tab */}
         {activeTab === 'contracting' && (
           <div style={{ padding: '20px 24px' }}>
+
+            {/* Americo Banner */}
             {americoFormSubmitted && !americoSurelcUnlocked && (
               <div style={{ padding: '14px 16px', backgroundColor: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '8px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <p style={{ fontSize: '13px', fontWeight: '700', color: '#92400E', marginBottom: '2px' }}>⏳ Americo Form Submitted</p>
                   <p style={{ fontSize: '12px', color: '#92400E' }}>This agent has completed the Americo form and is waiting for their SureLC link to be unlocked.</p>
                 </div>
-                <button
-                  onClick={async () => {
-                    const { data: { user } } = await supabase.auth.getUser()
-                    const { error } = await supabase
-                      .from('agents')
-                      .update({
-                        americo_surelc_unlocked: true,
-                        americo_surelc_unlocked_at: new Date().toISOString(),
-                        americo_surelc_unlocked_by: user?.id,
+                <div style={{ display: 'flex', gap: '8px', marginLeft: '16px' }}>
+                  <button
+                    onClick={async () => {
+                      const { data: { user } } = await supabase.auth.getUser()
+                      const { error } = await supabase
+                        .from('agents')
+                        .update({
+                          americo_surelc_unlocked: true,
+                          americo_surelc_unlocked_at: new Date().toISOString(),
+                          americo_surelc_unlocked_by: user?.id,
+                          updated_at: new Date().toISOString(),
+                        })
+                        .eq('id', agentId)
+                      if (!error) setAmericoSurelcUnlocked(true)
+                    }}
+                    style={{ padding: '8px 18px', backgroundColor: '#27AE60', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit', whiteSpace: 'nowrap' }}
+                  >
+                    🔓 Unlock SureLC Link
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const updatedCarriers = { ...agentCarriers, Americo: 'none' }
+                      await supabase.from('agents').update({
+                        carriers: updatedCarriers,
+                        americo_form_submitted: false,
+                        americo_form_submitted_at: null,
+                        americo_surelc_unlocked: false,
+                        americo_surelc_unlocked_at: null,
                         updated_at: new Date().toISOString(),
-                      })
-                      .eq('id', agentId)
-                    if (!error) {
-                      setAmericoSurelcUnlocked(true)
-                    }
-                  }}
-                  style={{ padding: '8px 18px', backgroundColor: '#27AE60', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit', whiteSpace: 'nowrap', marginLeft: '16px' }}
-                >
-                  🔓 Unlock SureLC Link
-                </button>
-              </div>
-            )}
-            {americoSurelcUnlocked && (
-              <div style={{ padding: '12px 16px', backgroundColor: '#E8F5E9', border: '1px solid #A5D6A7', borderRadius: '8px', marginBottom: '16px' }}>
-                <p style={{ fontSize: '13px', fontWeight: '700', color: '#1B5E20' }}>✓ Americo SureLC link has been unlocked for this agent</p>
+                      }).eq('id', agentId)
+                      setAgentCarriers(updatedCarriers)
+                      setAmericoFormSubmitted(false)
+                      setAmericoSurelcUnlocked(false)
+                    }}
+                    style={{ padding: '8px 14px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit', whiteSpace: 'nowrap' }}
+                  >
+                    Reset
+                  </button>
+                </div>
               </div>
             )}
 
+            {americoSurelcUnlocked && (
+              <div style={{ padding: '12px 16px', backgroundColor: '#E8F5E9', border: '1px solid #A5D6A7', borderRadius: '8px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <p style={{ fontSize: '13px', fontWeight: '700', color: '#1B5E20' }}>✓ Americo SureLC link has been unlocked for this agent</p>
+                <button
+                  onClick={async () => {
+                    const updatedCarriers = { ...agentCarriers, Americo: 'none' }
+                    await supabase.from('agents').update({
+                      carriers: updatedCarriers,
+                      americo_form_submitted: false,
+                      americo_form_submitted_at: null,
+                      americo_surelc_unlocked: false,
+                      americo_surelc_unlocked_at: null,
+                      updated_at: new Date().toISOString(),
+                    }).eq('id', agentId)
+                    setAgentCarriers(updatedCarriers)
+                    setAmericoFormSubmitted(false)
+                    setAmericoSurelcUnlocked(false)
+                  }}
+                  style={{ padding: '6px 14px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}
+                >
+                  Reset
+                </button>
+              </div>
+            )}
+
+            {/* Mutual of Omaha Banner */}
             {mutualOmahaRequested && !mutualOmahaSurelcUnlocked && (
               <div style={{ padding: '14px 16px', backgroundColor: '#EDE9FE', border: '1px solid #C4B5FD', borderRadius: '8px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <p style={{ fontSize: '13px', fontWeight: '700', color: '#5B21B6', marginBottom: '2px' }}>⏳ Mutual of Omaha Access Requested</p>
                   <p style={{ fontSize: '12px', color: '#5B21B6' }}>This agent has requested access to the Mutual of Omaha SureLC contracting link.</p>
                 </div>
-                <button
-                  onClick={async () => {
-                    const { data: { user } } = await supabase.auth.getUser()
-                    const { error } = await supabase
-                      .from('agents')
-                      .update({
-                        mutual_omaha_surelc_unlocked: true,
-                        mutual_omaha_surelc_unlocked_at: new Date().toISOString(),
-                        mutual_omaha_surelc_unlocked_by: user?.id,
+                <div style={{ display: 'flex', gap: '8px', marginLeft: '16px' }}>
+                  <button
+                    onClick={async () => {
+                      const { data: { user } } = await supabase.auth.getUser()
+                      const { error } = await supabase
+                        .from('agents')
+                        .update({
+                          mutual_omaha_surelc_unlocked: true,
+                          mutual_omaha_surelc_unlocked_at: new Date().toISOString(),
+                          mutual_omaha_surelc_unlocked_by: user?.id,
+                          updated_at: new Date().toISOString(),
+                        })
+                        .eq('id', agentId)
+                      if (!error) setMutualOmahaSurelcUnlocked(true)
+                    }}
+                    style={{ padding: '8px 18px', backgroundColor: '#5B21B6', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit', whiteSpace: 'nowrap' }}
+                  >
+                    🔓 Unlock SureLC Link
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const updatedCarriers = { ...agentCarriers, 'Mutual of Omaha': 'none' }
+                      await supabase.from('agents').update({
+                        carriers: updatedCarriers,
+                        mutual_omaha_requested: false,
+                        mutual_omaha_requested_at: null,
+                        mutual_omaha_surelc_unlocked: false,
+                        mutual_omaha_surelc_unlocked_at: null,
                         updated_at: new Date().toISOString(),
-                      })
-                      .eq('id', agentId)
-                    if (!error) setMutualOmahaSurelcUnlocked(true)
-                  }}
-                  style={{ padding: '8px 18px', backgroundColor: '#5B21B6', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit', whiteSpace: 'nowrap', marginLeft: '16px' }}
-                >
-                  🔓 Unlock SureLC Link
-                </button>
+                      }).eq('id', agentId)
+                      setAgentCarriers(updatedCarriers)
+                      setMutualOmahaRequested(false)
+                      setMutualOmahaSurelcUnlocked(false)
+                    }}
+                    style={{ padding: '8px 14px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit', whiteSpace: 'nowrap' }}
+                  >
+                    Reset
+                  </button>
+                </div>
               </div>
             )}
 
             {mutualOmahaSurelcUnlocked && (
-              <div style={{ padding: '12px 16px', backgroundColor: '#E8F5E9', border: '1px solid #A5D6A7', borderRadius: '8px', marginBottom: '16px' }}>
+              <div style={{ padding: '12px 16px', backgroundColor: '#E8F5E9', border: '1px solid #A5D6A7', borderRadius: '8px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <p style={{ fontSize: '13px', fontWeight: '700', color: '#1B5E20' }}>✓ Mutual of Omaha SureLC link has been unlocked for this agent</p>
+                <button
+                  onClick={async () => {
+                    const updatedCarriers = { ...agentCarriers, 'Mutual of Omaha': 'none' }
+                    await supabase.from('agents').update({
+                      carriers: updatedCarriers,
+                      mutual_omaha_requested: false,
+                      mutual_omaha_requested_at: null,
+                      mutual_omaha_surelc_unlocked: false,
+                      mutual_omaha_surelc_unlocked_at: null,
+                      updated_at: new Date().toISOString(),
+                    }).eq('id', agentId)
+                    setAgentCarriers(updatedCarriers)
+                    setMutualOmahaRequested(false)
+                    setMutualOmahaSurelcUnlocked(false)
+                  }}
+                  style={{ padding: '6px 14px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}
+                >
+                  Reset
+                </button>
               </div>
             )}
+
+            {/* Carrier List */}
             {[
               { name: 'Aflac' },
               { name: 'Americo' },
@@ -660,18 +745,11 @@ export default function AgentDetailPage() {
                         <button
                           onClick={async () => {
                             const updatedCarriers = { ...agentCarriers, [carrier.name]: 'submitted' }
-                            const { error } = await supabase
-                              .from('agents')
-                              .update({ carriers: updatedCarriers, updated_at: new Date().toISOString() })
-                              .eq('id', agentId)
+                            const { error } = await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agentId)
                             if (!error) {
                               setAgentCarriers(updatedCarriers)
-                              const hasContractingStarted = Object.values(updatedCarriers).some(s => s === 'submitted' || s === 'active')
-                              if (hasContractingStarted && agent.current_stage !== 'active') {
-                                await supabase
-                                  .from('agents')
-                                  .update({ current_stage: 'active', updated_at: new Date().toISOString() })
-                                  .eq('id', agentId)
+                              if (agent.current_stage !== 'active') {
+                                await supabase.from('agents').update({ current_stage: 'active', updated_at: new Date().toISOString() }).eq('id', agentId)
                                 setAgent({ ...agent, current_stage: 'active' })
                               }
                             }
@@ -685,10 +763,7 @@ export default function AgentDetailPage() {
                         <button
                           onClick={async () => {
                             const updatedCarriers = { ...agentCarriers, [carrier.name]: 'active' }
-                            const { error } = await supabase
-                              .from('agents')
-                              .update({ carriers: updatedCarriers, updated_at: new Date().toISOString() })
-                              .eq('id', agentId)
+                            const { error } = await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agentId)
                             if (!error) setAgentCarriers(updatedCarriers)
                           }}
                           style={{ padding: '5px 12px', backgroundColor: '#E8F5E9', color: '#1B5E20', border: '1px solid #A5D6A7', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit' }}
@@ -700,10 +775,7 @@ export default function AgentDetailPage() {
                         <button
                           onClick={async () => {
                             const updatedCarriers = { ...agentCarriers, [carrier.name]: 'none' }
-                            const { error } = await supabase
-                              .from('agents')
-                              .update({ carriers: updatedCarriers, updated_at: new Date().toISOString() })
-                              .eq('id', agentId)
+                            const { error } = await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agentId)
                             if (!error) setAgentCarriers(updatedCarriers)
                           }}
                           style={{ padding: '5px 10px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}
