@@ -20,6 +20,10 @@ export default function ClientDetailPage() {
   const [editingClient, setEditingClient] = useState(false)
   const [editingPolicyId, setEditingPolicyId] = useState<string | null>(null)
   const [showAddPolicy, setShowAddPolicy] = useState(false)
+  const [showPreFill, setShowPreFill] = useState(false)
+  const [preFillForm, setPreFillForm] = useState<any>({})
+  const [savingPreFill, setSavingPreFill] = useState(false)
+  const [preFillSuccess, setPreFillSuccess] = useState('')
   const [notes, setNotes] = useState<any[]>([])
   const [showAddNote, setShowAddNote] = useState(false)
   const [noteForm, setNoteForm] = useState({ note_type: 'call', content: '', follow_up_date: '' })
@@ -61,6 +65,7 @@ export default function ClientDetailPage() {
 
       setClient(clientData)
       setClientForm(clientData)
+      setPreFillForm(clientData)
 
       const { data: policyData } = await supabase
         .from('crm_policies')
@@ -472,6 +477,364 @@ export default function ClientDetailPage() {
           <div style={{ padding: '40px', textAlign: 'center' }}>
             <p style={{ fontSize: '14px', color: '#7A7A7A', marginBottom: '4px' }}>No policies yet</p>
             <p style={{ fontSize: '12px', color: '#AAA' }}>Click "Add Policy" to log a policy for this client</p>
+          </div>
+        )}
+      </div>
+
+      {/* Pre-Fill Worksheet Section */}
+      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'hidden', marginTop: '20px' }}>
+        <div style={{ padding: '18px 24px', borderBottom: showPreFill ? '1px solid #E5E1DA' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1A1A1A' }}>Pre-Fill Worksheet</h2>
+            <p style={{ fontSize: '12px', color: '#7A7A7A', marginTop: '2px' }}>Gather all client info needed for applications</p>
+          </div>
+          <button
+            onClick={() => setShowPreFill(!showPreFill)}
+            style={{ padding: '8px 18px', backgroundColor: showPreFill ? '#FFFFFF' : '#C9A96E', color: showPreFill ? '#4A4A4A' : '#1A1A1A', border: '1px solid #E5E1DA', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', fontFamily: 'inherit' }}
+          >
+            {showPreFill ? 'Collapse' : 'Open Worksheet'}
+          </button>
+        </div>
+
+        {showPreFill && (
+          <div style={{ padding: '24px' }}>
+            {preFillSuccess && (
+              <div style={{ padding: '12px 16px', backgroundColor: '#F0FAF4', border: '1px solid #C8E6C9', borderRadius: '8px', color: '#2E7D32', fontSize: '13px', marginBottom: '20px' }}>
+                {preFillSuccess}
+              </div>
+            )}
+
+            {/* Section 1: Personal Info */}
+            <div style={{ marginBottom: '28px' }}>
+              <h3 style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', paddingBottom: '8px', borderBottom: '1px solid #F0EDE8' }}>
+                1. Personal Information
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={grid2}>
+                  <div><label style={lbl}>First Name</label><input style={inp} value={preFillForm.first_name ?? ''} onChange={e => setPreFillForm({ ...preFillForm, first_name: e.target.value })} /></div>
+                  <div><label style={lbl}>Last Name</label><input style={inp} value={preFillForm.last_name ?? ''} onChange={e => setPreFillForm({ ...preFillForm, last_name: e.target.value })} /></div>
+                </div>
+                <div style={grid3}>
+                  <div><label style={lbl}>Date of Birth</label><input type="date" style={inp} value={preFillForm.date_of_birth ?? ''} onChange={e => setPreFillForm({ ...preFillForm, date_of_birth: e.target.value })} /></div>
+                  <div>
+                    <label style={lbl}>Gender</label>
+                    <select style={{ ...inp, cursor: 'pointer' }} value={preFillForm.gender ?? ''} onChange={e => setPreFillForm({ ...preFillForm, gender: e.target.value })}>
+                      <option value="">Select</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={lbl}>Marital Status</label>
+                    <select style={{ ...inp, cursor: 'pointer' }} value={preFillForm.marital_status ?? ''} onChange={e => setPreFillForm({ ...preFillForm, marital_status: e.target.value })}>
+                      <option value="">Select</option>
+                      <option value="single">Single</option>
+                      <option value="married">Married</option>
+                      <option value="divorced">Divorced</option>
+                      <option value="widowed">Widowed</option>
+                    </select>
+                  </div>
+                </div>
+                <div style={grid2}>
+                  <div><label style={lbl}>SSN (last 4)</label><input style={inp} value={preFillForm.ssn_last4 ?? ''} onChange={e => setPreFillForm({ ...preFillForm, ssn_last4: e.target.value })} placeholder="XXXX" maxLength={4} /></div>
+                  <div><label style={lbl}># of Dependents</label><input type="number" style={inp} value={preFillForm.num_dependents ?? ''} onChange={e => setPreFillForm({ ...preFillForm, num_dependents: e.target.value })} placeholder="0" /></div>
+                </div>
+                <div style={grid2}>
+                  <div><label style={lbl}>Phone</label><input style={inp} value={preFillForm.phone ?? ''} onChange={e => setPreFillForm({ ...preFillForm, phone: e.target.value })} /></div>
+                  <div><label style={lbl}>Email</label><input type="email" style={inp} value={preFillForm.email ?? ''} onChange={e => setPreFillForm({ ...preFillForm, email: e.target.value })} /></div>
+                </div>
+                <div><label style={lbl}>Street Address</label><input style={inp} value={preFillForm.address ?? ''} onChange={e => setPreFillForm({ ...preFillForm, address: e.target.value })} /></div>
+                <div style={grid3}>
+                  <div><label style={lbl}>City</label><input style={inp} value={preFillForm.city ?? ''} onChange={e => setPreFillForm({ ...preFillForm, city: e.target.value })} /></div>
+                  <div>
+                    <label style={lbl}>State</label>
+                    <select style={{ ...inp, cursor: 'pointer' }} value={preFillForm.state ?? ''} onChange={e => setPreFillForm({ ...preFillForm, state: e.target.value })}>
+                      <option value="">Select</option>
+                      {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div><label style={lbl}>ZIP</label><input style={inp} value={preFillForm.zip ?? ''} onChange={e => setPreFillForm({ ...preFillForm, zip: e.target.value })} /></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Section 2: Employment/Financial */}
+            <div style={{ marginBottom: '28px' }}>
+              <h3 style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', paddingBottom: '8px', borderBottom: '1px solid #F0EDE8' }}>
+                2. Employment &amp; Financial
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={grid2}>
+                  <div><label style={lbl}>Employer / Occupation</label><input style={inp} value={preFillForm.employer ?? ''} onChange={e => setPreFillForm({ ...preFillForm, employer: e.target.value })} /></div>
+                  <div>
+                    <label style={lbl}>Employment Status</label>
+                    <select style={{ ...inp, cursor: 'pointer' }} value={preFillForm.employment_status ?? ''} onChange={e => setPreFillForm({ ...preFillForm, employment_status: e.target.value })}>
+                      <option value="">Select</option>
+                      <option value="employed">Employed</option>
+                      <option value="self_employed">Self-Employed</option>
+                      <option value="retired">Retired</option>
+                      <option value="unemployed">Unemployed</option>
+                      <option value="disabled">Disabled</option>
+                    </select>
+                  </div>
+                </div>
+                <div style={grid2}>
+                  <div><label style={lbl}>Annual Income</label><input type="number" style={inp} value={preFillForm.annual_income ?? ''} onChange={e => setPreFillForm({ ...preFillForm, annual_income: e.target.value })} placeholder="0" /></div>
+                  <div><label style={lbl}>Years at Job</label><input type="number" style={inp} value={preFillForm.years_at_job ?? ''} onChange={e => setPreFillForm({ ...preFillForm, years_at_job: e.target.value })} placeholder="0" /></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Section 3: Health/Lifestyle */}
+            <div style={{ marginBottom: '28px' }}>
+              <h3 style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', paddingBottom: '8px', borderBottom: '1px solid #F0EDE8' }}>
+                3. Health &amp; Lifestyle
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {[
+                  { key: 'h_tobacco', label: 'Tobacco / nicotine use in the past 12 months?' },
+                  { key: 'h_heart', label: 'Heart disease, heart attack, or chest pain?' },
+                  { key: 'h_diabetes', label: 'Diabetes or blood sugar issues?' },
+                  { key: 'h_cancer', label: 'Cancer (history or current)?' },
+                  { key: 'h_blood_pressure', label: 'High blood pressure?' },
+                  { key: 'h_stroke', label: 'Stroke or TIA (mini-stroke)?' },
+                  { key: 'h_kidney', label: 'Kidney disease or dialysis?' },
+                  { key: 'h_hiv', label: 'HIV / AIDS?' },
+                  { key: 'h_mental', label: 'Mental health treatment or hospitalization in the past 2 years?' },
+                ].map(item => (
+                  <div key={item.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: '#FAFAF8', borderRadius: '8px', border: '1px solid #F0EDE8' }}>
+                    <span style={{ fontSize: '13px', color: '#1A1A1A', flex: 1, marginRight: '12px' }}>{item.label}</span>
+                    <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                      {(['yes', 'no'] as const).map(opt => (
+                        <button
+                          key={opt}
+                          onClick={() => setPreFillForm({ ...preFillForm, [item.key]: opt })}
+                          style={{
+                            padding: '5px 16px', fontSize: '12px', fontWeight: '600', borderRadius: '6px', cursor: 'pointer', fontFamily: 'inherit', border: '1px solid',
+                            backgroundColor: preFillForm[item.key] === opt ? (opt === 'yes' ? '#FEE2E2' : '#F0FAF4') : '#FFFFFF',
+                            color: preFillForm[item.key] === opt ? (opt === 'yes' ? '#C0392B' : '#2E7D32') : '#7A7A7A',
+                            borderColor: preFillForm[item.key] === opt ? (opt === 'yes' ? '#FECACA' : '#C8E6C9') : '#E5E1DA',
+                          }}
+                        >
+                          {opt === 'yes' ? 'Yes' : 'No'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: '12px' }}>
+                <label style={lbl}>Height / Weight / Additional Health Notes</label>
+                <textarea style={{ ...inp, minHeight: '70px', resize: 'vertical' }} value={preFillForm.health_notes ?? ''} onChange={e => setPreFillForm({ ...preFillForm, health_notes: e.target.value })} placeholder="e.g. 5'10'' / 180 lbs. On Lisinopril for BP." />
+              </div>
+            </div>
+
+            {/* Section 4: Beneficiaries */}
+            <div style={{ marginBottom: '28px' }}>
+              <h3 style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', paddingBottom: '8px', borderBottom: '1px solid #F0EDE8' }}>
+                4. Beneficiaries
+              </h3>
+              <p style={{ fontSize: '12px', color: '#7A7A7A', marginBottom: '12px', fontWeight: '600' }}>Primary Beneficiary</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+                <div style={grid2}>
+                  <div><label style={lbl}>Full Name</label><input style={inp} value={preFillForm.primary_bene_name ?? ''} onChange={e => setPreFillForm({ ...preFillForm, primary_bene_name: e.target.value })} /></div>
+                  <div><label style={lbl}>Relationship</label><input style={inp} value={preFillForm.primary_bene_rel ?? ''} onChange={e => setPreFillForm({ ...preFillForm, primary_bene_rel: e.target.value })} placeholder="e.g. Spouse" /></div>
+                </div>
+                <div style={grid2}>
+                  <div><label style={lbl}>Date of Birth</label><input type="date" style={inp} value={preFillForm.primary_bene_dob ?? ''} onChange={e => setPreFillForm({ ...preFillForm, primary_bene_dob: e.target.value })} /></div>
+                  <div><label style={lbl}>SSN (last 4)</label><input style={inp} value={preFillForm.primary_bene_ssn ?? ''} onChange={e => setPreFillForm({ ...preFillForm, primary_bene_ssn: e.target.value })} placeholder="XXXX" maxLength={4} /></div>
+                </div>
+              </div>
+              <p style={{ fontSize: '12px', color: '#7A7A7A', marginBottom: '12px', fontWeight: '600' }}>Contingent Beneficiary</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={grid2}>
+                  <div><label style={lbl}>Full Name</label><input style={inp} value={preFillForm.contingent_bene_name ?? ''} onChange={e => setPreFillForm({ ...preFillForm, contingent_bene_name: e.target.value })} /></div>
+                  <div><label style={lbl}>Relationship</label><input style={inp} value={preFillForm.contingent_bene_rel ?? ''} onChange={e => setPreFillForm({ ...preFillForm, contingent_bene_rel: e.target.value })} placeholder="e.g. Child" /></div>
+                </div>
+                <div style={grid2}>
+                  <div><label style={lbl}>Date of Birth</label><input type="date" style={inp} value={preFillForm.contingent_bene_dob ?? ''} onChange={e => setPreFillForm({ ...preFillForm, contingent_bene_dob: e.target.value })} /></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Section 5: Medications */}
+            <div style={{ marginBottom: '28px' }}>
+              <h3 style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', paddingBottom: '8px', borderBottom: '1px solid #F0EDE8' }}>
+                5. Medications
+              </h3>
+              <div>
+                <label style={lbl}>List all current medications, dosages, and conditions treated</label>
+                <textarea style={{ ...inp, minHeight: '100px', resize: 'vertical' }} value={preFillForm.medications ?? ''} onChange={e => setPreFillForm({ ...preFillForm, medications: e.target.value })} placeholder={'e.g. Lisinopril 10mg – high blood pressure\nMetformin 500mg – Type 2 diabetes'} />
+              </div>
+            </div>
+
+            {/* Section 6: Existing Insurance */}
+            <div style={{ marginBottom: '28px' }}>
+              <h3 style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', paddingBottom: '8px', borderBottom: '1px solid #F0EDE8' }}>
+                6. Existing Insurance
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: '#FAFAF8', borderRadius: '8px', border: '1px solid #F0EDE8' }}>
+                  <span style={{ fontSize: '13px', color: '#1A1A1A' }}>Does client have any existing life insurance?</span>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    {(['yes', 'no'] as const).map(opt => (
+                      <button
+                        key={opt}
+                        onClick={() => setPreFillForm({ ...preFillForm, has_existing_insurance: opt })}
+                        style={{
+                          padding: '5px 16px', fontSize: '12px', fontWeight: '600', borderRadius: '6px', cursor: 'pointer', fontFamily: 'inherit', border: '1px solid',
+                          backgroundColor: preFillForm.has_existing_insurance === opt ? (opt === 'yes' ? '#EDE9FE' : '#F0FAF4') : '#FFFFFF',
+                          color: preFillForm.has_existing_insurance === opt ? (opt === 'yes' ? '#5B21B6' : '#2E7D32') : '#7A7A7A',
+                          borderColor: preFillForm.has_existing_insurance === opt ? (opt === 'yes' ? '#DDD6FE' : '#C8E6C9') : '#E5E1DA',
+                        }}
+                      >
+                        {opt === 'yes' ? 'Yes' : 'No'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {preFillForm.has_existing_insurance === 'yes' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={grid3}>
+                      <div><label style={lbl}>Carrier</label><input style={inp} value={preFillForm.existing_ins_carrier ?? ''} onChange={e => setPreFillForm({ ...preFillForm, existing_ins_carrier: e.target.value })} /></div>
+                      <div><label style={lbl}>Policy Type</label><input style={inp} value={preFillForm.existing_ins_type ?? ''} onChange={e => setPreFillForm({ ...preFillForm, existing_ins_type: e.target.value })} placeholder="e.g. Term, Whole Life" /></div>
+                      <div><label style={lbl}>Face Amount</label><input type="number" style={inp} value={preFillForm.existing_ins_face ?? ''} onChange={e => setPreFillForm({ ...preFillForm, existing_ins_face: e.target.value })} placeholder="250000" /></div>
+                    </div>
+                    <div style={grid2}>
+                      <div><label style={lbl}>Monthly Premium</label><input type="number" style={inp} value={preFillForm.existing_ins_premium ?? ''} onChange={e => setPreFillForm({ ...preFillForm, existing_ins_premium: e.target.value })} placeholder="0.00" /></div>
+                      <div>
+                        <label style={lbl}>Replacing this policy?</label>
+                        <select style={{ ...inp, cursor: 'pointer' }} value={preFillForm.existing_ins_replacing ?? ''} onChange={e => setPreFillForm({ ...preFillForm, existing_ins_replacing: e.target.value })}>
+                          <option value="">Select</option>
+                          <option value="yes">Yes – replacing</option>
+                          <option value="no">No – keeping</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Section 7: Bank Info */}
+            <div style={{ marginBottom: '28px' }}>
+              <h3 style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', paddingBottom: '8px', borderBottom: '1px solid #F0EDE8' }}>
+                7. Bank Information
+              </h3>
+              <div style={{ padding: '10px 14px', backgroundColor: '#FFF8E1', border: '1px solid #FFE082', borderRadius: '8px', marginBottom: '12px' }}>
+                <p style={{ fontSize: '12px', color: '#F57F17' }}>Handle with care — for pre-filling applications only.</p>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={grid2}>
+                  <div><label style={lbl}>Bank Name</label><input style={inp} value={preFillForm.bank_name ?? ''} onChange={e => setPreFillForm({ ...preFillForm, bank_name: e.target.value })} /></div>
+                  <div>
+                    <label style={lbl}>Account Type</label>
+                    <select style={{ ...inp, cursor: 'pointer' }} value={preFillForm.bank_account_type ?? ''} onChange={e => setPreFillForm({ ...preFillForm, bank_account_type: e.target.value })}>
+                      <option value="">Select</option>
+                      <option value="checking">Checking</option>
+                      <option value="savings">Savings</option>
+                    </select>
+                  </div>
+                </div>
+                <div style={grid2}>
+                  <div><label style={lbl}>Routing Number</label><input style={inp} value={preFillForm.bank_routing ?? ''} onChange={e => setPreFillForm({ ...preFillForm, bank_routing: e.target.value })} placeholder="9 digits" maxLength={9} /></div>
+                  <div><label style={lbl}>Account Number</label><input style={inp} value={preFillForm.bank_account ?? ''} onChange={e => setPreFillForm({ ...preFillForm, bank_account: e.target.value })} /></div>
+                </div>
+                <div>
+                  <label style={lbl}>Draft Date (day of month)</label>
+                  <input type="number" style={{ ...inp, maxWidth: '120px' }} value={preFillForm.bank_draft_date ?? ''} onChange={e => setPreFillForm({ ...preFillForm, bank_draft_date: e.target.value })} placeholder="1–28" min={1} max={28} />
+                </div>
+              </div>
+            </div>
+
+            {/* Section 8: Agent Notes */}
+            <div style={{ marginBottom: '24px' }}>
+              <h3 style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', paddingBottom: '8px', borderBottom: '1px solid #F0EDE8' }}>
+                8. Agent Notes
+              </h3>
+              <div>
+                <label style={lbl}>Internal notes (not shared with client)</label>
+                <textarea style={{ ...inp, minHeight: '90px', resize: 'vertical' }} value={preFillForm.agent_notes ?? ''} onChange={e => setPreFillForm({ ...preFillForm, agent_notes: e.target.value })} placeholder="Coverage needs, objections, follow-up notes, referral source, etc." />
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '16px', borderTop: '1px solid #E5E1DA' }}>
+              <button onClick={() => setShowPreFill(false)} style={{ padding: '10px 20px', backgroundColor: '#FFFFFF', color: '#4A4A4A', border: '1px solid #E5E1DA', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit' }}>
+                Collapse
+              </button>
+              <button
+                onClick={async () => {
+                  setSavingPreFill(true)
+                  const worksheetData = {
+                    gender: preFillForm.gender,
+                    marital_status: preFillForm.marital_status,
+                    ssn_last4: preFillForm.ssn_last4,
+                    num_dependents: preFillForm.num_dependents,
+                    address: preFillForm.address,
+                    employer: preFillForm.employer,
+                    employment_status: preFillForm.employment_status,
+                    annual_income: preFillForm.annual_income,
+                    years_at_job: preFillForm.years_at_job,
+                    h_tobacco: preFillForm.h_tobacco,
+                    h_heart: preFillForm.h_heart,
+                    h_diabetes: preFillForm.h_diabetes,
+                    h_cancer: preFillForm.h_cancer,
+                    h_blood_pressure: preFillForm.h_blood_pressure,
+                    h_stroke: preFillForm.h_stroke,
+                    h_kidney: preFillForm.h_kidney,
+                    h_hiv: preFillForm.h_hiv,
+                    h_mental: preFillForm.h_mental,
+                    medications: preFillForm.medications,
+                    primary_bene_name: preFillForm.primary_bene_name,
+                    primary_bene_rel: preFillForm.primary_bene_rel,
+                    primary_bene_dob: preFillForm.primary_bene_dob,
+                    primary_bene_ssn: preFillForm.primary_bene_ssn,
+                    contingent_bene_name: preFillForm.contingent_bene_name,
+                    contingent_bene_rel: preFillForm.contingent_bene_rel,
+                    contingent_bene_dob: preFillForm.contingent_bene_dob,
+                    has_existing_insurance: preFillForm.has_existing_insurance,
+                    existing_ins_carrier: preFillForm.existing_ins_carrier,
+                    existing_ins_type: preFillForm.existing_ins_type,
+                    existing_ins_face: preFillForm.existing_ins_face,
+                    existing_ins_premium: preFillForm.existing_ins_premium,
+                    existing_ins_replacing: preFillForm.existing_ins_replacing,
+                    bank_name: preFillForm.bank_name,
+                    bank_account_type: preFillForm.bank_account_type,
+                    bank_routing: preFillForm.bank_routing,
+                    bank_account: preFillForm.bank_account,
+                    bank_draft_date: preFillForm.bank_draft_date,
+                    agent_notes: preFillForm.agent_notes,
+                  }
+                  const { error } = await supabase
+                    .from('crm_clients')
+                    .update({
+                      first_name: preFillForm.first_name,
+                      last_name: preFillForm.last_name,
+                      date_of_birth: preFillForm.date_of_birth || null,
+                      phone: preFillForm.phone || null,
+                      email: preFillForm.email || null,
+                      city: preFillForm.city || null,
+                      state: preFillForm.state || null,
+                      zip: preFillForm.zip || null,
+                      health_notes: preFillForm.health_notes || null,
+                      tobacco_user: preFillForm.h_tobacco === 'yes',
+                      worksheet_data: worksheetData,
+                    } as any)
+                    .eq('id', clientId)
+                  if (!error) {
+                    setClient({ ...client, ...preFillForm })
+                    setPreFillSuccess('Worksheet saved successfully.')
+                    setTimeout(() => setPreFillSuccess(''), 3000)
+                  }
+                  setSavingPreFill(false)
+                }}
+                disabled={savingPreFill}
+                style={{ padding: '10px 28px', backgroundColor: '#C9A96E', color: '#1A1A1A', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '700', fontFamily: 'inherit', opacity: savingPreFill ? 0.6 : 1 }}
+              >
+                {savingPreFill ? 'Saving...' : 'Save Worksheet'}
+              </button>
+            </div>
           </div>
         )}
       </div>
