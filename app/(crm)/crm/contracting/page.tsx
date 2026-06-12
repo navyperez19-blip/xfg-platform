@@ -66,6 +66,32 @@ export default function ContractingPage() {
       setLoading(false)
     }
     load()
+
+    // Subscribe to real-time changes on the agent record
+    const subscription = supabase
+      .channel('agent-contracting-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'agents',
+        },
+        (payload) => {
+          const updated = payload.new as any
+          setCarriers(updated.carriers ?? {})
+          setAmericoFormSubmitted(updated.americo_form_submitted ?? false)
+          setAmericoSurelcUnlocked(updated.americo_surelc_unlocked ?? false)
+          setMutualOmahaRequested(updated.mutual_omaha_requested ?? false)
+          setMutualOmahaSurelcUnlocked(updated.mutual_omaha_surelc_unlocked ?? false)
+          setAgentRecord((prev: any) => ({ ...prev, ...updated }))
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(subscription)
+    }
   }, [router])
 
   async function updateCarrierStatus(carrierName: string, newStatus: string) {
@@ -300,7 +326,7 @@ export default function ContractingPage() {
                           setAmericoSurelcUnlocked(false)
                           setSaving(null)
                         }}
-                        disabled={isSaving === 'Americo'}
+                        disabled={saving === 'Americo'}
                         style={{ padding: '6px 12px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}
                       >
                         Reset
@@ -329,7 +355,7 @@ export default function ContractingPage() {
                           setMutualOmahaSurelcUnlocked(false)
                           setSaving(null)
                         }}
-                        disabled={isSaving === 'Mutual of Omaha'}
+                        disabled={saving === 'Mutual of Omaha'}
                         style={{ padding: '6px 12px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}
                       >
                         Reset
@@ -340,7 +366,7 @@ export default function ContractingPage() {
                     {!isAmerico && !isMutualOmaha && currentStatus === 'none' && (
                       <button
                         onClick={() => updateCarrierStatus(carrier.name, 'submitted')}
-                        disabled={isSaving === carrier.name}
+                        disabled={saving === carrier.name}
                         style={{ padding: '6px 14px', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit' }}
                       >
                         Mark Submitted
@@ -350,14 +376,14 @@ export default function ContractingPage() {
                       <>
                         <button
                           onClick={() => updateCarrierStatus(carrier.name, 'active')}
-                          disabled={isSaving === carrier.name}
+                          disabled={saving === carrier.name}
                           style={{ padding: '6px 14px', backgroundColor: '#E8F5E9', color: '#1B5E20', border: '1px solid #A5D6A7', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit' }}
                         >
                           Mark Active
                         </button>
                         <button
                           onClick={() => updateCarrierStatus(carrier.name, 'none')}
-                          disabled={isSaving === carrier.name}
+                          disabled={saving === carrier.name}
                           style={{ padding: '6px 12px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}
                         >
                           Reset
@@ -367,7 +393,7 @@ export default function ContractingPage() {
                     {!isAmerico && !isMutualOmaha && currentStatus === 'active' && (
                       <button
                         onClick={() => updateCarrierStatus(carrier.name, 'none')}
-                        disabled={isSaving === carrier.name}
+                        disabled={saving === carrier.name}
                         style={{ padding: '6px 12px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}
                       >
                         Reset
