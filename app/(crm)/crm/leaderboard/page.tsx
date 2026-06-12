@@ -33,35 +33,20 @@ export default function LeaderboardPage() {
       const now = new Date()
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
 
-      // Fetch all active agents with their policies
-      const { data: agents } = await supabase
-        .from('agents')
-        .select(`
-          id, full_name, agent_model,
-          crm_policies(id, status, annual_premium, date_written)
-        `)
-        .eq('current_stage', 'active')
-        .order('full_name')
+      // Use security definer function to bypass RLS for leaderboard
+      const { data: leaderboardData } = await supabase
+        .rpc('get_leaderboard_data', { month_start: startOfMonth })
 
-      const stats = (agents ?? []).map(agent => {
-        const allPolicies = (agent as any).crm_policies ?? []
-        const mtdPolicies = allPolicies.filter((p: any) => p.date_written >= startOfMonth)
-        const activePolicies = allPolicies.filter((p: any) => ['active', 'issued', 'approved'].includes(p.status))
-        const mtdPremium = mtdPolicies.reduce((s: number, p: any) => s + (Number(p.annual_premium) || 0), 0)
+      const stats = (leaderboardData ?? []).map((row: any) => ({
+        id: row.agent_id,
+        full_name: row.full_name,
+        agent_model: row.agent_model,
+        mtdPolicies: Number(row.mtd_policies),
+        mtdPremium: Number(row.mtd_premium),
+        activePolicies: Number(row.active_policies),
+        totalPolicies: Number(row.total_policies),
+      }))
 
-        return {
-          id: agent.id,
-          full_name: agent.full_name,
-          agent_model: agent.agent_model,
-          mtdPolicies: mtdPolicies.length,
-          mtdPremium,
-          activePolicies: activePolicies.length,
-          totalPolicies: allPolicies.length,
-        }
-      })
-
-      // Sort by MTD premium descending
-      stats.sort((a, b) => b.mtdPremium - a.mtdPremium)
       setLeaderboard(stats)
       setLoading(false)
     }
