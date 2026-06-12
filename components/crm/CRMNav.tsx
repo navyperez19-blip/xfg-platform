@@ -20,6 +20,7 @@ export default function CRMNav({
 
   const navItems = [
     { href: '/crm', label: 'Dashboard', icon: '⬡', exact: true },
+    { href: '/crm/leaderboard', label: 'Leaderboard', icon: '🏆' },
     { href: '/crm/leads', label: 'Leads Pipeline', icon: '◎' },
     { href: '/crm/clients', label: 'My Clients', icon: '◈' },
     { href: '/crm/clients/new', label: 'Add Client', icon: '+' },
