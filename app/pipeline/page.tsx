@@ -158,7 +158,7 @@ export default function PipelinePage() {
         {/* List View */}
         {view === 'list' && (
           <div style={{ background: '#FFFFFF', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', overflow: 'hidden', overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #EBE8E3' }}>
                   {[
