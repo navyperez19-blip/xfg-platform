@@ -600,9 +600,9 @@ export default function AgentDetailPage() {
                       await supabase.from('agents').update({
                         carriers: updatedCarriers,
                         americo_form_submitted: false,
-                        americo_form_submitted_at: null,
+                        americo_form_submitted_at: null as any,
                         americo_surelc_unlocked: false,
-                        americo_surelc_unlocked_at: null,
+                        americo_surelc_unlocked_at: null as any,
                         updated_at: new Date().toISOString(),
                       }).eq('id', agentId)
                       setAgentCarriers(updatedCarriers)
@@ -674,9 +674,9 @@ export default function AgentDetailPage() {
                       await supabase.from('agents').update({
                         carriers: updatedCarriers,
                         mutual_omaha_requested: false,
-                        mutual_omaha_requested_at: null,
+                        mutual_omaha_requested_at: null as any,
                         mutual_omaha_surelc_unlocked: false,
-                        mutual_omaha_surelc_unlocked_at: null,
+                        mutual_omaha_surelc_unlocked_at: null as any,
                         updated_at: new Date().toISOString(),
                       }).eq('id', agentId)
                       setAgentCarriers(updatedCarriers)
