@@ -624,7 +624,7 @@ export default function AgentPortalPage() {
             <h2 style={{ color: '#1A1814', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>System Setup</h2>
             <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '20px' }}>Check off each item as you receive access. The XFG team will confirm each one on their end.</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
-              {['CRM Access', 'Dialer Setup', 'XFG Email Configured', 'Agent Profile Complete'].map(item => {
+              {['XFG Email Configured', 'Agent Profile Complete'].map(item => {
                 const items = agent.system_setup_items || {}
                 const isChecked = items[item] === true
                 return (
@@ -650,41 +650,39 @@ export default function AgentPortalPage() {
               })}
             </div>
             <div style={{ marginTop: '20px', borderTop: '1px solid #EBE8E3', paddingTop: '20px' }}>
-              <p style={{ color: '#6B6966', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '14px' }}>Carrier Contracting</p>
-              <p style={{ color: '#9A9890', fontSize: '13px', marginBottom: '14px' }}>As you submit each carrier contract externally, mark it below so your team knows.</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {['Aflac', 'Americo', 'Transamerica', 'UHL', 'AHL', 'Mutual of Omaha', 'Ethos'].map(carrier => {
-                  const carriersObj = (agent.carriers as Record<string, string>) || {}
-                  const status = carriersObj[carrier] || 'none'
-                  return (
-                    <div key={carrier} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: status === 'active' ? '#F0FFF4' : status === 'submitted' ? '#FFFBF0' : '#F0EDE8', border: `1px solid ${status === 'active' ? '#A8D5B5' : status === 'submitted' ? '#E8C87A' : '#DDD9D2'}`, borderRadius: '10px', padding: '12px 16px' }}>
-                      <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600' }}>{carrier}</p>
-                      {status === 'active' && (
-                        <span style={{ background: '#2D6A4F', color: '#FFFFFF', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px' }}>✓ Active</span>
-                      )}
-                      {status === 'submitted' && (
-                        <span style={{ background: '#B5652A', color: '#FFFFFF', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px' }}>⏳ Submitted</span>
-                      )}
-                      {status === 'none' && (
-                        <button
-                          onClick={async () => {
-                            const updated = { ...carriersObj, [carrier]: 'submitted' }
-                            await supabase.from('agents').update({ carriers: updated, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                            setAgent({ ...agent, carriers: updated })
-                            const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
-                            if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'profile_update', title: `${carrier} contract submitted`, message: `${agent.full_name} has submitted their ${carrier} contract` })))
-                          }}
-                          style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', padding: '6px 14px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}
-                        >
-                          Mark Submitted
-                        </button>
-                      )}
-                    </div>
-                  )
-                })}
+              {/* Dialer Setup */}
+              <div style={{ background: '#F5F2ED', border: '1px solid #DDD9D2', borderRadius: '12px', padding: '18px 20px', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '20px' }}>📞</span>
+                  <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '700' }}>Dialer Setup — Contact Finley</p>
+                </div>
+                <p style={{ color: '#6B6966', fontSize: '13px', lineHeight: 1.6, marginBottom: '14px' }}>
+                  To get your dialer set up, contact Finley directly. He will walk you through the ReadyMode setup process.
+                </p>
+                <a href="tel:8587529085" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#C9A96E', color: '#1A1814', padding: '10px 20px', borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: '700' }}>
+                  📱 Call Finley — (858) 752-9085
+                </a>
+              </div>
+
+              {/* CRM Contracting Note */}
+              <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '12px', padding: '18px 20px', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '20px' }}>💡</span>
+                  <p style={{ color: '#1E40AF', fontSize: '15px', fontWeight: '700' }}>Your Carrier Contracting</p>
+                </div>
+                <p style={{ color: '#1E40AF', fontSize: '13px', lineHeight: 1.7 }}>
+                  Once you&apos;ve spoken with Finley about your dialer setup, head to the <strong>My Contracting</strong> section in your CRM to complete your carrier contracting. You should have already submitted <strong>Ethos</strong> with Finley or Nick — your next step is <strong>Americo</strong>.
+                </p>
+              </div>
+
+              {/* Go to CRM Button */}
+              <div style={{ textAlign: 'center', marginTop: '8px' }}>
+                <a href="/crm/contracting" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', background: '#1A1814', color: '#C9A96E', padding: '14px 32px', borderRadius: '12px', textDecoration: 'none', fontSize: '15px', fontWeight: '700', letterSpacing: '0.02em' }}>
+                  Go to My Contracting in CRM →
+                </a>
               </div>
             </div>
-            {Object.values(agent.system_setup_items || {}).filter(Boolean).length === 4 ? (
+            {Object.values(agent.system_setup_items || {}).filter(Boolean).length >= 2 ? (
               <div style={{ display: 'flex', gap: '12px' }}>
                 {currentStep > 0 && (
                   <button onClick={goBack} disabled={saving} style={{ flex: 1, background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
