@@ -158,7 +158,7 @@ export default function PipelinePage() {
         {/* List View */}
         {view === 'list' && (
           <div style={{ background: '#FFFFFF', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', overflow: 'hidden', overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1100px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #EBE8E3' }}>
                   {[
@@ -229,7 +229,7 @@ export default function PipelinePage() {
                 })}
                 {sortedAgents.length === 0 && (
                   <tr>
-                    <td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: '#9A9890', fontSize: '0.9rem' }}>No agents found.</td>
+                    <td colSpan={10} style={{ padding: '3rem', textAlign: 'center', color: '#9A9890', fontSize: '0.9rem' }}>No agents found.</td>
                   </tr>
                 )}
               </tbody>
