@@ -157,7 +157,7 @@ export default function PipelinePage() {
 
         {/* List View */}
         {view === 'list' && (
-          <div style={{ background: '#FFFFFF', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', overflow: 'hidden', overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #EBE8E3' }}>
@@ -176,7 +176,7 @@ export default function PipelinePage() {
                       {col.label} {sortKey === col.key ? (sortDir === 'desc' ? '↓' : '↑') : ''}
                     </th>
                   ))}
-                  <th style={{ padding: '0.875rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#6B6966', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Status</th>
+                  <th style={{ padding: '0.875rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#6B6966', letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Status</th>
                 </tr>
               </thead>
               <tbody>
