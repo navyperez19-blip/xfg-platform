@@ -48,13 +48,14 @@ export default function AlertsPage() {
           id, status, carrier, product_type, policy_number,
           annual_premium, monthly_premium, date_written, effective_date,
           crm_clients(id, first_name, last_name, phone, email),
-          agents!crm_policies_agent_id_fkey(full_name)
+          agents!crm_policies_agent_id_fkey(id, full_name)
         `)
         .order('date_written', { ascending: false })
 
       if (!admin) {
         query = query.eq('agent_id', aid)
       }
+      // Admins see all agents — no filter applied
 
       const { data: policies } = await query
       const all = policies ?? []
@@ -108,52 +109,57 @@ export default function AlertsPage() {
     )
   }
 
-  function PolicyRow({ policy, showAgent }: { policy: any; showAgent: boolean }) {
-    const client = policy.crm_clients
-    const isChargebackWindow = policy.date_written && (() => {
-      const written = new Date(policy.date_written)
-      const now = new Date()
-      const diffMonths = (now.getFullYear() - written.getFullYear()) * 12 + (now.getMonth() - written.getMonth())
-      return diffMonths < 9
-    })()
+    function PolicyRow({ policy, showAgent }: { policy: any; showAgent: boolean }) {
+      const client = policy.crm_clients
+      const agent = policy.agents
+      const isChargebackWindow = policy.date_written && (() => {
+        const written = new Date(policy.date_written)
+        const now = new Date()
+        const diffMonths = (now.getFullYear() - written.getFullYear()) * 12 + (now.getMonth() - written.getMonth())
+        return diffMonths < 9
+      })()
 
-    return (
-      <div style={{ padding: '14px 20px', borderBottom: '1px solid #F0EDE8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div>
-            <div style={{ fontSize: '14px', fontWeight: '600', color: '#1A1A1A' }}>
-              {client ? (
-                <Link href={`/crm/clients/${client.id}`} style={{ color: '#1A1A1A', textDecoration: 'none' }}>
-                  {client.first_name} {client.last_name}
-                </Link>
-              ) : 'Unknown Client'}
+      return (
+        <div style={{ padding: '14px 20px', borderBottom: '1px solid #F0EDE8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: '600', color: '#1A1A1A' }}>
+                {client ? (
+                  <Link href={`/crm/clients/${client.id}`} style={{ color: '#1A1A1A', textDecoration: 'none' }}>
+                    {client.first_name} {client.last_name}
+                  </Link>
+                ) : 'Unknown Client'}
+              </div>
+              <div style={{ fontSize: '12px', color: '#7A7A7A', marginTop: '2px' }}>
+                {policy.carrier} · {policy.product_type}
+                {policy.policy_number && ` · #${policy.policy_number}`}
+              </div>
+              {showAgent && agent && (
+                <div style={{ fontSize: '12px', color: '#C9A96E', fontWeight: '600', marginTop: '2px' }}>
+                  Agent: {agent.full_name}
+                </div>
+              )}
+              {client?.phone && (
+                <div style={{ fontSize: '12px', color: '#AAA', marginTop: '1px' }}>{client.phone}</div>
+              )}
             </div>
-            <div style={{ fontSize: '12px', color: '#7A7A7A', marginTop: '2px' }}>
-              {policy.carrier} · {policy.product_type}
-              {policy.policy_number && ` · #${policy.policy_number}`}
-              {showAgent && policy.agents && ` · ${policy.agents.full_name}`}
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '13px', fontWeight: '700', color: '#1A1A1A' }}>
+              {policy.annual_premium ? `$${Number(policy.annual_premium).toLocaleString()}/yr` : policy.monthly_premium ? `$${Number(policy.monthly_premium).toLocaleString()}/mo` : '—'}
             </div>
-            {client?.phone && (
-              <div style={{ fontSize: '12px', color: '#AAA', marginTop: '1px' }}>{client.phone}</div>
+            <div style={{ fontSize: '11px', color: '#AAA', marginTop: '2px' }}>
+              Written {policy.date_written ? new Date(policy.date_written).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+            </div>
+            {isChargebackWindow && (
+              <div style={{ fontSize: '10px', color: '#9C27B0', fontWeight: '700', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                In chargeback window
+              </div>
             )}
           </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '13px', fontWeight: '700', color: '#1A1A1A' }}>
-            {policy.annual_premium ? `$${Number(policy.annual_premium).toLocaleString()}/yr` : policy.monthly_premium ? `$${Number(policy.monthly_premium).toLocaleString()}/mo` : '—'}
-          </div>
-          <div style={{ fontSize: '11px', color: '#AAA', marginTop: '2px' }}>
-            Written {policy.date_written ? new Date(policy.date_written).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
-          </div>
-          {isChargebackWindow && (
-            <div style={{ fontSize: '10px', color: '#9C27B0', fontWeight: '700', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              In chargeback window
-            </div>
-          )}
-        </div>
-      </div>
-    )
-  }
+      )
+    }
 
   function Section({ title, subtitle, count, color, children, emptyText }: {
     title: string; subtitle: string; count: number; color: string; children: React.ReactNode; emptyText: string
