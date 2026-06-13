@@ -188,6 +188,8 @@ export default function AgentPortalPage() {
           <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginBottom: '16px' }}>
             <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>Your Tools & Support</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+
+              {/* CRM Ready */}
               <div style={{ background: '#F5F2ED', border: '1px solid #EBE8E3', borderRadius: '10px', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '2px' }}>CRM Access</p>
@@ -195,26 +197,31 @@ export default function AgentPortalPage() {
                 </div>
                 <span style={{ background: '#F0FFF4', color: '#2D6A4F', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px', border: '1px solid #A8D5B5' }}>✓ Ready</span>
               </div>
+
+              {/* Dialer */}
               <div style={{ background: '#F5F2ED', border: '1px solid #EBE8E3', borderRadius: '10px', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '2px' }}>Dialer</p>
-                  <p style={{ color: '#6B6966', fontSize: '13px' }}>Your dialer has been configured</p>
-                </div>
-                <span style={{ background: '#F0FFF4', color: '#2D6A4F', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px', border: '1px solid #A8D5B5' }}>✓ Ready</span>
-              </div>
-              <div style={{ background: '#1A1814', borderRadius: '10px', padding: '20px 16px', textAlign: 'center' }}>
-                <p style={{ color: '#C9A96E', fontSize: '13px', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>You Are All Set</p>
-                <p style={{ color: '#F5F2ED', fontSize: '18px', fontWeight: '700', marginBottom: '4px' }}>Let's Get Selling. 🚀</p>
-                <p style={{ color: '#9A9890', fontSize: '13px', marginBottom: '20px' }}>Jump into the virtual office, join the live dial, and start building your book of business.</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <a href="https://discord.gg/nCEWxbJPU2" target="_blank" rel="noopener noreferrer" style={{ background: '#5865F2', color: '#FFFFFF', padding: '14px', borderRadius: '10px', textDecoration: 'none', fontSize: '15px', fontWeight: '700', display: 'block' }}>
-                    Join the Virtual Office on Discord →
-                  </a>
-                  <a href="https://discord.gg/nCEWxbJPU2" target="_blank" rel="noopener noreferrer" style={{ background: '#242220', border: '1px solid #2E2C29', color: '#C9A96E', padding: '14px', borderRadius: '10px', textDecoration: 'none', fontSize: '15px', fontWeight: '700', display: 'block' }}>
-                    Join the Live Dial →
-                  </a>
+                  <p style={{ color: '#6B6966', fontSize: '13px' }}>Once you have your credentials from Finley, log in to your dialer from the bottom of your CRM sidebar</p>
                 </div>
               </div>
+
+              {/* CRM Button + Contracting Note */}
+              <div style={{ background: '#1A1814', borderRadius: '12px', padding: '24px', textAlign: 'center' }}>
+                <p style={{ color: '#C9A96E', fontSize: '13px', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>🎉 Congratulations</p>
+                <p style={{ color: '#F5F2ED', fontSize: '18px', fontWeight: '700', marginBottom: '16px' }}>You're ready — here's your CRM</p>
+                <a href="/crm" style={{ display: 'block', background: '#C9A96E', color: '#1A1814', padding: '14px', borderRadius: '10px', textDecoration: 'none', fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>
+                  Enter Production CRM →
+                </a>
+                <div style={{ background: '#242220', border: '1px solid #2E2C29', borderRadius: '10px', padding: '14px 16px', textAlign: 'left' }}>
+                  <p style={{ color: '#C9A96E', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>💡 Important Reminder</p>
+                  <p style={{ color: '#9A9890', fontSize: '13px', lineHeight: 1.7 }}>
+                    Once you're in your CRM, go to <strong style={{ color: '#F5F2ED' }}>My Contracting</strong> to complete your carrier contracting. You should have already submitted <strong style={{ color: '#F5F2ED' }}>Ethos</strong> with Finley or Nick — your next step is <strong style={{ color: '#F5F2ED' }}>Americo</strong>. Once you have your dialer credentials from Finley, you can log in directly from the <strong style={{ color: '#F5F2ED' }}>Open Dialer</strong> button at the bottom of your CRM sidebar.
+                  </p>
+                </div>
+              </div>
+
+              {/* Support */}
               <div style={{ background: '#F5EDD9', border: '1px solid #E8C87A', borderRadius: '10px', padding: '14px 16px' }}>
                 <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '6px' }}>Need Support?</p>
                 <p style={{ color: '#6B6966', fontSize: '13px', marginBottom: '12px' }}>Reach out to your contracting team for any questions or assistance.</p>
@@ -227,42 +234,7 @@ export default function AgentPortalPage() {
                   </a>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginBottom: '16px' }}>
-            <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>Carrier Contracting</p>
-            <p style={{ color: '#9A9890', fontSize: '13px', marginBottom: '14px' }}>Track the status of your carrier contracts below.</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {['Aflac', 'Americo', 'Transamerica', 'UHL', 'AHL', 'Mutual of Omaha', 'Ethos'].map(carrier => {
-                const carriersObj = (agent.carriers as Record<string, string>) || {}
-                const status = carriersObj[carrier] || 'none'
-                return (
-                  <div key={carrier} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: status === 'active' ? '#F0FFF4' : status === 'submitted' ? '#FFFBF0' : '#F0EDE8', border: `1px solid ${status === 'active' ? '#A8D5B5' : status === 'submitted' ? '#E8C87A' : '#DDD9D2'}`, borderRadius: '10px', padding: '12px 16px' }}>
-                    <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600' }}>{carrier}</p>
-                    {status === 'active' && (
-                      <span style={{ background: '#2D6A4F', color: '#FFFFFF', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px' }}>✓ Active</span>
-                    )}
-                    {status === 'submitted' && (
-                      <span style={{ background: '#B5652A', color: '#FFFFFF', fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px' }}>⏳ Submitted</span>
-                    )}
-                    {status === 'none' && (
-                      <button
-                        onClick={async () => {
-                          const updated = { ...carriersObj, [carrier]: 'submitted' }
-                          await supabase.from('agents').update({ carriers: updated, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                          setAgent({ ...agent, carriers: updated })
-                          const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
-                          if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'profile_update', title: `${carrier} contract submitted`, message: `${agent.full_name} has submitted their ${carrier} contract` })))
-                        }}
-                        style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', padding: '6px 14px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}
-                      >
-                        Mark Submitted
-                      </button>
-                    )}
-                  </div>
-                )
-              })}
             </div>
           </div>
 
@@ -675,12 +647,6 @@ export default function AgentPortalPage() {
                 </p>
               </div>
 
-              {/* Go to CRM Button */}
-              <div style={{ textAlign: 'center', marginTop: '8px' }}>
-                <a href="/crm/contracting" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', background: '#1A1814', color: '#C9A96E', padding: '14px 32px', borderRadius: '12px', textDecoration: 'none', fontSize: '15px', fontWeight: '700', letterSpacing: '0.02em' }}>
-                  Go to My Contracting in CRM →
-                </a>
-              </div>
             </div>
             {Object.values(agent.system_setup_items || {}).filter(Boolean).length >= 2 ? (
               <div style={{ display: 'flex', gap: '12px' }}>
