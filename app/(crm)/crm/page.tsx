@@ -159,6 +159,35 @@ export default function CRMDashboard() {
       setLoading(false)
     }
     load()
+
+    // Real-time subscription for dashboard updates
+    const subscription = supabase
+      .channel('crm-dashboard-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'crm_policies' },
+        () => { load() }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'crm_clients' },
+        () => { load() }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'crm_goals' },
+        () => { load() }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'crm_notes' },
+        () => { load() }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(subscription)
+    }
   }, [router])
 
   function getGreeting() {
