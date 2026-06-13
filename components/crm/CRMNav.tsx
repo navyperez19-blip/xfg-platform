@@ -28,6 +28,7 @@ export default function CRMNav({
     { href: '/crm/book', label: 'Book of Business', icon: '◆' },
     { href: '/crm/alerts', label: 'Policy Alerts', icon: '⚠' },
     { href: '/crm/contracting', label: 'My Contracting', icon: '◐' },
+    { href: '/crm/profile', label: 'My Profile', icon: '◯' },
     ...(isAdmin ? [{ href: '/crm/admin', label: 'All Agents', icon: '◉' }] : []),
   ]
 
