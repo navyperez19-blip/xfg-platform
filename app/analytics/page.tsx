@@ -72,6 +72,7 @@ export default function AnalyticsPage() {
     if (contractingFilter === 'transamerica') return nameMatch && getCarrierStatus(a, 'Transamerica') !== 'none'
     if (contractingFilter === 'uhl') return nameMatch && getCarrierStatus(a, 'UHL (United Home Life)') !== 'none'
     if (contractingFilter === 'ahl') return nameMatch && getCarrierStatus(a, 'AHL (American Home Life)') !== 'none'
+    if (contractingFilter === 'dialer') return nameMatch && a.dialer_submitted
     return nameMatch
   })
 
@@ -114,6 +115,7 @@ export default function AnalyticsPage() {
     americo_unlocked: activeAgents.filter(a => a.americo_surelc_unlocked).length,
     mutual_requested: activeAgents.filter(a => a.mutual_omaha_requested).length,
     mutual_unlocked: activeAgents.filter(a => a.mutual_omaha_surelc_unlocked).length,
+    dialer_submitted: activeAgents.filter(a => a.dialer_submitted).length,
   }
 
   return (
@@ -234,15 +236,20 @@ export default function AnalyticsPage() {
         {activeTab === 'contracting' && (
           <div>
             {/* Summary Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '14px', marginBottom: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '14px', marginBottom: '24px' }}>
               {[
-                { label: 'Ethos Active', value: contractingSummary.ethos_active, color: '#27AE60' },
-                { label: 'Americo Form Submitted', value: contractingSummary.americo_form, color: '#C9A96E' },
-                { label: 'Americo SureLC Unlocked', value: contractingSummary.americo_unlocked, color: '#27AE60' },
-                { label: 'Mutual of Omaha Requested', value: contractingSummary.mutual_requested, color: '#5B21B6' },
-                { label: 'Mutual of Omaha Unlocked', value: contractingSummary.mutual_unlocked, color: '#27AE60' },
+                { label: 'Ethos Active', value: contractingSummary.ethos_active, color: '#27AE60', filter: 'ethos' },
+                { label: 'Americo Form Submitted', value: contractingSummary.americo_form, color: '#C9A96E', filter: 'americo_form' },
+                { label: 'Americo SureLC Unlocked', value: contractingSummary.americo_unlocked, color: '#27AE60', filter: 'americo_surelc' },
+                { label: 'Mutual of Omaha Requested', value: contractingSummary.mutual_requested, color: '#5B21B6', filter: 'mutual_requested' },
+                { label: 'Mutual of Omaha Unlocked', value: contractingSummary.mutual_unlocked, color: '#27AE60', filter: 'mutual_unlocked' },
+                { label: 'Dialer Submitted', value: contractingSummary.dialer_submitted, color: '#2196F3', filter: 'dialer' },
               ].map(card => (
-                <div key={card.label} style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '12px', padding: '16px 20px' }}>
+                <div
+                  key={card.label}
+                  onClick={() => setContractingFilter(contractingFilter === card.filter ? null : card.filter)}
+                  style={{ background: contractingFilter === card.filter ? '#FFFBF0' : '#FFFFFF', border: contractingFilter === card.filter ? '1px solid #C9A96E' : '1px solid #DDD9D2', borderRadius: '12px', padding: '16px 20px', cursor: 'pointer' }}
+                >
                   <div style={{ fontSize: '28px', fontWeight: '700', color: card.color, marginBottom: '4px' }}>{card.value}</div>
                   <div style={{ fontSize: '11px', color: '#7A7A7A', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', lineHeight: 1.4 }}>{card.label}</div>
                 </div>
@@ -287,6 +294,7 @@ export default function AnalyticsPage() {
                         { label: 'Transamerica', filter: 'transamerica' },
                         { label: 'UHL', filter: 'uhl' },
                         { label: 'AHL', filter: 'ahl' },
+                        { label: 'Dialer', filter: 'dialer' },
                         { label: 'Last Updated', filter: null },
                       ].map(h => (
                         <th
@@ -332,6 +340,32 @@ export default function AnalyticsPage() {
                         <td style={{ padding: '12px 14px' }}><Badge status={getStatusBadge(getCarrierStatus(agent, 'Transamerica'))} /></td>
                         <td style={{ padding: '12px 14px' }}><Badge status={getStatusBadge(getCarrierStatus(agent, 'UHL (United Home Life)'))} /></td>
                         <td style={{ padding: '12px 14px' }}><Badge status={getStatusBadge(getCarrierStatus(agent, 'AHL (American Home Life)'))} /></td>
+                        <td style={{ padding: '12px 14px' }}>
+                          {agent.dialer_submitted ? (
+                            <Badge status={{ label: '✓ Submitted', bg: '#E3F2FD', color: '#1565C0', border: '#90CAF9' }} />
+                          ) : (
+                            <button
+                              onClick={async () => {
+                                const { data: { user } } = await supabase.auth.getUser()
+                                const { error } = await supabase
+                                  .from('agents')
+                                  .update({
+                                    dialer_submitted: true,
+                                    dialer_submitted_at: new Date().toISOString(),
+                                    dialer_submitted_by: user?.id,
+                                    updated_at: new Date().toISOString(),
+                                  })
+                                  .eq('id', agent.id)
+                                if (!error) {
+                                  setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, dialer_submitted: true } : a))
+                                }
+                              }}
+                              style={{ padding: '4px 12px', backgroundColor: '#E3F2FD', color: '#1565C0', border: '1px solid #90CAF9', borderRadius: '20px', cursor: 'pointer', fontSize: '11px', fontWeight: '600', fontFamily: 'inherit', whiteSpace: 'nowrap' }}
+                            >
+                              Mark Submitted
+                            </button>
+                          )}
+                        </td>
                         <td style={{ padding: '12px 14px', color: '#AAA', fontSize: '11px', whiteSpace: 'nowrap' }}>
                           {agent.updated_at ? new Date(agent.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                         </td>
