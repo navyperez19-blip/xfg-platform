@@ -14,11 +14,15 @@ const STAGES = [
   { key: 'active', label: 'Active' },
 ]
 
+const CARRIERS = ['Ethos', 'Americo', 'Transamerica', 'Aflac', 'Mutual of Omaha', 'UHL (United Home Life)', 'AHL (American Home Life)']
+
 export default function AnalyticsPage() {
   const router = useRouter()
   const [agents, setAgents] = useState<any[]>([])
   const [history, setHistory] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'overview' | 'contracting'>('overview')
+  const [contractingSearch, setContractingSearch] = useState('')
 
   useEffect(() => {
     const load = async () => {
@@ -48,217 +52,247 @@ export default function AnalyticsPage() {
     </main>
   )
 
-  const total = agents.length
-  const active = agents.filter(a => a.current_stage === 'active').length
-  const pipeline = agents.filter(a => a.current_stage !== 'active').length
-  const locked = agents.filter(a => a.is_locked).length
-  const supported = agents.filter(a => a.agent_model === 'supported').length
-  const independent = agents.filter(a => a.agent_model === 'independent').length
-  const hasNPN = agents.filter(a => a.npn).length
-  const hasXFGEmail = agents.filter(a => a.xfg_email).length
-  const licensed = agents.filter(a => a.is_licensed === 'yes').length
-  const notLicensed = agents.filter(a => a.is_licensed === 'no').length
+  const stageCounts = STAGES.map(s => ({
+    ...s,
+    count: agents.filter(a => a.current_stage === s.key).length
+  }))
 
-  const card = { background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '10px', padding: '1.25rem' }
+  const activeAgents = agents.filter(a => a.current_stage === 'active')
+
+  const filteredContracting = activeAgents.filter(a =>
+    !contractingSearch || a.full_name?.toLowerCase().includes(contractingSearch.toLowerCase())
+  )
+
+  const getCarrierStatus = (agent: any, carrier: string) => {
+    const carriers = agent.carriers || {}
+    return carriers[carrier] || 'none'
+  }
+
+  const getStatusBadge = (status: string) => {
+    if (status === 'active') return { label: '✓ Active', bg: '#E8F5E9', color: '#1B5E20', border: '#A5D6A7' }
+    if (status === 'submitted') return { label: '⏳ Submitted', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }
+    return { label: '—', bg: '#F5F5F5', color: '#AAA', border: '#E5E1DA' }
+  }
+
+  const getAmericoStatus = (agent: any) => {
+    if (agent.americo_surelc_unlocked) return { label: '🔓 SureLC Unlocked', bg: '#E8F5E9', color: '#1B5E20', border: '#A5D6A7' }
+    if (agent.americo_form_submitted) return { label: '📋 Form Submitted', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }
+    return { label: '—', bg: '#F5F5F5', color: '#AAA', border: '#E5E1DA' }
+  }
+
+  const getMutualOmahaStatus = (agent: any) => {
+    const carrierStatus = getCarrierStatus(agent, 'Mutual of Omaha')
+    if (carrierStatus === 'active') return { label: '✓ Active', bg: '#E8F5E9', color: '#1B5E20', border: '#A5D6A7' }
+    if (agent.mutual_omaha_surelc_unlocked) return { label: '🔓 SureLC Unlocked', bg: '#E8F5E9', color: '#1B5E20', border: '#A5D6A7' }
+    if (agent.mutual_omaha_requested) return { label: '📋 Requested', bg: '#EDE9FE', color: '#5B21B6', border: '#C4B5FD' }
+    if (carrierStatus === 'submitted') return { label: '⏳ Submitted', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }
+    return { label: '—', bg: '#F5F5F5', color: '#AAA', border: '#E5E1DA' }
+  }
+
+  const Badge = ({ status }: { status: { label: string; bg: string; color: string; border: string } }) => (
+    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: status.bg, color: status.color, border: `1px solid ${status.border}`, whiteSpace: 'nowrap' }}>
+      {status.label}
+    </span>
+  )
+
+  // Contracting summary counts
+  const contractingSummary = {
+    ethos_active: activeAgents.filter(a => getCarrierStatus(a, 'Ethos') === 'active').length,
+    americo_form: activeAgents.filter(a => a.americo_form_submitted).length,
+    americo_unlocked: activeAgents.filter(a => a.americo_surelc_unlocked).length,
+    mutual_requested: activeAgents.filter(a => a.mutual_omaha_requested).length,
+    mutual_unlocked: activeAgents.filter(a => a.mutual_omaha_surelc_unlocked).length,
+  }
 
   return (
-    <main style={{ minHeight: '100vh', background: '#F5F2ED', color: '#1A1814', fontFamily: 'Georgia, serif', padding: '2rem 1.5rem' }}>
-      <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+    <main style={{ minHeight: '100vh', background: '#F5F2ED', padding: '32px 24px' }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+        {/* Header */}
+        <div style={{ marginBottom: '24px' }}>
+          <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>XFG · X Financial Group</p>
+          <h1 style={{ color: '#1A1814', fontSize: '28px', fontWeight: '700', letterSpacing: '-0.02em' }}>Analytics</h1>
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', borderBottom: '2px solid #E5E1DA', marginBottom: '24px', gap: '4px' }}>
+          {[
+            { key: 'overview', label: 'Overview' },
+            { key: 'contracting', label: 'Contracting Tracker' },
+          ].map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key as 'overview' | 'contracting')}
+              style={{ padding: '12px 24px', border: 'none', backgroundColor: 'transparent', fontSize: '14px', fontWeight: activeTab === tab.key ? '700' : '500', color: activeTab === tab.key ? '#1A1814' : '#7A7A7A', cursor: 'pointer', borderBottom: activeTab === tab.key ? '2px solid #C9A96E' : '2px solid transparent', marginBottom: '-2px', fontFamily: 'inherit' }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* OVERVIEW TAB */}
+        {activeTab === 'overview' && (
           <div>
-            <p style={{ color: '#C9A96E', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '0.25rem' }}>XFG · X Financial Group</p>
-            <h1 style={{ color: '#1A1814', fontSize: '1.6rem', fontWeight: '400', marginBottom: '0.2rem' }}>Analytics</h1>
-            <p style={{ color: '#6B6966', fontSize: '0.85rem' }}>Executive overview</p>
-          </div>
-          <button
-            onClick={() => router.push('/dashboard')}
-            style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Georgia, serif' }}
-          >
-            ← Dashboard
-          </button>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
-          <div style={card}>
-            <p style={{ color: '#6B6966', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Total Agents</p>
-            <p style={{ fontSize: '2rem', fontWeight: '400', color: '#C9A96E' }}>{total}</p>
-          </div>
-          <div style={card}>
-            <p style={{ color: '#6B6966', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Active Agents</p>
-            <p style={{ fontSize: '2rem', fontWeight: '400', color: '#1A1814' }}>{active}</p>
-          </div>
-          <div style={card}>
-            <p style={{ color: '#6B6966', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>In Pipeline</p>
-            <p style={{ fontSize: '2rem', fontWeight: '400', color: '#1A1814' }}>{pipeline}</p>
-          </div>
-          <div style={card}>
-            <p style={{ color: '#6B6966', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Locked Agents</p>
-            <p style={{ fontSize: '2rem', fontWeight: '400', color: '#C9A96E' }}>{locked}</p>
-          </div>
-          <div style={card}>
-            <p style={{ color: '#6B6966', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Supported Model</p>
-            <p style={{ fontSize: '2rem', fontWeight: '400', color: '#1A1814' }}>{supported}</p>
-          </div>
-          <div style={card}>
-            <p style={{ color: '#6B6966', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Independent Model</p>
-            <p style={{ fontSize: '2rem', fontWeight: '400', color: '#1A1814' }}>{independent}</p>
-          </div>
-        </div>
-
-        <div style={{ ...card, marginBottom: '1.25rem' }}>
-          <p style={{ color: '#C9A96E', fontSize: '0.75rem', fontWeight: '600', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Profile Completion</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-            {[
-              { label: 'Have NPN', value: hasNPN, color: '#2D6A4F' },
-              { label: 'Have XFG Email', value: hasXFGEmail, color: '#2D6A4F' },
-              { label: 'Licensed', value: licensed, color: '#2D6A4F' },
-              { label: 'Not Licensed', value: notLicensed, color: '#8B2635' },
-            ].map(stat => (
-              <div key={stat.label} style={{ background: '#F5F2ED', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '1rem', textAlign: 'center' }}>
-                <p style={{ color: '#6B6966', fontSize: '0.72rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>{stat.label}</p>
-                <p style={{ color: stat.color, fontSize: '1.75rem', fontWeight: '700' }}>{stat.value}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ ...card, marginBottom: '1.25rem' }}>
-          <p style={{ color: '#C9A96E', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Agents by Stage</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-            {STAGES.map(stage => {
-              const count = agents.filter(a => a.current_stage === stage.key).length
-              const pct = total > 0 ? Math.round((count / total) * 100) : 0
-              return (
-                <div key={stage.key}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
-                    <span style={{ color: '#1A1814', fontSize: '0.85rem' }}>{stage.label}</span>
-                    <span style={{ color: '#6B6966', fontSize: '0.8rem' }}>{count} agents</span>
-                  </div>
-                  <div style={{ background: '#EDEAE4', borderRadius: '4px', height: '6px', overflow: 'hidden' }}>
-                    <div
-                      style={{ background: '#C9A96E', height: '6px', borderRadius: '4px', width: `${pct}%`, transition: 'width 0.3s ease' }}
-                    />
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        <div style={{ ...card, marginBottom: '1.25rem' }}>
-          <p style={{ color: '#C9A96E', fontSize: '0.75rem', fontWeight: '600', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Carrier Contracting Status</p>
-          {(() => {
-            const contractingAgents = agents.filter(a => a.carriers && Object.values(a.carriers).some((v: any) => v === 'submitted' || v === 'active'))
-            const totalSubmitted = contractingAgents.filter(a => Object.values(a.carriers || {}).some((v: any) => v === 'submitted')).length
-            const totalActive = contractingAgents.filter(a => Object.values(a.carriers || {}).some((v: any) => v === 'active')).length
-            return contractingAgents.length > 0 ? (
-              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
-                <div style={{ background: '#FFFBF0', border: '1px solid #E8C87A', borderRadius: '8px', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ color: '#B5652A', fontSize: '20px', fontWeight: '700' }}>{totalSubmitted}</span>
-                  <span style={{ color: '#6B6966', fontSize: '13px', fontWeight: '500' }}>agents with submitted contracts</span>
-                </div>
-                <div style={{ background: '#F0FFF4', border: '1px solid #A8D5B5', borderRadius: '8px', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ color: '#2D6A4F', fontSize: '20px', fontWeight: '700' }}>{totalActive}</span>
-                  <span style={{ color: '#6B6966', fontSize: '13px', fontWeight: '500' }}>agents with active contracts</span>
-                </div>
-              </div>
-            ) : null
-          })()}
-          {agents.filter(a => a.carriers && Object.keys(a.carriers).length > 0).length === 0 ? (
-            <p style={{ color: '#9A9890', fontSize: '0.875rem' }}>No carrier contracting data yet.</p>
-          ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
-                <thead>
-                  <tr style={{ borderBottom: '2px solid #EBE8E3' }}>
-                    <th style={{ padding: '8px 10px', textAlign: 'left', color: '#6B6966', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Agent</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'left', color: '#6B6966', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em' }}>XFG Email</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'left', color: '#6B6966', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em' }}>NPN</th>
-                    {['Aflac', 'Americo', 'Transamerica', 'UHL', 'AHL', 'Mutual of Omaha', 'Ethos'].map(carrier => (
-                      <th key={carrier} style={{ padding: '8px 6px', textAlign: 'center', color: '#6B6966', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{carrier}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {agents
-                    .filter(a => a.carriers && Object.values(a.carriers).some(v => v === 'submitted' || v === 'active'))
-                    .sort((a, b) => a.full_name.localeCompare(b.full_name))
-                    .map((agent, index) => (
-                      <tr key={agent.id} style={{ borderBottom: '1px solid #F5F2ED', background: index % 2 === 0 ? '#FFFFFF' : '#FAFAF9', cursor: 'pointer' }} onClick={() => router.push(`/agents/${agent.id}`)}>
-                        <td style={{ padding: '8px 10px' }}>
-                          <p style={{ color: '#1A1814', fontSize: '13px', fontWeight: '600', marginBottom: '2px' }}>{agent.full_name}</p>
-                          <p style={{ color: '#C9A96E', fontSize: '11px', fontFamily: 'monospace' }}>{agent.xfg_id}</p>
-                        </td>
-                        <td style={{ padding: '8px 10px' }}>
-                          <p style={{ color: '#6B6966', fontSize: '12px' }}>{agent.xfg_email || '—'}</p>
-                        </td>
-                        <td style={{ padding: '8px 10px' }}>
-                          <p style={{ color: '#6B6966', fontSize: '12px' }}>{agent.npn || '—'}</p>
-                        </td>
-                        {['Aflac', 'Americo', 'Transamerica', 'UHL', 'AHL', 'Mutual of Omaha', 'Ethos'].map(carrier => {
-                          const carriersObj = agent.carriers as Record<string, string> || {}
-                          const status = carriersObj[carrier] ?? 'none'
-                          return (
-                            <td key={carrier} style={{ padding: '10px 12px', textAlign: 'center' }}>
-                              {status === 'active' && <span style={{ background: '#F0FFF4', color: '#2D6A4F', fontSize: '12px', fontWeight: '600', padding: '3px 10px', borderRadius: '20px' }}>✓ Active</span>}
-                              {status === 'submitted' && <span style={{ background: '#FFFBF0', color: '#B5652A', fontSize: '12px', fontWeight: '600', padding: '3px 10px', borderRadius: '20px' }}>⏳ Submitted</span>}
-                              {status !== 'active' && status !== 'submitted' && <span style={{ color: '#DDD9D2', fontSize: '12px' }}>—</span>}
-                            </td>
-                          )
-                        })}
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        <div style={{ ...card, marginBottom: '1.25rem' }}>
-          <p style={{ color: '#C9A96E', fontSize: '0.75rem', fontWeight: '600', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Agent XFG Emails</p>
-          {agents.filter(a => a.xfg_email).length === 0 ? (
-            <p style={{ color: '#9A9890', fontSize: '0.875rem' }}>No agents have set their XFG email yet.</p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {agents
-                .filter(a => a.xfg_email)
-                .sort((a, b) => a.full_name.localeCompare(b.full_name))
-                .map(a => (
-                  <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F5F2ED', border: '1px solid #DDD9D2', borderRadius: '8px', padding: '0.75rem 1rem', cursor: 'pointer' }} onClick={() => router.push(`/agents/${a.id}`)}>
-                    <div>
-                      <p style={{ color: '#1A1814', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.15rem' }}>{a.full_name}</p>
-                      <p style={{ color: '#C9A96E', fontSize: '0.8rem', fontFamily: 'monospace' }}>{a.xfg_id}</p>
-                    </div>
-                    <p style={{ color: '#6B6966', fontSize: '0.875rem' }}>{a.xfg_email}</p>
-                  </div>
-                ))}
-            </div>
-          )}
-        </div>
-
-        <div style={card}>
-          <p style={{ color: '#C9A96E', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Recent Stage Changes</p>
-          {history.length === 0 ? (
-            <p style={{ color: '#6B6966', fontSize: '0.85rem' }}>No stage changes yet.</p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {history.map(h => (
-                <div key={h.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#EDEAE4', border: '1px solid #DDD9D2', borderRadius: '6px', padding: '0.6rem 0.875rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
-                    <span style={{ color: '#6B6966' }}>{h.from_stage?.replace(/_/g, ' ')}</span>
-                    <span style={{ color: '#9A9890' }}>→</span>
-                    <span style={{ color: '#1A1814' }}>{h.to_stage?.replace(/_/g, ' ')}</span>
-                    {h.is_override && (
-                      <span style={{ fontSize: '0.7rem', background: '#FEE2E2', color: '#8B2635', border: '1px solid #FCA5A5', padding: '0.1rem 0.5rem', borderRadius: '4px' }}>Override</span>
-                    )}
-                  </div>
-                  <span style={{ color: '#9A9890', fontSize: '0.75rem' }}>{new Date(h.created_at).toLocaleDateString()}</span>
+            {/* Stage Counts */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '16px', marginBottom: '32px' }}>
+              {stageCounts.map(s => (
+                <div key={s.key} style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '12px', padding: '20px', textAlign: 'center' }}>
+                  <p style={{ color: '#1A1814', fontSize: '32px', fontWeight: '700', marginBottom: '4px' }}>{s.count}</p>
+                  <p style={{ color: '#6B6966', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{s.label}</p>
                 </div>
               ))}
             </div>
-          )}
-        </div>
+
+            {/* Agent Table */}
+            <div style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '12px', overflow: 'hidden', marginBottom: '32px' }}>
+              <div style={{ padding: '16px 24px', borderBottom: '1px solid #EBE8E3' }}>
+                <h2 style={{ color: '#1A1814', fontSize: '16px', fontWeight: '700' }}>All Agents</h2>
+              </div>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', minWidth: '800px' }}>
+                  <thead>
+                    <tr style={{ background: '#F9F7F4' }}>
+                      {['Name', 'XFG ID', 'Stage', 'State', 'Model', 'Licensed', 'NPN', 'Joined'].map(h => (
+                        <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.07em', borderBottom: '1px solid #E5E1DA', whiteSpace: 'nowrap' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {agents.map((agent, i) => (
+                      <tr key={agent.id} style={{ borderBottom: i < agents.length - 1 ? '1px solid #F0EDE8' : 'none' }}>
+                        <td style={{ padding: '12px 16px', fontWeight: '600', color: '#1A1814', fontSize: '13px' }}>{agent.full_name}</td>
+                        <td style={{ padding: '12px 16px', color: '#C9A96E', fontFamily: 'monospace', fontSize: '12px' }}>{agent.xfg_id}</td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <span style={{ display: 'inline-block', padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700', backgroundColor: '#F5EDD9', color: '#8B6A2E', textTransform: 'capitalize' }}>
+                            {agent.current_stage?.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 16px', color: '#6B6966', fontSize: '13px' }}>{agent.state || '—'}</td>
+                        <td style={{ padding: '12px 16px', color: '#6B6966', fontSize: '13px', textTransform: 'capitalize' }}>{agent.agent_model || '—'}</td>
+                        <td style={{ padding: '12px 16px', fontSize: '13px' }}>
+                          {agent.is_licensed === 'yes' && <span style={{ color: '#2D6A4F', fontWeight: '600' }}>✓ Yes</span>}
+                          {agent.is_licensed === 'no' && <span style={{ color: '#8B2635' }}>✗ No</span>}
+                          {!agent.is_licensed && <span style={{ color: '#AAA' }}>—</span>}
+                        </td>
+                        <td style={{ padding: '12px 16px', color: '#6B6966', fontSize: '13px' }}>{agent.npn || '—'}</td>
+                        <td style={{ padding: '12px 16px', color: '#6B6966', fontSize: '12px' }}>{agent.created_at ? new Date(agent.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Recent Stage History */}
+            {history.length > 0 && (
+              <div style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '12px', overflow: 'hidden' }}>
+                <div style={{ padding: '16px 24px', borderBottom: '1px solid #EBE8E3' }}>
+                  <h2 style={{ color: '#1A1814', fontSize: '16px', fontWeight: '700' }}>Recent Stage Changes</h2>
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                  <thead>
+                    <tr style={{ background: '#F9F7F4' }}>
+                      {['Agent', 'From', 'To', 'Changed By', 'Date'].map(h => (
+                        <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.07em', borderBottom: '1px solid #E5E1DA' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {history.map((h, i) => (
+                      <tr key={h.id} style={{ borderBottom: i < history.length - 1 ? '1px solid #F0EDE8' : 'none' }}>
+                        <td style={{ padding: '12px 16px', fontWeight: '600', color: '#1A1814', fontSize: '13px' }}>{h.agent_name || '—'}</td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <span style={{ display: 'inline-block', padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#F5F5F5', color: '#7A7A7A', textTransform: 'capitalize' }}>{h.from_stage?.replace('_', ' ') || '—'}</span>
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <span style={{ display: 'inline-block', padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#F5EDD9', color: '#8B6A2E', textTransform: 'capitalize' }}>{h.to_stage?.replace('_', ' ') || '—'}</span>
+                        </td>
+                        <td style={{ padding: '12px 16px', color: '#6B6966', fontSize: '13px' }}>{h.changed_by_name || '—'}</td>
+                        <td style={{ padding: '12px 16px', color: '#6B6966', fontSize: '12px' }}>{h.created_at ? new Date(h.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* CONTRACTING TRACKER TAB */}
+        {activeTab === 'contracting' && (
+          <div>
+            {/* Summary Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '14px', marginBottom: '24px' }}>
+              {[
+                { label: 'Ethos Active', value: contractingSummary.ethos_active, color: '#27AE60' },
+                { label: 'Americo Form Submitted', value: contractingSummary.americo_form, color: '#C9A96E' },
+                { label: 'Americo SureLC Unlocked', value: contractingSummary.americo_unlocked, color: '#27AE60' },
+                { label: 'Mutual of Omaha Requested', value: contractingSummary.mutual_requested, color: '#5B21B6' },
+                { label: 'Mutual of Omaha Unlocked', value: contractingSummary.mutual_unlocked, color: '#27AE60' },
+              ].map(card => (
+                <div key={card.label} style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '12px', padding: '16px 20px' }}>
+                  <div style={{ fontSize: '28px', fontWeight: '700', color: card.color, marginBottom: '4px' }}>{card.value}</div>
+                  <div style={{ fontSize: '11px', color: '#7A7A7A', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', lineHeight: 1.4 }}>{card.label}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Search */}
+            <div style={{ marginBottom: '16px' }}>
+              <input
+                value={contractingSearch}
+                onChange={e => setContractingSearch(e.target.value)}
+                placeholder="Search agents..."
+                style={{ padding: '10px 16px', fontSize: '13px', border: '1px solid #DDD9D2', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', backgroundColor: '#FFFFFF', width: '300px' }}
+              />
+            </div>
+
+            {/* Contracting Table */}
+            <div style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '12px', overflow: 'hidden' }}>
+              <div style={{ padding: '16px 24px', borderBottom: '1px solid #EBE8E3', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 style={{ color: '#1A1814', fontSize: '16px', fontWeight: '700' }}>Agent Contracting Status</h2>
+                <span style={{ fontSize: '12px', color: '#888' }}>{filteredContracting.length} active agents</span>
+              </div>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', minWidth: '1200px' }}>
+                  <thead>
+                    <tr style={{ background: '#F9F7F4' }}>
+                      {['Agent', 'Ethos', 'Americo Form', 'Americo SureLC', 'Mutual of Omaha', 'Aflac', 'Transamerica', 'UHL', 'AHL', 'Last Updated'].map(h => (
+                        <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: '10px', fontWeight: '700', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.07em', borderBottom: '1px solid #E5E1DA', whiteSpace: 'nowrap' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredContracting.map((agent, i) => (
+                      <tr key={agent.id} style={{ borderBottom: i < filteredContracting.length - 1 ? '1px solid #F0EDE8' : 'none' }}>
+                        <td style={{ padding: '12px 14px', fontWeight: '600', color: '#1A1814', fontSize: '13px', whiteSpace: 'nowrap' }}>{agent.full_name}</td>
+                        <td style={{ padding: '12px 14px' }}><Badge status={getStatusBadge(getCarrierStatus(agent, 'Ethos'))} /></td>
+                        <td style={{ padding: '12px 14px' }}><Badge status={getAmericoStatus(agent)} /></td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <Badge status={
+                            agent.americo_surelc_unlocked
+                              ? { label: '🔓 Unlocked', bg: '#E8F5E9', color: '#1B5E20', border: '#A5D6A7' }
+                              : agent.americo_form_submitted
+                              ? { label: '⏳ Pending Unlock', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }
+                              : { label: '—', bg: '#F5F5F5', color: '#AAA', border: '#E5E1DA' }
+                          } />
+                        </td>
+                        <td style={{ padding: '12px 14px' }}><Badge status={getMutualOmahaStatus(agent)} /></td>
+                        <td style={{ padding: '12px 14px' }}><Badge status={getStatusBadge(getCarrierStatus(agent, 'Aflac'))} /></td>
+                        <td style={{ padding: '12px 14px' }}><Badge status={getStatusBadge(getCarrierStatus(agent, 'Transamerica'))} /></td>
+                        <td style={{ padding: '12px 14px' }}><Badge status={getStatusBadge(getCarrierStatus(agent, 'UHL (United Home Life)'))} /></td>
+                        <td style={{ padding: '12px 14px' }}><Badge status={getStatusBadge(getCarrierStatus(agent, 'AHL (American Home Life)'))} /></td>
+                        <td style={{ padding: '12px 14px', color: '#AAA', fontSize: '11px', whiteSpace: 'nowrap' }}>
+                          {agent.updated_at ? new Date(agent.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </main>
