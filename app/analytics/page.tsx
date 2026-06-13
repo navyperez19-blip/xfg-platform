@@ -169,7 +169,11 @@ export default function AnalyticsPage() {
                   <tbody>
                     {agents.map((agent, i) => (
                       <tr key={agent.id} style={{ borderBottom: i < agents.length - 1 ? '1px solid #F0EDE8' : 'none' }}>
-                        <td style={{ padding: '12px 16px', fontWeight: '600', color: '#1A1814', fontSize: '13px' }}>{agent.full_name}</td>
+                        <td style={{ padding: '12px 16px', fontWeight: '600', color: '#1A1814', fontSize: '13px' }}>
+                          <a href={`/agents/${agent.id}`} style={{ color: '#1A1814', textDecoration: 'none', fontWeight: '600' }} onMouseEnter={e => (e.currentTarget.style.color = '#C9A96E')} onMouseLeave={e => (e.currentTarget.style.color = '#1A1814')}>
+                            {agent.full_name}
+                          </a>
+                        </td>
                         <td style={{ padding: '12px 16px', color: '#C9A96E', fontFamily: 'monospace', fontSize: '12px' }}>{agent.xfg_id}</td>
                         <td style={{ padding: '12px 16px' }}>
                           <span style={{ display: 'inline-block', padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700', backgroundColor: '#F5EDD9', color: '#8B6A2E', textTransform: 'capitalize' }}>
@@ -318,7 +322,11 @@ export default function AnalyticsPage() {
                   <tbody>
                     {filteredContracting.map((agent, i) => (
                       <tr key={agent.id} style={{ borderBottom: i < filteredContracting.length - 1 ? '1px solid #F0EDE8' : 'none' }}>
-                        <td style={{ padding: '12px 14px', fontWeight: '600', color: '#1A1A1A', fontSize: '13px', whiteSpace: 'nowrap' }}>{agent.full_name}</td>
+                        <td style={{ padding: '12px 14px', fontWeight: '600', color: '#1A1A1A', fontSize: '13px', whiteSpace: 'nowrap' }}>
+                          <a href={`/crm/admin/agents/${agent.id}`} style={{ color: '#1A1A1A', textDecoration: 'none', fontWeight: '600' }} onMouseEnter={e => (e.currentTarget.style.color = '#C9A96E')} onMouseLeave={e => (e.currentTarget.style.color = '#1A1A1A')}>
+                            {agent.full_name}
+                          </a>
+                        </td>
 
                         {/* Ethos */}
                         <td style={{ padding: '12px 14px' }}>
