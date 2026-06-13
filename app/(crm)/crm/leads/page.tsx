@@ -67,7 +67,7 @@ export default function LeadsPage() {
         .select('*, agents!crm_leads_agent_id_fkey(full_name)')
         .order('created_at', { ascending: false })
 
-      if (!admin) query = query.eq('agent_id', aid)
+      query = query.eq('agent_id', aid)
 
       const { data } = await query
       setLeads(data ?? [])
