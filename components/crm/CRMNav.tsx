@@ -25,6 +25,7 @@ export default function CRMNav({
     { href: '/crm/clients', label: 'My Clients', icon: '◈' },
     { href: '/crm/clients/new', label: 'Add Client', icon: '+' },
     { href: '/crm/activity', label: 'Activity Log', icon: '◷' },
+    { href: '/crm/calendar', label: 'Calendar', icon: '📅' },
     { href: '/crm/book', label: 'Book of Business', icon: '◆' },
     { href: '/crm/alerts', label: 'Policy Alerts', icon: '⚠' },
     { href: '/crm/contracting', label: 'My Contracting', icon: '◐' },
