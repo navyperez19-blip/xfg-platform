@@ -29,6 +29,9 @@ export default function CRMDashboard() {
   const [recentActivity, setRecentActivity] = useState<any[]>([])
   const [monthlyTrend, setMonthlyTrend] = useState<{ month: string; premium: number; count: number }[]>([])
   const [followUpsToday, setFollowUpsToday] = useState<any[]>([])
+  const [showProfileTip, setShowProfileTip] = useState(
+    typeof window !== 'undefined' ? localStorage.getItem('xfg_profile_tip_dismissed') !== 'true' : true
+  )
 
   useEffect(() => {
     const load = async () => {
@@ -181,6 +184,28 @@ export default function CRMDashboard() {
 
   return (
     <div>
+      {/* Profile Tip Banner */}
+      {showProfileTip && (
+        <div style={{ padding: '14px 18px', backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+          <span style={{ fontSize: '18px', flexShrink: 0 }}>💡</span>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: '13px', fontWeight: '700', color: '#1E40AF', marginBottom: '3px' }}>Keep Your Profile Up to Date</p>
+            <p style={{ fontSize: '13px', color: '#1E40AF', lineHeight: 1.6 }}>
+              Make sure your state, phone number, and email are correct in your profile. You can update your information anytime by clicking <strong>My Profile</strong> in the sidebar. This helps your team reach you and keeps your account accurate.
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              setShowProfileTip(false)
+              localStorage.setItem('xfg_profile_tip_dismissed', 'true')
+            }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#93C5FD', fontSize: '20px', padding: 0, flexShrink: 0, lineHeight: 1 }}
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
         <div>
