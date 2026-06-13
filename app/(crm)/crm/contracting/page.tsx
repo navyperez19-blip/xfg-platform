@@ -162,6 +162,17 @@ export default function ContractingPage() {
         </p>
       </div>
 
+      {/* Important Warning Banner */}
+      <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '10px', padding: '14px 18px', marginBottom: '24px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+        <span style={{ fontSize: '18px', flexShrink: 0 }}>⚠️</span>
+        <div>
+          <p style={{ fontSize: '13px', fontWeight: '700', color: '#C0392B', marginBottom: '4px' }}>Important — Please Read Before Updating Your Contracting Status</p>
+          <p style={{ fontSize: '13px', color: '#C0392B', lineHeight: 1.7 }}>
+            Only mark a carrier as <strong>Submitted</strong> or <strong>Active</strong> if you have gone through the contracting process <strong>with XFG</strong>. If you are already contracted with any of these carriers through another agency or IMO, do <strong>not</strong> mark them here — this section tracks your contracting status with X Financial Group only.
+          </p>
+        </div>
+      </div>
+
       {/* Summary Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', marginBottom: '24px' }}>
         {[
