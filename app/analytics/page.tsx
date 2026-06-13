@@ -22,6 +22,7 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'overview' | 'contracting'>('overview')
   const [contractingSearch, setContractingSearch] = useState('')
+  const [resetError, setResetError] = useState('')
   const [contractingFilter, setContractingFilter] = useState<string | null>(null)
 
   useEffect(() => {
@@ -234,6 +235,11 @@ export default function AnalyticsPage() {
         {/* CONTRACTING TRACKER TAB */}
         {activeTab === 'contracting' && (
           <div>
+            {resetError && (
+              <div style={{ padding: '12px 16px', backgroundColor: '#FEE2E2', border: '1px solid #FECACA', borderRadius: '8px', color: '#C0392B', fontSize: '13px', marginBottom: '16px' }}>
+                ⚠ {resetError}
+              </div>
+            )}
             {/* Summary Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '14px', marginBottom: '24px' }}>
               {[
@@ -334,11 +340,15 @@ export default function AnalyticsPage() {
                             <span
                               onClick={async (e) => {
                                 e.stopPropagation()
-                                const status = getCarrierStatus(agent, 'Ethos')
-                                const newStatus = status === 'active' ? 'submitted' : 'none'
-                                const updatedCarriers = { ...(agent.carriers || {}), Ethos: newStatus }
-                                await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                                setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, carriers: updatedCarriers } : a))
+                                try {
+                                  const status = getCarrierStatus(agent, 'Ethos')
+                                  const newStatus = status === 'active' ? 'submitted' : 'none'
+                                  const updatedCarriers = { ...(agent.carriers || {}), Ethos: newStatus }
+                                  const { error } = await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                  if (error) { setResetError('Failed to update Ethos status. Please try again.'); return }
+                                  setResetError('')
+                                  setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, carriers: updatedCarriers } : a))
+                                } catch { setResetError('An error occurred. Please try again.') }
                               }}
                               title="Click to reset"
                               style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: getStatusBadge(getCarrierStatus(agent, 'Ethos')).bg, color: getStatusBadge(getCarrierStatus(agent, 'Ethos')).color, border: `1px solid ${getStatusBadge(getCarrierStatus(agent, 'Ethos')).border}`, whiteSpace: 'nowrap', cursor: 'pointer' }}
@@ -354,9 +364,13 @@ export default function AnalyticsPage() {
                             <span
                               onClick={async (e) => {
                                 e.stopPropagation()
-                                const updatedCarriers = { ...(agent.carriers || {}), Americo: 'none' }
-                                await supabase.from('agents').update({ americo_form_submitted: false, americo_form_submitted_at: null as any, americo_surelc_unlocked: false, carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                                setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, americo_form_submitted: false, americo_surelc_unlocked: false, carriers: updatedCarriers } : a))
+                                try {
+                                  const updatedCarriers = { ...(agent.carriers || {}), Americo: 'none' }
+                                  const { error } = await supabase.from('agents').update({ americo_form_submitted: false, americo_form_submitted_at: null as any, americo_surelc_unlocked: false, carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                  if (error) { setResetError('Failed to reset Americo status. Please try again.'); return }
+                                  setResetError('')
+                                  setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, americo_form_submitted: false, americo_surelc_unlocked: false, carriers: updatedCarriers } : a))
+                                } catch { setResetError('An error occurred. Please try again.') }
                               }}
                               title="Click to reset"
                               style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap', cursor: 'pointer' }}
@@ -383,9 +397,13 @@ export default function AnalyticsPage() {
                             <span
                               onClick={async (e) => {
                                 e.stopPropagation()
-                                const updatedCarriers = { ...(agent.carriers || {}), 'Mutual of Omaha': 'none' }
-                                await supabase.from('agents').update({ mutual_omaha_requested: false, mutual_omaha_requested_at: null as any, mutual_omaha_surelc_unlocked: false, carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                                setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, mutual_omaha_requested: false, mutual_omaha_surelc_unlocked: false, carriers: updatedCarriers } : a))
+                                try {
+                                  const updatedCarriers = { ...(agent.carriers || {}), 'Mutual of Omaha': 'none' }
+                                  const { error } = await supabase.from('agents').update({ mutual_omaha_requested: false, mutual_omaha_requested_at: null as any, mutual_omaha_surelc_unlocked: false, carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                  if (error) { setResetError('Failed to reset Mutual of Omaha status. Please try again.'); return }
+                                  setResetError('')
+                                  setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, mutual_omaha_requested: false, mutual_omaha_surelc_unlocked: false, carriers: updatedCarriers } : a))
+                                } catch { setResetError('An error occurred. Please try again.') }
                               }}
                               title="Click to reset"
                               style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: getMutualOmahaStatus(agent).bg, color: getMutualOmahaStatus(agent).color, border: `1px solid ${getMutualOmahaStatus(agent).border}`, whiteSpace: 'nowrap', cursor: 'pointer' }}
@@ -401,11 +419,15 @@ export default function AnalyticsPage() {
                             <span
                               onClick={async (e) => {
                                 e.stopPropagation()
-                                const status = getCarrierStatus(agent, 'Aflac')
-                                const newStatus = status === 'active' ? 'submitted' : 'none'
-                                const updatedCarriers = { ...(agent.carriers || {}), Aflac: newStatus }
-                                await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                                setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, carriers: updatedCarriers } : a))
+                                try {
+                                  const status = getCarrierStatus(agent, 'Aflac')
+                                  const newStatus = status === 'active' ? 'submitted' : 'none'
+                                  const updatedCarriers = { ...(agent.carriers || {}), Aflac: newStatus }
+                                  const { error } = await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                  if (error) { setResetError('Failed to update Aflac status. Please try again.'); return }
+                                  setResetError('')
+                                  setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, carriers: updatedCarriers } : a))
+                                } catch { setResetError('An error occurred. Please try again.') }
                               }}
                               title="Click to reset"
                               style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: getStatusBadge(getCarrierStatus(agent, 'Aflac')).bg, color: getStatusBadge(getCarrierStatus(agent, 'Aflac')).color, border: `1px solid ${getStatusBadge(getCarrierStatus(agent, 'Aflac')).border}`, whiteSpace: 'nowrap', cursor: 'pointer' }}
@@ -421,11 +443,15 @@ export default function AnalyticsPage() {
                             <span
                               onClick={async (e) => {
                                 e.stopPropagation()
-                                const status = getCarrierStatus(agent, 'Transamerica')
-                                const newStatus = status === 'active' ? 'submitted' : 'none'
-                                const updatedCarriers = { ...(agent.carriers || {}), Transamerica: newStatus }
-                                await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                                setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, carriers: updatedCarriers } : a))
+                                try {
+                                  const status = getCarrierStatus(agent, 'Transamerica')
+                                  const newStatus = status === 'active' ? 'submitted' : 'none'
+                                  const updatedCarriers = { ...(agent.carriers || {}), Transamerica: newStatus }
+                                  const { error } = await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                  if (error) { setResetError('Failed to update Transamerica status. Please try again.'); return }
+                                  setResetError('')
+                                  setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, carriers: updatedCarriers } : a))
+                                } catch { setResetError('An error occurred. Please try again.') }
                               }}
                               title="Click to reset"
                               style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: getStatusBadge(getCarrierStatus(agent, 'Transamerica')).bg, color: getStatusBadge(getCarrierStatus(agent, 'Transamerica')).color, border: `1px solid ${getStatusBadge(getCarrierStatus(agent, 'Transamerica')).border}`, whiteSpace: 'nowrap', cursor: 'pointer' }}
@@ -441,11 +467,15 @@ export default function AnalyticsPage() {
                             <span
                               onClick={async (e) => {
                                 e.stopPropagation()
-                                const status = getCarrierStatus(agent, 'UHL (United Home Life)')
-                                const newStatus = status === 'active' ? 'submitted' : 'none'
-                                const updatedCarriers = { ...(agent.carriers || {}), 'UHL (United Home Life)': newStatus }
-                                await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                                setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, carriers: updatedCarriers } : a))
+                                try {
+                                  const status = getCarrierStatus(agent, 'UHL (United Home Life)')
+                                  const newStatus = status === 'active' ? 'submitted' : 'none'
+                                  const updatedCarriers = { ...(agent.carriers || {}), 'UHL (United Home Life)': newStatus }
+                                  const { error } = await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                  if (error) { setResetError('Failed to update UHL status. Please try again.'); return }
+                                  setResetError('')
+                                  setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, carriers: updatedCarriers } : a))
+                                } catch { setResetError('An error occurred. Please try again.') }
                               }}
                               title="Click to reset"
                               style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: getStatusBadge(getCarrierStatus(agent, 'UHL (United Home Life)')).bg, color: getStatusBadge(getCarrierStatus(agent, 'UHL (United Home Life)')).color, border: `1px solid ${getStatusBadge(getCarrierStatus(agent, 'UHL (United Home Life)')).border}`, whiteSpace: 'nowrap', cursor: 'pointer' }}
@@ -461,11 +491,15 @@ export default function AnalyticsPage() {
                             <span
                               onClick={async (e) => {
                                 e.stopPropagation()
-                                const status = getCarrierStatus(agent, 'AHL (American Home Life)')
-                                const newStatus = status === 'active' ? 'submitted' : 'none'
-                                const updatedCarriers = { ...(agent.carriers || {}), 'AHL (American Home Life)': newStatus }
-                                await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                                setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, carriers: updatedCarriers } : a))
+                                try {
+                                  const status = getCarrierStatus(agent, 'AHL (American Home Life)')
+                                  const newStatus = status === 'active' ? 'submitted' : 'none'
+                                  const updatedCarriers = { ...(agent.carriers || {}), 'AHL (American Home Life)': newStatus }
+                                  const { error } = await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                  if (error) { setResetError('Failed to update AHL status. Please try again.'); return }
+                                  setResetError('')
+                                  setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, carriers: updatedCarriers } : a))
+                                } catch { setResetError('An error occurred. Please try again.') }
                               }}
                               title="Click to reset"
                               style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: getStatusBadge(getCarrierStatus(agent, 'AHL (American Home Life)')).bg, color: getStatusBadge(getCarrierStatus(agent, 'AHL (American Home Life)')).color, border: `1px solid ${getStatusBadge(getCarrierStatus(agent, 'AHL (American Home Life)')).border}`, whiteSpace: 'nowrap', cursor: 'pointer' }}
