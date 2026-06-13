@@ -36,12 +36,24 @@ export default function CalendarPage() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingEvent, setEditingEvent] = useState<any | null>(null)
   const [saving, setSaving] = useState(false)
+  const [googleConnected, setGoogleConnected] = useState(false)
+  const [googleConnecting, setGoogleConnecting] = useState(false)
+  const [syncMessage, setSyncMessage] = useState('')
   const [form, setForm] = useState({
     title: '', description: '', event_type: 'follow_up',
     event_date: '', event_time: '', client_id: '', status: 'scheduled'
   })
 
   useEffect(() => {
+    // Check if just connected Google Calendar
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('connected') === 'true' && agentId) {
+      supabase.from('agents').update({ google_calendar_connected: true }).eq('id', agentId).then(() => {
+        setGoogleConnected(true)
+        window.history.replaceState({}, '', '/crm/calendar')
+      })
+    }
+
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
@@ -63,6 +75,16 @@ export default function CalendarPage() {
         .eq('agent_id', aid)
         .order('first_name')
       setClients(clientsData ?? [])
+
+      // Check if Google Calendar is connected
+      if (agentRecord?.id) {
+        const { data: agentData } = await supabase
+          .from('agents')
+          .select('google_calendar_connected')
+          .eq('id', agentRecord.id)
+          .single()
+        setGoogleConnected(agentData?.google_calendar_connected ?? false)
+      }
 
       setLoading(false)
     }
@@ -106,10 +128,31 @@ export default function CalendarPage() {
       status: form.status,
     }
 
+    let savedEventId = editingEvent?.id
+
     if (editingEvent) {
       await supabase.from('crm_events').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', editingEvent.id)
     } else {
-      await supabase.from('crm_events').insert(payload)
+      const { data: newEvent } = await supabase.from('crm_events').insert(payload).select().single()
+      savedEventId = newEvent?.id
+    }
+
+    // Auto-sync to Google Calendar if connected
+    if (googleConnected && savedEventId && agentId) {
+      try {
+        const response = await fetch('/api/google-calendar/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ agentId, event: { ...payload, id: savedEventId } })
+        })
+        const result = await response.json()
+        if (result.synced) {
+          setSyncMessage('✓ Synced to Google Calendar')
+          setTimeout(() => setSyncMessage(''), 3000)
+        }
+      } catch (err) {
+        console.error('Google sync error:', err)
+      }
     }
 
     await loadEvents(agentId, isAdmin)
@@ -183,12 +226,33 @@ export default function CalendarPage() {
           <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1A1A1A', letterSpacing: '-0.02em', marginBottom: '4px' }}>Calendar</h1>
           <p style={{ fontSize: '14px', color: '#7A7A7A' }}>Schedule and track follow-ups, calls, and meetings</p>
         </div>
-        <button
-          onClick={() => openAddModal(today)}
-          style={{ padding: '10px 20px', backgroundColor: '#C9A96E', color: '#1A1A1A', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
-        >
-          + Add Event
-        </button>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          {syncMessage && (
+            <span style={{ fontSize: '12px', color: '#27AE60', fontWeight: '600' }}>{syncMessage}</span>
+          )}
+          {!isAdmin && (
+            googleConnected ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', backgroundColor: '#E8F5E9', border: '1px solid #A5D6A7', borderRadius: '8px' }}>
+                <span style={{ fontSize: '14px' }}>📅</span>
+                <span style={{ fontSize: '12px', fontWeight: '600', color: '#1B5E20' }}>Google Calendar Connected</span>
+              </div>
+            ) : (
+              <a
+                href={`/api/auth/google?agentId=${agentId}`}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', backgroundColor: '#FFFFFF', border: '1px solid #E5E1DA', borderRadius: '8px', textDecoration: 'none', fontSize: '12px', fontWeight: '600', color: '#4A4A4A' }}
+              >
+                <span style={{ fontSize: '14px' }}>📅</span>
+                Connect Google Calendar
+              </a>
+            )
+          )}
+          <button
+            onClick={() => openAddModal(today)}
+            style={{ padding: '10px 20px', backgroundColor: '#C9A96E', color: '#1A1A1A', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            + Add Event
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
