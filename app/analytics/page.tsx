@@ -62,7 +62,7 @@ export default function AnalyticsPage() {
   const filteredContracting = activeAgents.filter(a => {
     const nameMatch = !contractingSearch || a.full_name?.toLowerCase().includes(contractingSearch.toLowerCase())
     if (!contractingFilter) return nameMatch
-    if (contractingFilter === 'ethos') return nameMatch && getCarrierStatus(a, 'Ethos') === 'active'
+    if (contractingFilter === 'ethos') return nameMatch && getCarrierStatus(a, 'Ethos') !== 'none'
     if (contractingFilter === 'americo_form') return nameMatch && a.americo_form_submitted
     if (contractingFilter === 'americo_surelc') return nameMatch && a.americo_surelc_unlocked
     if (contractingFilter === 'americo_pending') return nameMatch && a.americo_form_submitted && !a.americo_surelc_unlocked
@@ -324,7 +324,8 @@ export default function AnalyticsPage() {
                         <td style={{ padding: '12px 14px' }}>
                           {getCarrierStatus(agent, 'Ethos') !== 'none' ? (
                             <span
-                              onClick={async () => {
+                              onClick={async (e) => {
+                                e.stopPropagation()
                                 const status = getCarrierStatus(agent, 'Ethos')
                                 const newStatus = status === 'active' ? 'submitted' : 'none'
                                 const updatedCarriers = { ...(agent.carriers || {}), Ethos: newStatus }
@@ -343,7 +344,8 @@ export default function AnalyticsPage() {
                         <td style={{ padding: '12px 14px' }}>
                           {agent.americo_form_submitted ? (
                             <span
-                              onClick={async () => {
+                              onClick={async (e) => {
+                                e.stopPropagation()
                                 const updatedCarriers = { ...(agent.carriers || {}), Americo: 'none' }
                                 await supabase.from('agents').update({ americo_form_submitted: false, americo_form_submitted_at: null as any, americo_surelc_unlocked: false, carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
                                 setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, americo_form_submitted: false, americo_surelc_unlocked: false, carriers: updatedCarriers } : a))
@@ -371,7 +373,8 @@ export default function AnalyticsPage() {
                         <td style={{ padding: '12px 14px' }}>
                           {(agent.mutual_omaha_requested || getCarrierStatus(agent, 'Mutual of Omaha') !== 'none') ? (
                             <span
-                              onClick={async () => {
+                              onClick={async (e) => {
+                                e.stopPropagation()
                                 const updatedCarriers = { ...(agent.carriers || {}), 'Mutual of Omaha': 'none' }
                                 await supabase.from('agents').update({ mutual_omaha_requested: false, mutual_omaha_requested_at: null as any, mutual_omaha_surelc_unlocked: false, carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
                                 setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, mutual_omaha_requested: false, mutual_omaha_surelc_unlocked: false, carriers: updatedCarriers } : a))
@@ -388,7 +391,8 @@ export default function AnalyticsPage() {
                         <td style={{ padding: '12px 14px' }}>
                           {getCarrierStatus(agent, 'Aflac') !== 'none' ? (
                             <span
-                              onClick={async () => {
+                              onClick={async (e) => {
+                                e.stopPropagation()
                                 const status = getCarrierStatus(agent, 'Aflac')
                                 const newStatus = status === 'active' ? 'submitted' : 'none'
                                 const updatedCarriers = { ...(agent.carriers || {}), Aflac: newStatus }
@@ -407,7 +411,8 @@ export default function AnalyticsPage() {
                         <td style={{ padding: '12px 14px' }}>
                           {getCarrierStatus(agent, 'Transamerica') !== 'none' ? (
                             <span
-                              onClick={async () => {
+                              onClick={async (e) => {
+                                e.stopPropagation()
                                 const status = getCarrierStatus(agent, 'Transamerica')
                                 const newStatus = status === 'active' ? 'submitted' : 'none'
                                 const updatedCarriers = { ...(agent.carriers || {}), Transamerica: newStatus }
@@ -426,7 +431,8 @@ export default function AnalyticsPage() {
                         <td style={{ padding: '12px 14px' }}>
                           {getCarrierStatus(agent, 'UHL (United Home Life)') !== 'none' ? (
                             <span
-                              onClick={async () => {
+                              onClick={async (e) => {
+                                e.stopPropagation()
                                 const status = getCarrierStatus(agent, 'UHL (United Home Life)')
                                 const newStatus = status === 'active' ? 'submitted' : 'none'
                                 const updatedCarriers = { ...(agent.carriers || {}), 'UHL (United Home Life)': newStatus }
@@ -445,7 +451,8 @@ export default function AnalyticsPage() {
                         <td style={{ padding: '12px 14px' }}>
                           {getCarrierStatus(agent, 'AHL (American Home Life)') !== 'none' ? (
                             <span
-                              onClick={async () => {
+                              onClick={async (e) => {
+                                e.stopPropagation()
                                 const status = getCarrierStatus(agent, 'AHL (American Home Life)')
                                 const newStatus = status === 'active' ? 'submitted' : 'none'
                                 const updatedCarriers = { ...(agent.carriers || {}), 'AHL (American Home Life)': newStatus }
@@ -464,7 +471,8 @@ export default function AnalyticsPage() {
                             <Badge status={{ label: '✓ Submitted', bg: '#E3F2FD', color: '#1565C0', border: '#90CAF9' }} />
                           ) : (
                             <button
-                              onClick={async () => {
+                              onClick={async (e) => {
+                                e.stopPropagation()
                                 const { data: { user } } = await supabase.auth.getUser()
                                 const { error } = await supabase
                                   .from('agents')
