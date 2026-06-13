@@ -353,8 +353,44 @@ export default function ClientDetailPage() {
               </div>
               <div style={grid3}>
                 <div><label style={lbl}>Face Amount</label><input type="number" style={inp} value={policyForm.face_amount} onChange={e => setPolicyForm({ ...policyForm, face_amount: e.target.value })} placeholder="250000" /></div>
-                <div><label style={lbl}>Monthly Premium</label><input type="number" style={inp} value={policyForm.monthly_premium} onChange={e => setPolicyForm({ ...policyForm, monthly_premium: e.target.value })} placeholder="0.00" /></div>
-                <div><label style={lbl}>Annual Premium</label><input type="number" style={inp} value={policyForm.annual_premium} onChange={e => setPolicyForm({ ...policyForm, annual_premium: e.target.value })} placeholder="0.00" /></div>
+                <div>
+                  <label style={lbl}>Monthly Premium</label>
+                  <input
+                    type="number"
+                    style={inp}
+                    value={policyForm.monthly_premium}
+                    onChange={e => {
+                      const monthly = e.target.value
+                      const annual = monthly ? (parseFloat(monthly) * 12).toFixed(2) : ''
+                      setPolicyForm((prev: any) => ({ ...prev, monthly_premium: monthly, annual_premium: annual }))
+                    }}
+                    placeholder="0.00"
+                  />
+                  {policyForm.monthly_premium && parseFloat(policyForm.monthly_premium) > 0 && (
+                    <p style={{ fontSize: '11px', color: '#7A7A7A', marginTop: '4px' }}>
+                      Annual: ${(parseFloat(policyForm.monthly_premium) * 12).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label style={lbl}>Annual Premium</label>
+                  <input
+                    type="number"
+                    style={inp}
+                    value={policyForm.annual_premium}
+                    onChange={e => {
+                      const annual = e.target.value
+                      const monthly = annual ? (parseFloat(annual) / 12).toFixed(2) : ''
+                      setPolicyForm((prev: any) => ({ ...prev, annual_premium: annual, monthly_premium: monthly }))
+                    }}
+                    placeholder="0.00"
+                  />
+                  {policyForm.annual_premium && parseFloat(policyForm.annual_premium) > 0 && (
+                    <p style={{ fontSize: '11px', color: '#7A7A7A', marginTop: '4px' }}>
+                      Monthly: ${(parseFloat(policyForm.annual_premium) / 12).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                  )}
+                </div>
               </div>
               <div style={grid2}>
                 <div><label style={lbl}>Date Written</label><input type="date" style={inp} value={policyForm.date_written} onChange={e => setPolicyForm({ ...policyForm, date_written: e.target.value })} /></div>
@@ -453,8 +489,42 @@ export default function ClientDetailPage() {
                       </div>
                       <div style={grid3}>
                         <div><label style={lbl}>Face Amount</label><input type="number" style={inp} value={policyForm.face_amount ?? ''} onChange={e => setPolicyForm({ ...policyForm, face_amount: e.target.value })} /></div>
-                        <div><label style={lbl}>Monthly Premium</label><input type="number" style={inp} value={policyForm.monthly_premium ?? ''} onChange={e => setPolicyForm({ ...policyForm, monthly_premium: e.target.value })} /></div>
-                        <div><label style={lbl}>Annual Premium</label><input type="number" style={inp} value={policyForm.annual_premium ?? ''} onChange={e => setPolicyForm({ ...policyForm, annual_premium: e.target.value })} /></div>
+                        <div>
+                          <label style={lbl}>Monthly Premium</label>
+                          <input
+                            type="number"
+                            style={inp}
+                            value={policyForm.monthly_premium ?? ''}
+                            onChange={e => {
+                              const monthly = e.target.value
+                              const annual = monthly ? (parseFloat(monthly) * 12).toFixed(2) : ''
+                              setPolicyForm((prev: any) => ({ ...prev, monthly_premium: monthly, annual_premium: annual }))
+                            }}
+                          />
+                          {policyForm.monthly_premium && parseFloat(policyForm.monthly_premium) > 0 && (
+                            <p style={{ fontSize: '11px', color: '#7A7A7A', marginTop: '4px' }}>
+                              Annual: ${(parseFloat(policyForm.monthly_premium) * 12).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <label style={lbl}>Annual Premium</label>
+                          <input
+                            type="number"
+                            style={inp}
+                            value={policyForm.annual_premium ?? ''}
+                            onChange={e => {
+                              const annual = e.target.value
+                              const monthly = annual ? (parseFloat(annual) / 12).toFixed(2) : ''
+                              setPolicyForm((prev: any) => ({ ...prev, annual_premium: annual, monthly_premium: monthly }))
+                            }}
+                          />
+                          {policyForm.annual_premium && parseFloat(policyForm.annual_premium) > 0 && (
+                            <p style={{ fontSize: '11px', color: '#7A7A7A', marginTop: '4px' }}>
+                              Monthly: ${(parseFloat(policyForm.annual_premium) / 12).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                          )}
+                        </div>
                       </div>
                       <div style={grid2}>
                         <div><label style={lbl}>Date Written</label><input type="date" style={inp} value={policyForm.date_written ?? ''} onChange={e => setPolicyForm({ ...policyForm, date_written: e.target.value })} /></div>

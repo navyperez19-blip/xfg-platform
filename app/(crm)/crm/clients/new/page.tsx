@@ -530,8 +530,44 @@ export default function NewClientPage() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
                 <div><label style={lbl}>Face Amount ($)</label><input type="number" style={inp} value={policy.face_amount} onChange={e => updPolicy('face_amount', e.target.value)} placeholder="250000" /></div>
-                <div><label style={lbl}>Monthly Premium ($)</label><input type="number" style={inp} value={policy.monthly_premium} onChange={e => updPolicy('monthly_premium', e.target.value)} placeholder="0.00" /></div>
-                <div><label style={lbl}>Annual Premium ($)</label><input type="number" style={inp} value={policy.annual_premium} onChange={e => updPolicy('annual_premium', e.target.value)} placeholder="0.00" /></div>
+                <div>
+                  <label style={lbl}>Monthly Premium ($)</label>
+                  <input
+                    type="number"
+                    style={inp}
+                    value={policy.monthly_premium}
+                    onChange={e => {
+                      const monthly = e.target.value
+                      const annual = monthly ? (parseFloat(monthly) * 12).toFixed(2) : ''
+                      setPolicy(prev => ({ ...prev, monthly_premium: monthly, annual_premium: annual }))
+                    }}
+                    placeholder="0.00"
+                  />
+                  {policy.monthly_premium && (
+                    <p style={{ fontSize: '11px', color: '#7A7A7A', marginTop: '4px' }}>
+                      Annual: ${(parseFloat(policy.monthly_premium) * 12).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label style={lbl}>Annual Premium ($)</label>
+                  <input
+                    type="number"
+                    style={inp}
+                    value={policy.annual_premium}
+                    onChange={e => {
+                      const annual = e.target.value
+                      const monthly = annual ? (parseFloat(annual) / 12).toFixed(2) : ''
+                      setPolicy(prev => ({ ...prev, annual_premium: annual, monthly_premium: monthly }))
+                    }}
+                    placeholder="0.00"
+                  />
+                  {policy.annual_premium && (
+                    <p style={{ fontSize: '11px', color: '#7A7A7A', marginTop: '4px' }}>
+                      Monthly: ${(parseFloat(policy.annual_premium) / 12).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                  )}
+                </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div><label style={lbl}>Date Written *</label><input type="date" style={inp} value={policy.date_written} onChange={e => updPolicy('date_written', e.target.value)} required /></div>
