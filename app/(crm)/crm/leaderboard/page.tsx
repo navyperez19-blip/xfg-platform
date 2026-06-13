@@ -45,6 +45,7 @@ export default function LeaderboardPage() {
         mtdPremium: Number(row.mtd_premium),
         activePolicies: Number(row.active_policies),
         totalPolicies: Number(row.total_policies),
+        alltimePremium: Number(row.alltime_premium),
       }))
 
       setLeaderboard(stats)
@@ -96,7 +97,7 @@ export default function LeaderboardPage() {
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '22px', fontWeight: '700', color: '#C9A96E' }}>${myStats.mtdPremium.toLocaleString()}</div>
-              <div style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em' }}>MTD Premium</div>
+              <div style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em' }}>MTD AP</div>
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '22px', fontWeight: '700', color: '#C9A96E' }}>{myStats.activePolicies}</div>
@@ -118,7 +119,7 @@ export default function LeaderboardPage() {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ backgroundColor: '#F9F7F4' }}>
-              {['Rank', 'Agent', 'Model', 'MTD Policies', 'MTD Premium', 'Active Policies', 'Progress'].map(h => (
+              {['Rank', 'Agent', 'Model', 'MTD Policies', 'MTD AP', 'Active Policies', 'All-Time AP', 'Progress'].map(h => (
                 <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.07em', borderBottom: '1px solid #E5E1DA', whiteSpace: 'nowrap' }}>
                   {h}
                 </th>
@@ -179,6 +180,11 @@ export default function LeaderboardPage() {
                   </td>
                   <td style={{ padding: '14px 16px', fontSize: '14px', fontWeight: '600', color: '#27AE60' }}>
                     {agent.activePolicies}
+                  </td>
+                  <td style={{ padding: '14px 16px' }}>
+                    <span style={{ fontSize: '14px', fontWeight: '700', color: agent.alltimePremium > 0 ? '#1A1A1A' : '#CCC' }}>
+                      ${agent.alltimePremium.toLocaleString('en-US', { minimumFractionDigits: 0 })}
+                    </span>
                   </td>
                   <td style={{ padding: '14px 16px', minWidth: '120px' }}>
                     <div style={{ height: '6px', backgroundColor: '#F0EDE8', borderRadius: '3px', overflow: 'hidden' }}>
