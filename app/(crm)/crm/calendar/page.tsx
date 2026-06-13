@@ -32,12 +32,10 @@ export default function CalendarPage() {
   const [clients, setClients] = useState<any[]>([])
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
-  const [view, setView] = useState<'month' | 'week'>('month')
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingEvent, setEditingEvent] = useState<any | null>(null)
   const [saving, setSaving] = useState(false)
   const [googleConnected, setGoogleConnected] = useState(false)
-  const [googleConnecting, setGoogleConnecting] = useState(false)
   const [syncMessage, setSyncMessage] = useState('')
   const [form, setForm] = useState({
     title: '', description: '', event_type: 'follow_up',
@@ -272,6 +270,19 @@ export default function CalendarPage() {
         ))}
       </div>
 
+      {/* Google Calendar Tip Banner */}
+      {!isAdmin && !googleConnected && (
+        <div style={{ padding: '14px 18px', backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', marginBottom: '16px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+          <span style={{ fontSize: '18px', flexShrink: 0 }}>📅</span>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: '13px', fontWeight: '700', color: '#1E40AF', marginBottom: '4px' }}>Connect Your XFG Google Calendar</p>
+            <p style={{ fontSize: '13px', color: '#1E40AF', lineHeight: 1.7 }}>
+              To get reminders and notifications for your follow-ups and appointments, connect your Google Calendar. <strong>Use your XFG email address</strong> (e.g. firstnamelastname.xfg@gmail.com) to sign in. If you haven't set up your XFG Gmail yet, create a free Google account at gmail.com using your XFG email format first, then come back and connect it here.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Overdue Alert */}
       {overdueEvents.length > 0 && (
         <div style={{ padding: '12px 18px', backgroundColor: '#FEE2E2', border: '1px solid #FECACA', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -376,7 +387,6 @@ export default function CalendarPage() {
                 <div>
                   {getEventsForDate(selectedDate).map((event, i, arr) => {
                     const typeConfig = EVENT_TYPES.find(t => t.value === event.event_type) ?? EVENT_TYPES[0]
-                    const statusConfig = STATUS_CONFIG[event.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.scheduled
                     return (
                       <div key={event.id} style={{ padding: '12px 16px', borderBottom: i < arr.length - 1 ? '1px solid #F0EDE8' : 'none' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
