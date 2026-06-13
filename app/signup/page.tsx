@@ -63,9 +63,10 @@ export default function SignupPage() {
         full_name,
         email: form.email,
         phone: form.phone,
-        state: form.state,
+        state: form.state || 'TX',
         current_stage: 'contacted',
         is_locked: false,
+        agent_model: 'supported',
         wizard_step: 'xfg_email'
       })
       if (agentError) { setError('Agent profile creation failed: ' + agentError.message); setLoading(false); return }
