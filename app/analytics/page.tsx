@@ -87,11 +87,6 @@ export default function AnalyticsPage() {
     return { label: '—', bg: '#F5F5F5', color: '#AAA', border: '#E5E1DA' }
   }
 
-  const getAmericoStatus = (agent: any) => {
-    if (agent.americo_surelc_unlocked) return { label: '🔓 SureLC Unlocked', bg: '#E8F5E9', color: '#1B5E20', border: '#A5D6A7' }
-    if (agent.americo_form_submitted) return { label: '📋 Form Submitted', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }
-    return { label: '—', bg: '#F5F5F5', color: '#AAA', border: '#E5E1DA' }
-  }
 
   const getMutualOmahaStatus = (agent: any) => {
     const carrierStatus = getCarrierStatus(agent, 'Mutual of Omaha')
@@ -323,23 +318,147 @@ export default function AnalyticsPage() {
                   <tbody>
                     {filteredContracting.map((agent, i) => (
                       <tr key={agent.id} style={{ borderBottom: i < filteredContracting.length - 1 ? '1px solid #F0EDE8' : 'none' }}>
-                        <td style={{ padding: '12px 14px', fontWeight: '600', color: '#1A1814', fontSize: '13px', whiteSpace: 'nowrap' }}>{agent.full_name}</td>
-                        <td style={{ padding: '12px 14px' }}><Badge status={getStatusBadge(getCarrierStatus(agent, 'Ethos'))} /></td>
-                        <td style={{ padding: '12px 14px' }}><Badge status={getAmericoStatus(agent)} /></td>
+                        <td style={{ padding: '12px 14px', fontWeight: '600', color: '#1A1A1A', fontSize: '13px', whiteSpace: 'nowrap' }}>{agent.full_name}</td>
+
+                        {/* Ethos */}
+                        <td style={{ padding: '12px 14px' }}>
+                          {getCarrierStatus(agent, 'Ethos') !== 'none' ? (
+                            <span
+                              onClick={async () => {
+                                const status = getCarrierStatus(agent, 'Ethos')
+                                const newStatus = status === 'active' ? 'submitted' : 'none'
+                                const updatedCarriers = { ...(agent.carriers || {}), Ethos: newStatus }
+                                await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, carriers: updatedCarriers } : a))
+                              }}
+                              title="Click to reset"
+                              style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: getStatusBadge(getCarrierStatus(agent, 'Ethos')).bg, color: getStatusBadge(getCarrierStatus(agent, 'Ethos')).color, border: `1px solid ${getStatusBadge(getCarrierStatus(agent, 'Ethos')).border}`, whiteSpace: 'nowrap', cursor: 'pointer' }}
+                            >
+                              {getStatusBadge(getCarrierStatus(agent, 'Ethos')).label}
+                            </span>
+                          ) : <Badge status={getStatusBadge('none')} />}
+                        </td>
+
+                        {/* Americo Form */}
+                        <td style={{ padding: '12px 14px' }}>
+                          {agent.americo_form_submitted ? (
+                            <span
+                              onClick={async () => {
+                                const updatedCarriers = { ...(agent.carriers || {}), Americo: 'none' }
+                                await supabase.from('agents').update({ americo_form_submitted: false, americo_form_submitted_at: null as any, americo_surelc_unlocked: false, carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, americo_form_submitted: false, americo_surelc_unlocked: false, carriers: updatedCarriers } : a))
+                              }}
+                              title="Click to reset"
+                              style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap', cursor: 'pointer' }}
+                            >
+                              📋 Form Submitted
+                            </span>
+                          ) : <Badge status={{ label: '—', bg: '#F5F5F5', color: '#AAA', border: '#E5E1DA' }} />}
+                        </td>
+
+                        {/* Americo SureLC */}
                         <td style={{ padding: '12px 14px' }}>
                           <Badge status={
                             agent.americo_surelc_unlocked
                               ? { label: '🔓 Unlocked', bg: '#E8F5E9', color: '#1B5E20', border: '#A5D6A7' }
                               : agent.americo_form_submitted
-                              ? { label: '⏳ Pending Unlock', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }
+                              ? { label: '⏳ Pending', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }
                               : { label: '—', bg: '#F5F5F5', color: '#AAA', border: '#E5E1DA' }
                           } />
                         </td>
-                        <td style={{ padding: '12px 14px' }}><Badge status={getMutualOmahaStatus(agent)} /></td>
-                        <td style={{ padding: '12px 14px' }}><Badge status={getStatusBadge(getCarrierStatus(agent, 'Aflac'))} /></td>
-                        <td style={{ padding: '12px 14px' }}><Badge status={getStatusBadge(getCarrierStatus(agent, 'Transamerica'))} /></td>
-                        <td style={{ padding: '12px 14px' }}><Badge status={getStatusBadge(getCarrierStatus(agent, 'UHL (United Home Life)'))} /></td>
-                        <td style={{ padding: '12px 14px' }}><Badge status={getStatusBadge(getCarrierStatus(agent, 'AHL (American Home Life)'))} /></td>
+
+                        {/* Mutual of Omaha */}
+                        <td style={{ padding: '12px 14px' }}>
+                          {(agent.mutual_omaha_requested || getCarrierStatus(agent, 'Mutual of Omaha') !== 'none') ? (
+                            <span
+                              onClick={async () => {
+                                const updatedCarriers = { ...(agent.carriers || {}), 'Mutual of Omaha': 'none' }
+                                await supabase.from('agents').update({ mutual_omaha_requested: false, mutual_omaha_requested_at: null as any, mutual_omaha_surelc_unlocked: false, carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, mutual_omaha_requested: false, mutual_omaha_surelc_unlocked: false, carriers: updatedCarriers } : a))
+                              }}
+                              title="Click to reset"
+                              style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: getMutualOmahaStatus(agent).bg, color: getMutualOmahaStatus(agent).color, border: `1px solid ${getMutualOmahaStatus(agent).border}`, whiteSpace: 'nowrap', cursor: 'pointer' }}
+                            >
+                              {getMutualOmahaStatus(agent).label}
+                            </span>
+                          ) : <Badge status={{ label: '—', bg: '#F5F5F5', color: '#AAA', border: '#E5E1DA' }} />}
+                        </td>
+
+                        {/* Aflac */}
+                        <td style={{ padding: '12px 14px' }}>
+                          {getCarrierStatus(agent, 'Aflac') !== 'none' ? (
+                            <span
+                              onClick={async () => {
+                                const status = getCarrierStatus(agent, 'Aflac')
+                                const newStatus = status === 'active' ? 'submitted' : 'none'
+                                const updatedCarriers = { ...(agent.carriers || {}), Aflac: newStatus }
+                                await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, carriers: updatedCarriers } : a))
+                              }}
+                              title="Click to reset"
+                              style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: getStatusBadge(getCarrierStatus(agent, 'Aflac')).bg, color: getStatusBadge(getCarrierStatus(agent, 'Aflac')).color, border: `1px solid ${getStatusBadge(getCarrierStatus(agent, 'Aflac')).border}`, whiteSpace: 'nowrap', cursor: 'pointer' }}
+                            >
+                              {getStatusBadge(getCarrierStatus(agent, 'Aflac')).label}
+                            </span>
+                          ) : <Badge status={getStatusBadge('none')} />}
+                        </td>
+
+                        {/* Transamerica */}
+                        <td style={{ padding: '12px 14px' }}>
+                          {getCarrierStatus(agent, 'Transamerica') !== 'none' ? (
+                            <span
+                              onClick={async () => {
+                                const status = getCarrierStatus(agent, 'Transamerica')
+                                const newStatus = status === 'active' ? 'submitted' : 'none'
+                                const updatedCarriers = { ...(agent.carriers || {}), Transamerica: newStatus }
+                                await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, carriers: updatedCarriers } : a))
+                              }}
+                              title="Click to reset"
+                              style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: getStatusBadge(getCarrierStatus(agent, 'Transamerica')).bg, color: getStatusBadge(getCarrierStatus(agent, 'Transamerica')).color, border: `1px solid ${getStatusBadge(getCarrierStatus(agent, 'Transamerica')).border}`, whiteSpace: 'nowrap', cursor: 'pointer' }}
+                            >
+                              {getStatusBadge(getCarrierStatus(agent, 'Transamerica')).label}
+                            </span>
+                          ) : <Badge status={getStatusBadge('none')} />}
+                        </td>
+
+                        {/* UHL */}
+                        <td style={{ padding: '12px 14px' }}>
+                          {getCarrierStatus(agent, 'UHL (United Home Life)') !== 'none' ? (
+                            <span
+                              onClick={async () => {
+                                const status = getCarrierStatus(agent, 'UHL (United Home Life)')
+                                const newStatus = status === 'active' ? 'submitted' : 'none'
+                                const updatedCarriers = { ...(agent.carriers || {}), 'UHL (United Home Life)': newStatus }
+                                await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, carriers: updatedCarriers } : a))
+                              }}
+                              title="Click to reset"
+                              style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: getStatusBadge(getCarrierStatus(agent, 'UHL (United Home Life)')).bg, color: getStatusBadge(getCarrierStatus(agent, 'UHL (United Home Life)')).color, border: `1px solid ${getStatusBadge(getCarrierStatus(agent, 'UHL (United Home Life)')).border}`, whiteSpace: 'nowrap', cursor: 'pointer' }}
+                            >
+                              {getStatusBadge(getCarrierStatus(agent, 'UHL (United Home Life)')).label}
+                            </span>
+                          ) : <Badge status={getStatusBadge('none')} />}
+                        </td>
+
+                        {/* AHL */}
+                        <td style={{ padding: '12px 14px' }}>
+                          {getCarrierStatus(agent, 'AHL (American Home Life)') !== 'none' ? (
+                            <span
+                              onClick={async () => {
+                                const status = getCarrierStatus(agent, 'AHL (American Home Life)')
+                                const newStatus = status === 'active' ? 'submitted' : 'none'
+                                const updatedCarriers = { ...(agent.carriers || {}), 'AHL (American Home Life)': newStatus }
+                                await supabase.from('agents').update({ carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, carriers: updatedCarriers } : a))
+                              }}
+                              title="Click to reset"
+                              style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: getStatusBadge(getCarrierStatus(agent, 'AHL (American Home Life)')).bg, color: getStatusBadge(getCarrierStatus(agent, 'AHL (American Home Life)')).color, border: `1px solid ${getStatusBadge(getCarrierStatus(agent, 'AHL (American Home Life)')).border}`, whiteSpace: 'nowrap', cursor: 'pointer' }}
+                            >
+                              {getStatusBadge(getCarrierStatus(agent, 'AHL (American Home Life)')).label}
+                            </span>
+                          ) : <Badge status={getStatusBadge('none')} />}
+                        </td>
                         <td style={{ padding: '12px 14px' }}>
                           {agent.dialer_submitted ? (
                             <Badge status={{ label: '✓ Submitted', bg: '#E3F2FD', color: '#1565C0', border: '#90CAF9' }} />
