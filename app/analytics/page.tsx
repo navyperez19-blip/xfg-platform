@@ -14,7 +14,6 @@ const STAGES = [
   { key: 'active', label: 'Active' },
 ]
 
-const CARRIERS = ['Ethos', 'Americo', 'Transamerica', 'Aflac', 'Mutual of Omaha', 'UHL (United Home Life)', 'AHL (American Home Life)']
 
 export default function AnalyticsPage() {
   const router = useRouter()
@@ -23,6 +22,7 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'overview' | 'contracting'>('overview')
   const [contractingSearch, setContractingSearch] = useState('')
+  const [contractingFilter, setContractingFilter] = useState<string | null>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -59,9 +59,21 @@ export default function AnalyticsPage() {
 
   const activeAgents = agents.filter(a => a.current_stage === 'active')
 
-  const filteredContracting = activeAgents.filter(a =>
-    !contractingSearch || a.full_name?.toLowerCase().includes(contractingSearch.toLowerCase())
-  )
+  const filteredContracting = activeAgents.filter(a => {
+    const nameMatch = !contractingSearch || a.full_name?.toLowerCase().includes(contractingSearch.toLowerCase())
+    if (!contractingFilter) return nameMatch
+    if (contractingFilter === 'ethos') return nameMatch && getCarrierStatus(a, 'Ethos') === 'active'
+    if (contractingFilter === 'americo_form') return nameMatch && a.americo_form_submitted
+    if (contractingFilter === 'americo_surelc') return nameMatch && a.americo_surelc_unlocked
+    if (contractingFilter === 'americo_pending') return nameMatch && a.americo_form_submitted && !a.americo_surelc_unlocked
+    if (contractingFilter === 'mutual_requested') return nameMatch && a.mutual_omaha_requested
+    if (contractingFilter === 'mutual_unlocked') return nameMatch && a.mutual_omaha_surelc_unlocked
+    if (contractingFilter === 'aflac') return nameMatch && getCarrierStatus(a, 'Aflac') !== 'none'
+    if (contractingFilter === 'transamerica') return nameMatch && getCarrierStatus(a, 'Transamerica') !== 'none'
+    if (contractingFilter === 'uhl') return nameMatch && getCarrierStatus(a, 'UHL (United Home Life)') !== 'none'
+    if (contractingFilter === 'ahl') return nameMatch && getCarrierStatus(a, 'AHL (American Home Life)') !== 'none'
+    return nameMatch
+  })
 
   const getCarrierStatus = (agent: any, carrier: string) => {
     const carriers = agent.carriers || {}
@@ -238,13 +250,21 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Search */}
-            <div style={{ marginBottom: '16px' }}>
+            <div style={{ marginBottom: '16px', display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
               <input
                 value={contractingSearch}
                 onChange={e => setContractingSearch(e.target.value)}
                 placeholder="Search agents..."
                 style={{ padding: '10px 16px', fontSize: '13px', border: '1px solid #DDD9D2', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', backgroundColor: '#FFFFFF', width: '300px' }}
               />
+              {contractingFilter && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px', backgroundColor: '#FFFBF0', border: '1px solid #C9A96E', borderRadius: '8px' }}>
+                  <span style={{ fontSize: '12px', color: '#92400E', fontWeight: '600' }}>
+                    Filtering by: {contractingFilter.replace('_', ' ')}
+                  </span>
+                  <button onClick={() => setContractingFilter(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#C9A96E', fontSize: '16px', padding: 0, lineHeight: 1 }}>×</button>
+                </div>
+              )}
             </div>
 
             {/* Contracting Table */}
@@ -257,8 +277,38 @@ export default function AnalyticsPage() {
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', minWidth: '1200px' }}>
                   <thead>
                     <tr style={{ background: '#F9F7F4' }}>
-                      {['Agent', 'Ethos', 'Americo Form', 'Americo SureLC', 'Mutual of Omaha', 'Aflac', 'Transamerica', 'UHL', 'AHL', 'Last Updated'].map(h => (
-                        <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: '10px', fontWeight: '700', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.07em', borderBottom: '1px solid #E5E1DA', whiteSpace: 'nowrap' }}>{h}</th>
+                      {[
+                        { label: 'Agent', filter: null },
+                        { label: 'Ethos', filter: 'ethos' },
+                        { label: 'Americo Form', filter: 'americo_form' },
+                        { label: 'Americo SureLC', filter: 'americo_surelc' },
+                        { label: 'Mutual of Omaha', filter: 'mutual_requested' },
+                        { label: 'Aflac', filter: 'aflac' },
+                        { label: 'Transamerica', filter: 'transamerica' },
+                        { label: 'UHL', filter: 'uhl' },
+                        { label: 'AHL', filter: 'ahl' },
+                        { label: 'Last Updated', filter: null },
+                      ].map(h => (
+                        <th
+                          key={h.label}
+                          onClick={() => h.filter && setContractingFilter(contractingFilter === h.filter ? null : h.filter)}
+                          style={{
+                            padding: '10px 14px',
+                            textAlign: 'left',
+                            fontSize: '10px',
+                            fontWeight: '700',
+                            color: contractingFilter === h.filter ? '#C9A96E' : '#7A7A7A',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.07em',
+                            borderBottom: contractingFilter === h.filter ? '2px solid #C9A96E' : '1px solid #E5E1DA',
+                            whiteSpace: 'nowrap',
+                            cursor: h.filter ? 'pointer' : 'default',
+                            userSelect: 'none',
+                            backgroundColor: contractingFilter === h.filter ? '#FFFBF0' : 'transparent',
+                          }}
+                        >
+                          {h.label} {h.filter ? (contractingFilter === h.filter ? '▼' : '↕') : ''}
+                        </th>
                       ))}
                     </tr>
                   </thead>
