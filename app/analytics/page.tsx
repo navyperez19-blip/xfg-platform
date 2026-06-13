@@ -98,11 +98,14 @@ export default function AnalyticsPage() {
     return { label: '—', bg: '#F5F5F5', color: '#AAA', border: '#E5E1DA' }
   }
 
-  const Badge = ({ status }: { status: { label: string; bg: string; color: string; border: string } }) => (
-    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: status.bg, color: status.color, border: `1px solid ${status.border}`, whiteSpace: 'nowrap' }}>
-      {status.label}
-    </span>
-  )
+  const Badge = ({ status }: { status: { label: string; bg: string; color: string; border: string } | null | undefined }) => {
+    if (!status) return <span style={{ color: '#AAA', fontSize: '11px' }}>—</span>
+    return (
+      <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: status.bg, color: status.color, border: `1px solid ${status.border}`, whiteSpace: 'nowrap' }}>
+        {status.label}
+      </span>
+    )
+  }
 
   // Contracting summary counts
   const contractingSummary = {
@@ -366,7 +369,7 @@ export default function AnalyticsPage() {
                                 e.stopPropagation()
                                 try {
                                   const updatedCarriers = { ...(agent.carriers || {}), Americo: 'none' }
-                                  const { error } = await supabase.from('agents').update({ americo_form_submitted: false, americo_form_submitted_at: null as any, americo_surelc_unlocked: false, carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                  const { error } = await supabase.from('agents').update({ americo_form_submitted: false, americo_form_submitted_at: null, americo_surelc_unlocked: false, carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
                                   if (error) { setResetError('Failed to reset Americo status. Please try again.'); return }
                                   setResetError('')
                                   setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, americo_form_submitted: false, americo_surelc_unlocked: false, carriers: updatedCarriers } : a))
@@ -399,7 +402,7 @@ export default function AnalyticsPage() {
                                 e.stopPropagation()
                                 try {
                                   const updatedCarriers = { ...(agent.carriers || {}), 'Mutual of Omaha': 'none' }
-                                  const { error } = await supabase.from('agents').update({ mutual_omaha_requested: false, mutual_omaha_requested_at: null as any, mutual_omaha_surelc_unlocked: false, carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                  const { error } = await supabase.from('agents').update({ mutual_omaha_requested: false, mutual_omaha_requested_at: null, mutual_omaha_surelc_unlocked: false, carriers: updatedCarriers, updated_at: new Date().toISOString() }).eq('id', agent.id)
                                   if (error) { setResetError('Failed to reset Mutual of Omaha status. Please try again.'); return }
                                   setResetError('')
                                   setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, mutual_omaha_requested: false, mutual_omaha_surelc_unlocked: false, carriers: updatedCarriers } : a))
