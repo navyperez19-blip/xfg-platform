@@ -47,6 +47,8 @@ export default function AnalyticsPage() {
     load()
   }, [router])
 
+  if (!agents) return null
+
   if (loading) return (
     <main style={{ minHeight: '100vh', background: '#F5F2ED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <p style={{ color: '#6B6966', fontFamily: 'Georgia, serif' }}>Loading analytics...</p>
@@ -78,11 +80,15 @@ export default function AnalyticsPage() {
   })
 
   const getCarrierStatus = (agent: any, carrier: string) => {
-    const carriers = agent.carriers || {}
-    return carriers[carrier] || 'none'
+    try {
+      const carriers = agent.carriers || {}
+      return carriers[carrier] || 'none'
+    } catch {
+      return 'none'
+    }
   }
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | null | undefined) => {
     if (status === 'active') return { label: '✓ Active', bg: '#E8F5E9', color: '#1B5E20', border: '#A5D6A7' }
     if (status === 'submitted') return { label: '⏳ Submitted', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }
     return { label: '—', bg: '#F5F5F5', color: '#AAA', border: '#E5E1DA' }
@@ -90,12 +96,16 @@ export default function AnalyticsPage() {
 
 
   const getMutualOmahaStatus = (agent: any) => {
-    const carrierStatus = getCarrierStatus(agent, 'Mutual of Omaha')
-    if (carrierStatus === 'active') return { label: '✓ Active', bg: '#E8F5E9', color: '#1B5E20', border: '#A5D6A7' }
-    if (agent.mutual_omaha_surelc_unlocked) return { label: '🔓 SureLC Unlocked', bg: '#E8F5E9', color: '#1B5E20', border: '#A5D6A7' }
-    if (agent.mutual_omaha_requested) return { label: '📋 Requested', bg: '#EDE9FE', color: '#5B21B6', border: '#C4B5FD' }
-    if (carrierStatus === 'submitted') return { label: '⏳ Submitted', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }
-    return { label: '—', bg: '#F5F5F5', color: '#AAA', border: '#E5E1DA' }
+    try {
+      const carrierStatus = getCarrierStatus(agent, 'Mutual of Omaha')
+      if (carrierStatus === 'active') return { label: '✓ Active', bg: '#E8F5E9', color: '#1B5E20', border: '#A5D6A7' }
+      if (agent.mutual_omaha_surelc_unlocked) return { label: '🔓 SureLC Unlocked', bg: '#E8F5E9', color: '#1B5E20', border: '#A5D6A7' }
+      if (agent.mutual_omaha_requested) return { label: '📋 Requested', bg: '#EDE9FE', color: '#5B21B6', border: '#C4B5FD' }
+      if (carrierStatus === 'submitted') return { label: '⏳ Submitted', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }
+      return { label: '—', bg: '#F5F5F5', color: '#AAA', border: '#E5E1DA' }
+    } catch {
+      return { label: '—', bg: '#F5F5F5', color: '#AAA', border: '#E5E1DA' }
+    }
   }
 
   const Badge = ({ status }: { status: { label: string; bg: string; color: string; border: string } | null | undefined }) => {
