@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
+import { createCalendarEventFromFollowUp } from '@/app/_actions/crm-actions'
 
 const LEAD_STATUSES = [
   { value: 'new',            label: 'New',            color: '#7A7A7A' },
@@ -368,6 +369,18 @@ export default function LeadDetailPage() {
                       setNotes([newNote, ...notes])
                       setNoteForm({ note_type: 'call', content: '' })
                       setShowAddNote(false)
+                    }
+                    // Auto-create calendar event if follow-up date is set
+                    if (!error && noteForm.follow_up_date && agentId) {
+                      const leadName = lead ? `${lead.first_name} ${lead.last_name}` : 'Lead'
+                      await createCalendarEventFromFollowUp(
+                        agentId,
+                        null,
+                        leadId,
+                        noteForm.follow_up_date,
+                        `Follow up with ${leadName}`,
+                        noteForm.content || undefined
+                      )
                     }
                     setSavingNote(false)
                   }}

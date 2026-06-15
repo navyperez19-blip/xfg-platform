@@ -108,3 +108,46 @@ export async function createCRMPolicy(formData: PolicyFormData, agentId?: string
   if (error) return { error: error.message }
   return { data }
 }
+
+export async function createCalendarEventFromFollowUp(
+  agentId: string,
+  clientId: string | null,
+  leadId: string | null,
+  followUpDate: string,
+  title: string,
+  description?: string
+) {
+  const supabase = await createCRMClient()
+
+  // Check if a calendar event already exists for this follow-up
+  let query = supabase
+    .from('crm_events')
+    .select('id')
+    .eq('agent_id', agentId)
+    .eq('event_date', followUpDate)
+    .eq('event_type', 'follow_up')
+
+  if (clientId) query = query.eq('client_id', clientId)
+  if (leadId) query = query.eq('lead_id', leadId)
+
+  const { data: existing } = await query.maybeSingle()
+  if (existing) return { data: existing, error: null }
+
+  // Create new calendar event
+  const { data, error } = await supabase
+    .from('crm_events')
+    .insert({
+      agent_id: agentId,
+      client_id: clientId || null,
+      lead_id: leadId || null,
+      title,
+      description: description || null,
+      event_type: 'follow_up',
+      event_date: followUpDate,
+      status: 'scheduled',
+    })
+    .select()
+    .single()
+
+  return { data, error }
+}

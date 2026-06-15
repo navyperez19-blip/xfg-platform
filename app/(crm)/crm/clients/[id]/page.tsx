@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
 import { POLICY_STATUSES, CARRIERS, PRODUCT_TYPES, HEALTH_STATUSES, US_STATES } from '@/app/crm-constants'
+import { createCalendarEventFromFollowUp } from '@/app/_actions/crm-actions'
 
 export default function ClientDetailPage() {
   const router = useRouter()
@@ -984,6 +985,18 @@ export default function ClientDetailPage() {
                       setNotes([newNote, ...notes])
                       setNoteForm({ note_type: 'call', content: '', follow_up_date: '' })
                       setShowAddNote(false)
+                    }
+                    // Auto-create calendar event if follow-up date is set
+                    if (!error && noteForm.follow_up_date && agentId) {
+                      const clientName = client ? `${client.first_name} ${client.last_name}` : 'Client'
+                      await createCalendarEventFromFollowUp(
+                        agentId,
+                        clientId,
+                        null,
+                        noteForm.follow_up_date,
+                        `Follow up with ${clientName}`,
+                        noteForm.content || undefined
+                      )
                     }
                     setSavingNote(false)
                   }}
