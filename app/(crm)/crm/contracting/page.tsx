@@ -6,7 +6,7 @@ import { supabase } from '@/app/lib/supabase'
 
 const CARRIERS = [
   { name: 'Aflac',                  description: 'Supplemental insurance',        surelcLink: null },
-  { name: 'Americo',                description: 'Life insurance',                surelcLink: 'https://surelc.surancebay.com/sbweb/login.jsp?branch=Joseph%20P%20James&branchEditable=off&branchRequired=on&branchVisible=on&gaId=233&gaName=Quility%20Sales' },
+  { name: 'Americo',                description: 'Life insurance',                surelcLink: null },
   { name: 'AIG (Core Bridge)',      description: 'Life insurance',                surelcLink: null },
   { name: 'Transamerica',           description: 'Life & health insurance',       surelcLink: null },
   { name: 'UHL (United Home Life)', description: 'Life insurance',                surelcLink: null },
