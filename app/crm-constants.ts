@@ -1,6 +1,7 @@
 export const CARRIERS = [
   'Aflac',
   'Americo',
+  'AIG (Core Bridge)',
   'Transamerica',
   'UHL (United Home Life)',
   'AHL (American Home Life)',

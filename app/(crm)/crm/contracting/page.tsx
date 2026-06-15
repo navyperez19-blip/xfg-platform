@@ -7,6 +7,7 @@ import { supabase } from '@/app/lib/supabase'
 const CARRIERS = [
   { name: 'Aflac',                  description: 'Supplemental insurance',        surelcLink: null },
   { name: 'Americo',                description: 'Life insurance',                surelcLink: 'https://surelc.surancebay.com/sbweb/login.jsp?branch=Joseph%20P%20James&branchEditable=off&branchRequired=on&branchVisible=on&gaId=233&gaName=Quility%20Sales' },
+  { name: 'AIG (Core Bridge)',      description: 'Life insurance',                surelcLink: null },
   { name: 'Transamerica',           description: 'Life & health insurance',       surelcLink: null },
   { name: 'UHL (United Home Life)', description: 'Life insurance',                surelcLink: null },
   { name: 'AHL (American Home Life)', description: 'Life insurance',              surelcLink: null },
@@ -27,6 +28,7 @@ export default function ContractingPage() {
   const [agentRecord, setAgentRecord] = useState<any>(null)
   const [carriers, setCarriers] = useState<Record<string, string>>({})
   const [americoFormSubmitted, setAmericoFormSubmitted] = useState(false)
+  const [aigFormSubmitted, setAigFormSubmitted] = useState(false)
   const [mutualOmahaRequested, setMutualOmahaRequested] = useState(false)
   const [mutualOmahaSurelcUnlocked, setMutualOmahaSurelcUnlocked] = useState(false)
 
@@ -40,7 +42,7 @@ export default function ContractingPage() {
       // Look up agent record by user_id for ALL users including admins
       const { data: agent } = await supabase
         .from('agents')
-        .select('id, full_name, carriers, current_stage, americo_form_submitted, americo_surelc_unlocked, mutual_omaha_requested, mutual_omaha_surelc_unlocked')
+        .select('id, full_name, carriers, current_stage, americo_form_submitted, americo_surelc_unlocked, mutual_omaha_requested, mutual_omaha_surelc_unlocked, aig_form_submitted')
         .eq('user_id', user.id)
         .single()
 
@@ -54,6 +56,7 @@ export default function ContractingPage() {
       setAgentRecord(agent)
       setCarriers(agent.carriers ?? {})
       setAmericoFormSubmitted(agent.americo_form_submitted ?? false)
+      setAigFormSubmitted((agent as any).aig_form_submitted ?? false)
       setMutualOmahaRequested((agent as any).mutual_omaha_requested ?? false)
       setMutualOmahaSurelcUnlocked((agent as any).mutual_omaha_surelc_unlocked ?? false)
       setLoading(false)
@@ -74,6 +77,7 @@ export default function ContractingPage() {
           const updated = payload.new as any
           setCarriers(updated.carriers ?? {})
           setAmericoFormSubmitted(updated.americo_form_submitted ?? false)
+          setAigFormSubmitted(updated.aig_form_submitted ?? false)
           setMutualOmahaRequested(updated.mutual_omaha_requested ?? false)
           setMutualOmahaSurelcUnlocked(updated.mutual_omaha_surelc_unlocked ?? false)
           setAgentRecord((prev: any) => ({ ...prev, ...updated }))
@@ -185,6 +189,7 @@ export default function ContractingPage() {
           const currentStatus = carriers[carrier.name] || 'none'
           const config = STATUS_CONFIG[currentStatus as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.none
           const isAmerico = carrier.name === 'Americo'
+          const isAIG = carrier.name === 'AIG (Core Bridge)'
           const isMutualOmaha = carrier.name === 'Mutual of Omaha'
 
           return (
@@ -227,6 +232,32 @@ export default function ContractingPage() {
                     )}
 
                     {isAmerico && americoFormSubmitted && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#E8F5E9', border: '1px solid #A5D6A7', borderRadius: '6px' }}>
+                        <span style={{ fontSize: '12px', color: '#1B5E20', fontWeight: '600' }}>✓ Form Submitted</span>
+                      </div>
+                    )}
+
+                    {/* AIG special flow - same as Americo */}
+                    {isAIG && !aigFormSubmitted && (
+                      <a
+                        href="https://form.jotform.com/261608640967062"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={async () => {
+                          await supabase
+                            .from('agents')
+                            .update({ aig_form_submitted: true, updated_at: new Date().toISOString() })
+                            .eq('id', agentRecord.id)
+                          setAigFormSubmitted(true)
+                          await updateCarrierStatus('AIG (Core Bridge)', 'submitted')
+                        }}
+                        style={{ display: 'inline-block', padding: '6px 14px', backgroundColor: '#EDE9FE', color: '#5B21B6', border: '1px solid #C4B5FD', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', textDecoration: 'none', whiteSpace: 'nowrap' }}
+                      >
+                        Complete AIG Form →
+                      </a>
+                    )}
+
+                    {isAIG && aigFormSubmitted && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#E8F5E9', border: '1px solid #A5D6A7', borderRadius: '6px' }}>
                         <span style={{ fontSize: '12px', color: '#1B5E20', fontWeight: '600' }}>✓ Form Submitted</span>
                       </div>
@@ -353,7 +384,7 @@ export default function ContractingPage() {
                     )}
 
                     {/* Standard carrier status buttons */}
-                    {!isAmerico && !isMutualOmaha && currentStatus === 'none' && (
+                    {!isAmerico && !isMutualOmaha && !isAIG && currentStatus === 'none' && (
                       <button
                         onClick={() => updateCarrierStatus(carrier.name, 'submitted')}
                         disabled={saving === carrier.name}
@@ -362,7 +393,7 @@ export default function ContractingPage() {
                         Mark Submitted
                       </button>
                     )}
-                    {!isAmerico && !isMutualOmaha && currentStatus === 'submitted' && (
+                    {!isAmerico && !isMutualOmaha && !isAIG && currentStatus === 'submitted' && (
                       <>
                         <button
                           onClick={() => updateCarrierStatus(carrier.name, 'active')}
@@ -380,7 +411,7 @@ export default function ContractingPage() {
                         </button>
                       </>
                     )}
-                    {!isAmerico && !isMutualOmaha && currentStatus === 'active' && (
+                    {!isAmerico && !isMutualOmaha && !isAIG && currentStatus === 'active' && (
                       <button
                         onClick={() => updateCarrierStatus(carrier.name, 'none')}
                         disabled={saving === carrier.name}
@@ -405,6 +436,19 @@ export default function ContractingPage() {
             <p style={{ fontSize: '13px', fontWeight: '700', color: '#14532D', marginBottom: '4px' }}>Americo Form Submitted — Next Steps</p>
             <p style={{ fontSize: '13px', color: '#166534', lineHeight: 1.7 }}>
               Your Americo hierarchy form has been received. Keep an eye on your <strong>XFG email inbox</strong> for an email from <strong>Anna</strong> with instructions to begin your SureLC Americo contracting process. If you don't receive it within 24 hours, reach out to Finley or Nick.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* AIG Next Steps Banner */}
+      {aigFormSubmitted && (
+        <div style={{ backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '10px', padding: '16px 18px', marginTop: '16px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+          <span style={{ fontSize: '20px', flexShrink: 0 }}>📧</span>
+          <div>
+            <p style={{ fontSize: '13px', fontWeight: '700', color: '#14532D', marginBottom: '4px' }}>AIG (Core Bridge) Form Submitted — Next Steps</p>
+            <p style={{ fontSize: '13px', color: '#166534', lineHeight: 1.7 }}>
+              Your AIG hierarchy form has been received. Keep an eye on your <strong>XFG email inbox</strong> for an email from <strong>Anna</strong> with instructions to begin your SureLC AIG contracting process. If you don't receive it within 24 hours, reach out to Finley or Nick.
             </p>
           </div>
         </div>
