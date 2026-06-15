@@ -148,7 +148,7 @@ export default function CRMNav({
       {/* Bottom links */}
       <div style={{ padding: '12px', borderTop: '1px solid #2A2A2A' }}>
         <a
-          href="https://app.readymode.com"
+          href="https://ascenti.readymode.com/login_new/?then=/"
           target="_blank"
           rel="noopener noreferrer"
           style={{
