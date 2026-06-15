@@ -314,18 +314,6 @@ export default function ContractingPage() {
                       </a>
                     )}
 
-                    {/* All other non-Americo, non-MutualOmaha carriers */}
-                    {!isAmerico && !isMutualOmaha && carrier.surelcLink && (
-                      <a
-                        href={carrier.surelcLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ display: 'inline-block', padding: '6px 14px', backgroundColor: '#E8F5E9', color: '#1B5E20', border: '1px solid #A5D6A7', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', textDecoration: 'none', whiteSpace: 'nowrap' }}
-                      >
-                        Start Contracting on SureLC →
-                      </a>
-                    )}
-
                     {/* Americo reset */}
                     {isAmerico && (americoFormSubmitted || currentStatus !== 'none') && (
                       <button
