@@ -40,15 +40,16 @@ export default function CRMNav({
 
   return (
     <aside style={{
-      position: 'fixed',
-      top: '48px',
-      left: 0,
       width: '240px',
-      height: 'calc(100vh - 48px)',
+      height: '100vh',
       backgroundColor: '#1A1A1A',
       display: 'flex',
       flexDirection: 'column',
-      zIndex: 10,
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      zIndex: 100,
+      overflowY: 'hidden',
       borderRight: '1px solid #2A2A2A',
     }}>
       {/* Logo */}
@@ -105,7 +106,7 @@ export default function CRMNav({
       </div>
 
       {/* Nav items */}
-      <nav style={{ padding: '12px', flex: 1 }}>
+      <nav style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
         {navItems.map((item) => {
           const active = isActive(item.href, item.exact)
           return (
@@ -145,8 +146,8 @@ export default function CRMNav({
         })}
       </nav>
 
-      {/* Bottom links */}
-      <div style={{ padding: '12px', borderTop: '1px solid #2A2A2A' }}>
+      {/* Bottom links - always visible */}
+      <div style={{ padding: '12px', borderTop: '1px solid #2A2A2A', flexShrink: 0 }}>
         <a
           href="https://ascenti.readymode.com/login_new/?then=/"
           target="_blank"
