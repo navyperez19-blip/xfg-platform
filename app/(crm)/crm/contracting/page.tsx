@@ -169,6 +169,20 @@ export default function ContractingPage() {
         </div>
       </div>
 
+      {/* Americo + AIG SureLC Info Banner */}
+      <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', padding: '16px 18px', marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+        <span style={{ fontSize: '18px', flexShrink: 0 }}>ℹ️</span>
+        <div>
+          <p style={{ fontSize: '13px', fontWeight: '700', color: '#1E40AF', marginBottom: '6px' }}>Americo & AIG (Core Bridge) — SureLC Contracting Info</p>
+          <p style={{ fontSize: '13px', color: '#1D4ED8', lineHeight: 1.7 }}>
+            Both <strong>Americo</strong> and <strong>AIG (Core Bridge)</strong> are contracted through the same SureLC link. Once you submit the hierarchy form for either carrier, <strong>Anna</strong> will email your XFG email with the SureLC link to complete your contracting. You will use that same link to contract with both carriers.
+          </p>
+          <p style={{ fontSize: '13px', color: '#1D4ED8', lineHeight: 1.7, marginTop: '6px' }}>
+            If you have any questions or need assistance, please contact <strong>Nick or Finley</strong>.
+          </p>
+        </div>
+      </div>
+
       {/* Summary Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', marginBottom: '24px' }}>
         {[
