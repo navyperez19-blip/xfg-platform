@@ -50,9 +50,7 @@ export default function ClientsListPage() {
         `)
         .order('created_at', { ascending: false })
 
-      if (!admin) {
-        query = query.eq('agent_id', agentRecord?.id)
-      }
+      query = query.eq('agent_id', agentRecord?.id)
 
       const { data } = await query
       setClients(data ?? [])
