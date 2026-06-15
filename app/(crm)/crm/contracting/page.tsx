@@ -27,7 +27,6 @@ export default function ContractingPage() {
   const [agentRecord, setAgentRecord] = useState<any>(null)
   const [carriers, setCarriers] = useState<Record<string, string>>({})
   const [americoFormSubmitted, setAmericoFormSubmitted] = useState(false)
-  const [americoSurelcUnlocked, setAmericoSurelcUnlocked] = useState(false)
   const [mutualOmahaRequested, setMutualOmahaRequested] = useState(false)
   const [mutualOmahaSurelcUnlocked, setMutualOmahaSurelcUnlocked] = useState(false)
 
@@ -37,11 +36,6 @@ export default function ContractingPage() {
       if (!user) { router.push('/login'); return }
 
       // First check users table for role
-      const { data: userRecord } = await supabase
-        .from('users')
-        .select('id, role')
-        .eq('id', user.id)
-        .single()
 
       // Look up agent record by user_id for ALL users including admins
       const { data: agent } = await supabase
@@ -60,7 +54,6 @@ export default function ContractingPage() {
       setAgentRecord(agent)
       setCarriers(agent.carriers ?? {})
       setAmericoFormSubmitted(agent.americo_form_submitted ?? false)
-      setAmericoSurelcUnlocked(agent.americo_surelc_unlocked ?? false)
       setMutualOmahaRequested((agent as any).mutual_omaha_requested ?? false)
       setMutualOmahaSurelcUnlocked((agent as any).mutual_omaha_surelc_unlocked ?? false)
       setLoading(false)
@@ -81,7 +74,6 @@ export default function ContractingPage() {
           const updated = payload.new as any
           setCarriers(updated.carriers ?? {})
           setAmericoFormSubmitted(updated.americo_form_submitted ?? false)
-          setAmericoSurelcUnlocked(updated.americo_surelc_unlocked ?? false)
           setMutualOmahaRequested(updated.mutual_omaha_requested ?? false)
           setMutualOmahaSurelcUnlocked(updated.mutual_omaha_surelc_unlocked ?? false)
           setAgentRecord((prev: any) => ({ ...prev, ...updated }))
@@ -192,7 +184,6 @@ export default function ContractingPage() {
         {CARRIERS.map(carrier => {
           const currentStatus = carriers[carrier.name] || 'none'
           const config = STATUS_CONFIG[currentStatus as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.none
-          const isSaving = saving === carrier.name
           const isAmerico = carrier.name === 'Americo'
           const isMutualOmaha = carrier.name === 'Mutual of Omaha'
 
@@ -235,21 +226,10 @@ export default function ContractingPage() {
                       </a>
                     )}
 
-                    {isAmerico && americoFormSubmitted && !americoSurelcUnlocked && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '6px' }}>
-                        <span style={{ fontSize: '12px', color: '#92400E', fontWeight: '600' }}>⏳ Awaiting admin approval</span>
+                    {isAmerico && americoFormSubmitted && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#E8F5E9', border: '1px solid #A5D6A7', borderRadius: '6px' }}>
+                        <span style={{ fontSize: '12px', color: '#1B5E20', fontWeight: '600' }}>✓ Form Submitted</span>
                       </div>
-                    )}
-
-                    {isAmerico && americoSurelcUnlocked && carrier.surelcLink && (
-                      <a
-                        href={carrier.surelcLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ display: 'inline-block', padding: '6px 14px', backgroundColor: '#E8F5E9', color: '#1B5E20', border: '1px solid #A5D6A7', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', textDecoration: 'none', whiteSpace: 'nowrap' }}
-                      >
-                        Start Contracting on SureLC →
-                      </a>
                     )}
 
                     {/* Mutual of Omaha special flow */}
@@ -334,7 +314,6 @@ export default function ContractingPage() {
                             .eq('id', agentRecord.id)
                           setCarriers(updatedCarriers)
                           setAmericoFormSubmitted(false)
-                          setAmericoSurelcUnlocked(false)
                           setSaving(null)
                         }}
                         disabled={saving === 'Americo'}
@@ -417,6 +396,19 @@ export default function ContractingPage() {
           )
         })}
       </div>
+
+      {/* Americo Next Steps Banner */}
+      {americoFormSubmitted && (
+        <div style={{ backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '10px', padding: '16px 18px', marginTop: '16px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+          <span style={{ fontSize: '20px', flexShrink: 0 }}>📧</span>
+          <div>
+            <p style={{ fontSize: '13px', fontWeight: '700', color: '#14532D', marginBottom: '4px' }}>Americo Form Submitted — Next Steps</p>
+            <p style={{ fontSize: '13px', color: '#166534', lineHeight: 1.7 }}>
+              Your Americo hierarchy form has been received. Keep an eye on your <strong>XFG email inbox</strong> for an email from <strong>Anna</strong> with instructions to begin your SureLC Americo contracting process. If you don't receive it within 24 hours, reach out to Finley or Nick.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Progress bar */}
       <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '20px', marginTop: '20px' }}>
