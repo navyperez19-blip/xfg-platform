@@ -35,6 +35,14 @@ export default function ClientsListPage() {
         .eq('user_id', user.id)
         .single()
 
+      if (!agentRecord?.id) {
+        setClients([])
+        setLoading(false)
+        return
+      }
+
+      const aid = agentRecord.id
+
       let query = supabase
         .from('crm_clients')
         .select(`
@@ -50,7 +58,7 @@ export default function ClientsListPage() {
         `)
         .order('created_at', { ascending: false })
 
-      query = query.eq('agent_id', agentRecord?.id)
+      query = query.eq('agent_id', aid)
 
       const { data } = await query
       setClients(data ?? [])
