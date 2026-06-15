@@ -27,7 +27,7 @@ export default function ContractingPage() {
   const [saving, setSaving] = useState<string | null>(null)
   const [agentRecord, setAgentRecord] = useState<any>(null)
   const [carriers, setCarriers] = useState<Record<string, string>>({})
-  const [americoFormSubmitted, setAmericoFormSubmitted] = useState(false)
+  const [americoFormSubmitted, setAmericoFormSubmitted] = useState<boolean | null>(null)
   const [aigFormSubmitted, setAigFormSubmitted] = useState(false)
   const [mutualOmahaRequested, setMutualOmahaRequested] = useState(false)
   const [mutualOmahaSurelcUnlocked, setMutualOmahaSurelcUnlocked] = useState(false)
@@ -226,7 +226,7 @@ export default function ContractingPage() {
 
                   <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                     {/* Americo special flow */}
-                    {isAmerico && !americoFormSubmitted && (
+                    {isAmerico && americoFormSubmitted === false && (
                       <a
                         href="https://form.jotform.com/261608640967062"
                         target="_blank"
@@ -245,7 +245,7 @@ export default function ContractingPage() {
                       </a>
                     )}
 
-                    {isAmerico && americoFormSubmitted && (
+                    {isAmerico && americoFormSubmitted === true && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#E8F5E9', border: '1px solid #A5D6A7', borderRadius: '6px' }}>
                         <span style={{ fontSize: '12px', color: '#1B5E20', fontWeight: '600' }}>✓ Form Submitted</span>
                       </div>
