@@ -41,7 +41,7 @@ export default function LeadDetailPage() {
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState<any>({})
   const [showAddNote, setShowAddNote] = useState(false)
-  const [noteForm, setNoteForm] = useState({ note_type: 'call', content: '' })
+  const [noteForm, setNoteForm] = useState({ note_type: 'call', content: '', follow_up_date: '' })
   const [savingNote, setSavingNote] = useState(false)
   const [showConvert, setShowConvert] = useState(false)
   const [success, setSuccess] = useState('')
@@ -367,7 +367,7 @@ export default function LeadDetailPage() {
                       .single()
                     if (!error && newNote) {
                       setNotes([newNote, ...notes])
-                      setNoteForm({ note_type: 'call', content: '' })
+                      setNoteForm({ note_type: 'call', content: '', follow_up_date: '' })
                       setShowAddNote(false)
                     }
                     // Auto-create calendar event if follow-up date is set

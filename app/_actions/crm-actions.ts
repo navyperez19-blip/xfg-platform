@@ -117,8 +117,6 @@ export async function createCalendarEventFromFollowUp(
   title: string,
   description?: string
 ) {
-  const supabase = await createCRMClient()
-
   // Check if a calendar event already exists for this follow-up
   let query = supabase
     .from('crm_events')
