@@ -251,29 +251,10 @@ export default function ContractingPage() {
                       </div>
                     )}
 
-                    {/* AIG special flow - same as Americo */}
-                    {isAIG && !aigFormSubmitted && (
-                      <a
-                        href="https://form.jotform.com/261608640967062"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={async () => {
-                          await supabase
-                            .from('agents')
-                            .update({ aig_form_submitted: true, updated_at: new Date().toISOString() })
-                            .eq('id', agentRecord.id)
-                          setAigFormSubmitted(true)
-                          await updateCarrierStatus('AIG (Core Bridge)', 'submitted')
-                        }}
-                        style={{ display: 'inline-block', padding: '6px 14px', backgroundColor: '#EDE9FE', color: '#5B21B6', border: '1px solid #C4B5FD', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', textDecoration: 'none', whiteSpace: 'nowrap' }}
-                      >
-                        Complete AIG Form →
-                      </a>
-                    )}
-
-                    {isAIG && aigFormSubmitted && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#E8F5E9', border: '1px solid #A5D6A7', borderRadius: '6px' }}>
-                        <span style={{ fontSize: '12px', color: '#1B5E20', fontWeight: '600' }}>✓ Form Submitted</span>
+                    {/* AIG - no separate form needed, covered by Americo form */}
+                    {isAIG && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '6px' }}>
+                        <span style={{ fontSize: '12px', color: '#1E40AF', fontWeight: '600' }}>ℹ️ Submit the Americo form above — it covers AIG contracting too</span>
                       </div>
                     )}
 
