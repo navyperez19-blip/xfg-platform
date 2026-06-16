@@ -84,6 +84,37 @@ export default function ContractingPage() {
     }
   }, [router])
 
+  // Real-time subscription for contracting page
+  useEffect(() => {
+    if (!agentRecord?.id) return
+
+    const channel = supabase
+      .channel('agent-contracting-realtime')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'agents',
+        filter: `id=eq.${agentRecord.id}`
+      }, async () => {
+        const { data: agent } = await supabase
+          .from('agents')
+          .select('*')
+          .eq('id', agentRecord.id)
+          .single()
+        if (agent) {
+          setCarriers(agent.carriers ?? {})
+          setAmericoFormSubmitted(agent.americo_form_submitted ?? false)
+          setAigFormSubmitted((agent as any).aig_form_submitted ?? false)
+          setMutualOmahaRequested(agent.mutual_omaha_requested ?? false)
+        }
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [agentRecord?.id])
+
   async function updateCarrierStatus(carrierName: string, newStatus: string) {
     setSaving(carrierName)
     const updatedCarriers = { ...carriers, [carrierName]: newStatus }
