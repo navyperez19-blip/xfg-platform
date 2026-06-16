@@ -11,6 +11,9 @@ export default function AdminOverviewPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [agentStats, setAgentStats] = useState<any[]>([])
+  const [search, setSearch] = useState('')
+  const [stageFilter, setStageFilter] = useState('')
+  const [modelFilter, setModelFilter] = useState('')
   const [page, setPage] = useState(0)
   const [totalAgents, setTotalAgents] = useState(0)
   const [orgStats, setOrgStats] = useState({
@@ -185,7 +188,59 @@ export default function AdminOverviewPage() {
                 </tr>
               </thead>
               <tbody>
-                {agentStats.map((agent, i) => {
+                {/* Search and Filter Bar */}
+                <tr>
+                  <td colSpan={99} style={{ padding: '12px 16px', borderBottom: '1px solid #E5E1DA' }}>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <input
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        placeholder="Search agents by name or email..."
+                        style={{ flex: 1, minWidth: '200px', padding: '10px 16px', fontSize: '13px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', backgroundColor: '#FFFFFF' }}
+                      />
+                      <select
+                        value={stageFilter}
+                        onChange={e => setStageFilter(e.target.value)}
+                        style={{ padding: '10px 14px', fontSize: '13px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', backgroundColor: '#FFFFFF', cursor: 'pointer' }}
+                      >
+                        <option value="">All Stages</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="licensing">Licensing</option>
+                        <option value="onboarding">Onboarding</option>
+                        <option value="contracting">Contracting</option>
+                        <option value="system_setup">System Setup</option>
+                        <option value="active">Active</option>
+                      </select>
+                      <select
+                        value={modelFilter}
+                        onChange={e => setModelFilter(e.target.value)}
+                        style={{ padding: '10px 14px', fontSize: '13px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', backgroundColor: '#FFFFFF', cursor: 'pointer' }}
+                      >
+                        <option value="">All Models</option>
+                        <option value="supported">Supported</option>
+                        <option value="independent">Independent</option>
+                      </select>
+                      {(search || stageFilter || modelFilter) && (
+                        <button
+                          onClick={() => { setSearch(''); setStageFilter(''); setModelFilter('') }}
+                          style={{ padding: '10px 16px', backgroundColor: '#F5F2ED', color: '#4A4A4A', border: '1px solid #E5E1DA', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit' }}
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+                {agentStats
+                  .filter(agent => {
+                    const nameMatch = !search ||
+                      (agent.full_name || '').toLowerCase().includes(search.toLowerCase()) ||
+                      (agent.email || '').toLowerCase().includes(search.toLowerCase())
+                    const stageMatch = !stageFilter || agent.current_stage === stageFilter
+                    const modelMatch = !modelFilter || agent.agent_model === modelFilter
+                    return nameMatch && stageMatch && modelMatch
+                  })
+                  .map((agent, i) => {
                   const globalRank = page * PAGE_SIZE + i + 1
                   return (
                     <tr key={agent.id} style={{ borderBottom: i < agentStats.length - 1 ? '1px solid #F0EDE8' : 'none' }}>
