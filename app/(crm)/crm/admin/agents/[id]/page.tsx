@@ -30,7 +30,6 @@ export default function AgentDetailPage() {
   const [americoFormSubmitted, setAmericoFormSubmitted] = useState(false)
   const [aigFormSubmitted, setAigFormSubmitted] = useState(false)
   const [mutualOmahaRequested, setMutualOmahaRequested] = useState(false)
-  const [mutualOmahaSurelcUnlocked, setMutualOmahaSurelcUnlocked] = useState(false)
   const [agentLeads, setAgentLeads] = useState<any[]>([])
   const [agentActivity, setAgentActivity] = useState<any[]>([])
   const [monthlyGoal, setMonthlyGoal] = useState<number>(5000)
@@ -65,7 +64,6 @@ export default function AgentDetailPage() {
       setAmericoFormSubmitted(agentData.americo_form_submitted ?? false)
       setAigFormSubmitted((agentData as any).aig_form_submitted ?? false)
       setMutualOmahaRequested((agentData as any).mutual_omaha_requested ?? false)
-      setMutualOmahaSurelcUnlocked((agentData as any).mutual_omaha_surelc_unlocked ?? false)
 
       const now = new Date()
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
@@ -607,73 +605,18 @@ export default function AgentDetailPage() {
             )}
 
             {/* Mutual of Omaha Banner */}
-            {mutualOmahaRequested && !mutualOmahaSurelcUnlocked && (
-              <div style={{ padding: '14px 16px', backgroundColor: '#EDE9FE', border: '1px solid #C4B5FD', borderRadius: '8px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            {mutualOmahaRequested && (
+              <div style={{ padding: '12px 16px', backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '8px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <p style={{ fontSize: '13px', fontWeight: '700', color: '#5B21B6', marginBottom: '2px' }}>⏳ Mutual of Omaha Access Requested</p>
-                  <p style={{ fontSize: '12px', color: '#5B21B6' }}>This agent has requested access to the Mutual of Omaha SureLC contracting link.</p>
+                  <p style={{ fontSize: '13px', fontWeight: '700', color: '#14532D', marginBottom: '2px' }}>📋 Mutual of Omaha — Direct SureLC Access</p>
+                  <p style={{ fontSize: '12px', color: '#166534' }}>Agents now have direct access to the Mutual of Omaha SureLC link from their My Contracting page. No unlock needed.</p>
                 </div>
-                <div style={{ display: 'flex', gap: '8px', marginLeft: '16px' }}>
-                  <button
-                    onClick={async () => {
-                      const { data: { user } } = await supabase.auth.getUser()
-                      const { error } = await supabase
-                        .from('agents')
-                        .update({
-                          mutual_omaha_surelc_unlocked: true,
-                          mutual_omaha_surelc_unlocked_at: new Date().toISOString(),
-                          mutual_omaha_surelc_unlocked_by: user?.id,
-                          updated_at: new Date().toISOString(),
-                        })
-                        .eq('id', agentId)
-                      if (!error) setMutualOmahaSurelcUnlocked(true)
-                    }}
-                    style={{ padding: '8px 18px', backgroundColor: '#5B21B6', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit', whiteSpace: 'nowrap' }}
-                  >
-                    🔓 Unlock SureLC Link
-                  </button>
-                  <button
-                    onClick={async () => {
-                      const updatedCarriers = { ...agentCarriers, 'Mutual of Omaha': 'none' }
-                      await supabase.from('agents').update({
-                        carriers: updatedCarriers,
-                        mutual_omaha_requested: false,
-                        mutual_omaha_requested_at: null as any,
-                        mutual_omaha_surelc_unlocked: false,
-                        mutual_omaha_surelc_unlocked_at: null as any,
-                        updated_at: new Date().toISOString(),
-                      }).eq('id', agentId)
-                      setAgentCarriers(updatedCarriers)
-                      setMutualOmahaRequested(false)
-                      setMutualOmahaSurelcUnlocked(false)
-                    }}
-                    style={{ padding: '8px 14px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit', whiteSpace: 'nowrap' }}
-                  >
-                    Reset
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {mutualOmahaSurelcUnlocked && (
-              <div style={{ padding: '12px 16px', backgroundColor: '#E8F5E9', border: '1px solid #A5D6A7', borderRadius: '8px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <p style={{ fontSize: '13px', fontWeight: '700', color: '#1B5E20' }}>✓ Mutual of Omaha SureLC link has been unlocked for this agent</p>
                 <button
                   onClick={async () => {
-                    const updatedCarriers = { ...agentCarriers, 'Mutual of Omaha': 'none' }
-                    await supabase.from('agents').update({
-                      carriers: updatedCarriers,
-                      mutual_omaha_requested: false,
-                      mutual_omaha_requested_at: null,
-                      mutual_omaha_surelc_unlocked: false,
-                      mutual_omaha_surelc_unlocked_at: null,
-                      updated_at: new Date().toISOString(),
-                    }).eq('id', agentId)
-                    setAgentCarriers(updatedCarriers)
+                    await supabase.from('agents').update({ mutual_omaha_requested: false, mutual_omaha_requested_at: null, updated_at: new Date().toISOString() }).eq('id', agentId)
                     setMutualOmahaRequested(false)
-                    setMutualOmahaSurelcUnlocked(false)
                   }}
-                  style={{ padding: '6px 14px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}
+                  style={{ padding: '6px 12px', backgroundColor: '#FEE2E2', color: '#C0392B', border: '1px solid #FECACA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit' }}
                 >
                   Reset
                 </button>
