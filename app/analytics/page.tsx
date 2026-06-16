@@ -410,17 +410,25 @@ export default function AnalyticsPage() {
                             {ahl !== 'none' ? badgeSpan(statusBadge(ahl), true, () => resetCarrier(agent.id, 'AHL (American Home Life)', ahl)) : emptyBadge}
                           </td>
                           <td style={{ padding: '12px 14px' }}>
-                            {agent.dialer_active
-                              ? badgeSpan({ label: '✓ Active', bg: '#E8F5E9', color: '#1B5E20', border: '#A5D6A7' }, true, async () => {
-                                  await supabase.from('agents').update({ dialer_active: false, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                                  setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, dialer_active: false } : a))
-                                })
-                              : agent.dialer_submitted
-                              ? badgeSpan({ label: '⏳ Submitted', bg: '#E3F2FD', color: '#1565C0', border: '#90CAF9' }, true, async () => {
-                                  await supabase.from('agents').update({ dialer_active: true, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                                  setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, dialer_active: true } : a))
-                                })
-                              : emptyBadge}
+                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
+                              {agent.dialer_submitted
+                                ? badgeSpan({ label: '⏳ Submitted', bg: '#E3F2FD', color: '#1565C0', border: '#90CAF9' }, true, async () => {
+                                    await supabase.from('agents').update({ dialer_submitted: false, dialer_active: false, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                    setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, dialer_submitted: false, dialer_active: false } : a))
+                                  })
+                                : emptyBadge}
+                              {agent.dialer_submitted && (
+                                agent.dialer_active
+                                  ? badgeSpan({ label: '✓ Active', bg: '#E8F5E9', color: '#1B5E20', border: '#A5D6A7' }, true, async () => {
+                                      await supabase.from('agents').update({ dialer_active: false, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                      setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, dialer_active: false } : a))
+                                    })
+                                  : badgeSpan({ label: 'Mark Active', bg: '#F5F5F5', color: '#666', border: '#E5E1DA' }, true, async () => {
+                                      await supabase.from('agents').update({ dialer_active: true, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                      setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, dialer_active: true } : a))
+                                    })
+                              )}
+                            </div>
                           </td>
                           <td style={{ padding: '12px 14px', color: '#AAA', fontSize: '11px', whiteSpace: 'nowrap' }}>
                             {agent.updated_at ? new Date(agent.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
