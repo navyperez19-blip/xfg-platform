@@ -46,6 +46,21 @@ export default function AnalyticsPage() {
     load()
   }, [router])
 
+  // Real-time subscription for contracting tracker
+  useEffect(() => {
+    const channel = supabase
+      .channel('agents-contracting-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'agents' }, async () => {
+        const { data: agentsData } = await supabase.from('agents').select('*')
+        setAgents(agentsData || [])
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
+
   if (loading) return (
     <main style={{ minHeight: '100vh', background: '#F5F2ED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <p style={{ color: '#6B6966', fontFamily: 'Georgia, serif' }}>Loading analytics...</p>
