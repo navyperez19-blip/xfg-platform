@@ -183,6 +183,24 @@ export default function ContractingPage() {
         </div>
       </div>
 
+      {/* SureLC Multiple Accounts Banner */}
+      <div style={{ backgroundColor: '#FFFBF0', border: '1px solid #F5D78E', borderRadius: '10px', padding: '16px 18px', marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+        <span style={{ fontSize: '18px', flexShrink: 0 }}>⚠️</span>
+        <div>
+          <p style={{ fontSize: '13px', fontWeight: '700', color: '#92400E', marginBottom: '8px' }}>SureLC — Multiple Accounts Required</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '8px' }}>
+            <p style={{ fontSize: '13px', color: '#92400E', lineHeight: 1.6 }}>• Use the <strong>same email address</strong> across all SureLC accounts</p>
+            <p style={{ fontSize: '13px', color: '#92400E', lineHeight: 1.6 }}>• Create a <strong>unique password</strong> for each carrier's SureLC account</p>
+            <p style={{ fontSize: '13px', color: '#92400E', lineHeight: 1.6 }}>• <strong>Americo and AIG (Core Bridge)</strong> are contracted through the <strong>same SureLC link</strong> — one account covers both</p>
+            <p style={{ fontSize: '13px', color: '#92400E', lineHeight: 1.6 }}>• <strong>Mutual of Omaha</strong> has its own separate SureLC account and link</p>
+            <p style={{ fontSize: '13px', color: '#92400E', lineHeight: 1.6 }}>• Unless told otherwise, each additional carrier will have its own separate SureLC account</p>
+          </div>
+          <p style={{ fontSize: '13px', color: '#92400E', lineHeight: 1.7 }}>
+            As you progress through contracting, make sure you are logging into the <strong>correct SureLC account</strong> for the carrier you're working on. If you need help, contact <strong>Nick or Finley</strong>.
+          </p>
+        </div>
+      </div>
+
       {/* Summary Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', marginBottom: '24px' }}>
         {[
