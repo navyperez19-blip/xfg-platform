@@ -386,10 +386,27 @@ export default function AgentPortalPage() {
               </div>
             </div>
               <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', padding: '16px', marginTop: '8px' }}>
-                <p style={{ color: '#1E40AF', fontSize: '13px', fontWeight: '700', marginBottom: '4px' }}>📋 Complete Your Contracting in the CRM</p>
-                <p style={{ color: '#1D4ED8', fontSize: '13px', lineHeight: 1.7 }}>
+                <p style={{ color: '#1E40AF', fontSize: '13px', fontWeight: '700', marginBottom: '8px' }}>📋 Complete Your Contracting in the CRM</p>
+                <p style={{ color: '#1D4ED8', fontSize: '13px', lineHeight: 1.7, marginBottom: '12px' }}>
                   Once you reach your CRM, head to the <strong>My Contracting</strong> section to submit your carrier contracts. Your contracting team will guide you through the rest of the process from there.
                 </p>
+                <div style={{ background: '#DBEAFE', borderRadius: '8px', padding: '12px 14px' }}>
+                  <p style={{ color: '#1E40AF', fontSize: '12px', fontWeight: '700', marginBottom: '8px' }}>📌 Your Contracting Order:</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#1E40AF', color: '#FFF', fontSize: '11px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>1</span>
+                      <p style={{ color: '#1E40AF', fontSize: '12px', lineHeight: 1.5 }}><strong>Ethos</strong> — Will be submitted for you by your contracting team</p>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#1E40AF', color: '#FFF', fontSize: '11px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>2</span>
+                      <p style={{ color: '#1E40AF', fontSize: '12px', lineHeight: 1.5 }}><strong>Americo & AIG (Core Bridge)</strong> — Complete in My Contracting section of your CRM</p>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#1E40AF', color: '#FFF', fontSize: '11px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>3</span>
+                      <p style={{ color: '#1E40AF', fontSize: '12px', lineHeight: 1.5 }}><strong>Mutual of Omaha</strong> — Request access in My Contracting section of your CRM</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
               {currentStep > 0 && (
