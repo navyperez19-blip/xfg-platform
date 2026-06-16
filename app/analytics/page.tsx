@@ -79,7 +79,8 @@ export default function AnalyticsPage() {
     if (!contractingFilter) return nameMatch
     if (contractingFilter === 'ethos') return nameMatch && getCarrierStatus(a, 'Ethos') !== 'none'
     if (contractingFilter === 'americo_form') return nameMatch && a.americo_form_submitted
-    if (contractingFilter === 'americo_surelc') return nameMatch && a.americo_surelc_unlocked
+    if (contractingFilter === 'aig_form') return nameMatch && a.aig_form_submitted
+    if (contractingFilter === 'dialer_active') return nameMatch && a.dialer_active
     if (contractingFilter === 'mutual_requested') return nameMatch && a.mutual_omaha_requested
     if (contractingFilter === 'mutual_unlocked') return nameMatch && a.mutual_omaha_surelc_unlocked
     if (contractingFilter === 'aflac') return nameMatch && getCarrierStatus(a, 'Aflac') !== 'none'
@@ -148,17 +149,18 @@ export default function AnalyticsPage() {
   const contractingSummary = {
     ethos_active: activeAgents.filter(a => getCarrierStatus(a, 'Ethos') !== 'none').length,
     americo_form: activeAgents.filter(a => a.americo_form_submitted).length,
-    americo_unlocked: activeAgents.filter(a => a.americo_surelc_unlocked).length,
+    aig_form: activeAgents.filter(a => a.aig_form_submitted).length,
     mutual_requested: activeAgents.filter(a => a.mutual_omaha_requested).length,
     mutual_unlocked: activeAgents.filter(a => a.mutual_omaha_surelc_unlocked).length,
     dialer_submitted: activeAgents.filter(a => a.dialer_submitted).length,
+    dialer_active: activeAgents.filter(a => a.dialer_active).length,
   }
 
   const HEADERS = [
     { label: 'Agent', filter: null },
     { label: 'Ethos', filter: 'ethos' },
     { label: 'Americo Form', filter: 'americo_form' },
-    { label: 'Americo SureLC', filter: 'americo_surelc' },
+    { label: 'AIG Form', filter: 'aig_form' },
     { label: 'Mutual of Omaha', filter: 'mutual_requested' },
     { label: 'Aflac', filter: 'aflac' },
     { label: 'Transamerica', filter: 'transamerica' },
@@ -309,10 +311,11 @@ export default function AnalyticsPage() {
               {[
                 { label: 'Ethos', value: contractingSummary.ethos_active, color: '#27AE60', filter: 'ethos' },
                 { label: 'Americo Form', value: contractingSummary.americo_form, color: '#C9A96E', filter: 'americo_form' },
-                { label: 'Americo Unlocked', value: contractingSummary.americo_unlocked, color: '#27AE60', filter: 'americo_surelc' },
+                { label: 'AIG Form', value: contractingSummary.aig_form, color: '#5B21B6', filter: 'aig_form' },
                 { label: 'Mutual Requested', value: contractingSummary.mutual_requested, color: '#5B21B6', filter: 'mutual_requested' },
                 { label: 'Mutual Unlocked', value: contractingSummary.mutual_unlocked, color: '#27AE60', filter: 'mutual_unlocked' },
                 { label: 'Dialer Submitted', value: contractingSummary.dialer_submitted, color: '#2196F3', filter: 'dialer' },
+                { label: 'Dialer Active', value: contractingSummary.dialer_active, color: '#27AE60', filter: 'dialer_active' },
               ].map(card => (
                 <div key={card.label} onClick={() => setContractingFilter(contractingFilter === card.filter ? null : card.filter)} style={{ background: contractingFilter === card.filter ? '#FFFBF0' : '#FFFFFF', border: contractingFilter === card.filter ? '1px solid #C9A96E' : '1px solid #DDD9D2', borderRadius: '12px', padding: '16px 20px', cursor: 'pointer' }}>
                   <div style={{ fontSize: '28px', fontWeight: '700', color: card.color, marginBottom: '4px' }}>{card.value}</div>
@@ -368,12 +371,6 @@ export default function AnalyticsPage() {
                         return { label: '—', bg: '#F5F5F5', color: '#AAA', border: '#E5E1DA' }
                       })()
 
-                      const americoSurelcStatus = (() => {
-                        if (agent.americo_surelc_unlocked) return { label: '🔓 Unlocked', bg: '#E8F5E9', color: '#1B5E20', border: '#A5D6A7' }
-                        if (agent.americo_form_submitted) return { label: '⏳ Pending', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }
-                        return { label: '—', bg: '#F5F5F5', color: '#AAA', border: '#E5E1DA' }
-                      })()
-
                       return (
                         <tr key={agent.id} style={{ borderBottom: i < filteredContracting.length - 1 ? '1px solid #F0EDE8' : 'none' }}>
                           <td style={{ padding: '12px 14px', fontWeight: '600', color: '#1A1A1A', fontSize: '13px', whiteSpace: 'nowrap' }}>
@@ -384,11 +381,16 @@ export default function AnalyticsPage() {
                           </td>
                           <td style={{ padding: '12px 14px' }}>
                             {agent.americo_form_submitted
-                              ? badgeSpan({ label: '📋 Form Submitted', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => resetAmerico(agent.id))
+                              ? badgeSpan({ label: '📋 Submitted', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => resetAmerico(agent.id))
                               : emptyBadge}
                           </td>
                           <td style={{ padding: '12px 14px' }}>
-                            {badgeSpan(americoSurelcStatus)}
+                            {agent.aig_form_submitted
+                              ? badgeSpan({ label: '📋 Submitted', bg: '#EDE9FE', color: '#5B21B6', border: '#C4B5FD' }, true, async () => {
+                                  await supabase.from('agents').update({ aig_form_submitted: false, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                  setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, aig_form_submitted: false } : a))
+                                })
+                              : emptyBadge}
                           </td>
                           <td style={{ padding: '12px 14px' }}>
                             {(agent.mutual_omaha_requested || moOmaha !== 'none')
@@ -408,8 +410,16 @@ export default function AnalyticsPage() {
                             {ahl !== 'none' ? badgeSpan(statusBadge(ahl), true, () => resetCarrier(agent.id, 'AHL (American Home Life)', ahl)) : emptyBadge}
                           </td>
                           <td style={{ padding: '12px 14px' }}>
-                            {agent.dialer_submitted
-                              ? badgeSpan({ label: '✓ Submitted', bg: '#E3F2FD', color: '#1565C0', border: '#90CAF9' })
+                            {agent.dialer_active
+                              ? badgeSpan({ label: '✓ Active', bg: '#E8F5E9', color: '#1B5E20', border: '#A5D6A7' }, true, async () => {
+                                  await supabase.from('agents').update({ dialer_active: false, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                  setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, dialer_active: false } : a))
+                                })
+                              : agent.dialer_submitted
+                              ? badgeSpan({ label: '⏳ Submitted', bg: '#E3F2FD', color: '#1565C0', border: '#90CAF9' }, true, async () => {
+                                  await supabase.from('agents').update({ dialer_active: true, updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                  setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, dialer_active: true } : a))
+                                })
                               : emptyBadge}
                           </td>
                           <td style={{ padding: '12px 14px', color: '#AAA', fontSize: '11px', whiteSpace: 'nowrap' }}>
