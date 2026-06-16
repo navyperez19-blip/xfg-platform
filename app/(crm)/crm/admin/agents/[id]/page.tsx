@@ -167,6 +167,37 @@ export default function AgentDetailPage() {
     load()
   }, [agentId, router])
 
+  // Real-time subscription for admin agent detail
+  useEffect(() => {
+    if (!agentId) return
+
+    const channel = supabase
+      .channel('admin-agent-detail-realtime')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'agents',
+        filter: `id=eq.${agentId}`
+      }, async () => {
+        const { data: agentData } = await supabase
+          .from('agents')
+          .select('*')
+          .eq('id', agentId)
+          .single()
+        if (agentData) {
+          setAmericoFormSubmitted(agentData.americo_form_submitted ?? false)
+          setAigFormSubmitted((agentData as any).aig_form_submitted ?? false)
+          setMutualOmahaRequested(agentData.mutual_omaha_requested ?? false)
+          setDialerSubmitted(agentData.dialer_submitted ?? false)
+        }
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [agentId])
+
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
