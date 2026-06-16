@@ -54,6 +54,38 @@ export default function LeaderboardPage() {
     load()
   }, [router])
 
+  // Real-time subscription for leaderboard
+  useEffect(() => {
+    const channel = supabase
+      .channel('leaderboard-realtime')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'crm_policies',
+      }, async () => {
+        const now = new Date()
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+        const { data: leaderboardData } = await supabase
+          .rpc('get_leaderboard_data', { month_start: startOfMonth })
+        const stats = (leaderboardData ?? []).map((row: any) => ({
+          id: row.agent_id,
+          full_name: row.full_name,
+          agent_model: row.agent_model,
+          mtdPolicies: Number(row.mtd_policies),
+          mtdPremium: Number(row.mtd_premium),
+          activePolicies: Number(row.active_policies),
+          totalPolicies: Number(row.total_policies),
+          alltimePremium: Number(row.alltime_premium),
+        }))
+        setLeaderboard(stats)
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
+
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
