@@ -29,8 +29,6 @@ export default function ContractingPage() {
   const [carriers, setCarriers] = useState<Record<string, string>>({})
   const [americoFormSubmitted, setAmericoFormSubmitted] = useState<boolean | null>(null)
   const [aigFormSubmitted, setAigFormSubmitted] = useState(false)
-  const [mutualOmahaRequested, setMutualOmahaRequested] = useState(false)
-  const [mutualOmahaSurelcUnlocked, setMutualOmahaSurelcUnlocked] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -57,8 +55,6 @@ export default function ContractingPage() {
       setCarriers(agent.carriers ?? {})
       setAmericoFormSubmitted(agent.americo_form_submitted ?? false)
       setAigFormSubmitted((agent as any).aig_form_submitted ?? false)
-      setMutualOmahaRequested((agent as any).mutual_omaha_requested ?? false)
-      setMutualOmahaSurelcUnlocked((agent as any).mutual_omaha_surelc_unlocked ?? false)
       setLoading(false)
     }
     load()
@@ -78,8 +74,6 @@ export default function ContractingPage() {
           setCarriers(updated.carriers ?? {})
           setAmericoFormSubmitted(updated.americo_form_submitted ?? false)
           setAigFormSubmitted(updated.aig_form_submitted ?? false)
-          setMutualOmahaRequested(updated.mutual_omaha_requested ?? false)
-          setMutualOmahaSurelcUnlocked(updated.mutual_omaha_surelc_unlocked ?? false)
           setAgentRecord((prev: any) => ({ ...prev, ...updated }))
         }
       )
@@ -281,55 +275,19 @@ export default function ContractingPage() {
                       </div>
                     )}
 
-                    {/* Mutual of Omaha special flow */}
-                    {isMutualOmaha && !mutualOmahaRequested && (
-                      <button
-                        onClick={async () => {
-                          await supabase
-                            .from('agents')
-                            .update({ mutual_omaha_requested: true, mutual_omaha_requested_at: new Date().toISOString() })
-                            .eq('id', agentRecord.id)
-                          setMutualOmahaRequested(true)
-
-                          // Notify admins
-                          const { data: admins } = await supabase
-                            .from('users')
-                            .select('id')
-                            .in('role', ['superadmin', 'executive'])
-
-                          if (admins && admins.length > 0) {
-                            const notifications = admins.map((admin: any) => ({
-                              recipient_id: admin.id,
-                              agent_id: agentRecord.id,
-                              type: 'mutual_omaha_requested',
-                              title: 'Mutual of Omaha Access Requested',
-                              message: `${agentRecord.full_name} has requested access to the Mutual of Omaha SureLC contracting link.`,
-                              is_read: false,
-                            }))
-                            await supabase.from('notifications').insert(notifications)
-                          }
-                        }}
-                        style={{ display: 'inline-block', padding: '6px 14px', backgroundColor: '#EDE9FE', color: '#5B21B6', border: '1px solid #C4B5FD', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit', whiteSpace: 'nowrap' }}
-                      >
-                        Request Access
-                      </button>
-                    )}
-
-                    {isMutualOmaha && mutualOmahaRequested && !mutualOmahaSurelcUnlocked && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '6px' }}>
-                        <span style={{ fontSize: '12px', color: '#92400E', fontWeight: '600' }}>⏳ Awaiting admin approval</span>
-                      </div>
-                    )}
-
-                    {isMutualOmaha && mutualOmahaSurelcUnlocked && carrier.surelcLink && (
+                    {/* Mutual of Omaha - direct SureLC link, no unlock needed */}
+                    {isMutualOmaha && (
                       <a
-                        href={carrier.surelcLink}
+                        href="https://surelc.surancebay.com/sbweb/login.jsp?branch=Ascent%20Insurance&branchEditable=off&branchRequired=on&branchVisible=on&gaId=1279&gaName=Supreme%20Life%20Brokerage"
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{ display: 'inline-block', padding: '6px 14px', backgroundColor: '#E8F5E9', color: '#1B5E20', border: '1px solid #A5D6A7', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', textDecoration: 'none', whiteSpace: 'nowrap' }}
                       >
-                        Start Contracting on SureLC →
+                        Start Mutual of Omaha Contracting on SureLC →
                       </a>
+                    )}
+                    {isMutualOmaha && (
+                      <p style={{ fontSize: '11px', color: '#7A7A7A', marginTop: '4px' }}>This link is for <strong>Mutual of Omaha only</strong> — do not use it for other carriers.</p>
                     )}
 
                     {/* Americo reset */}
@@ -361,7 +319,7 @@ export default function ContractingPage() {
                     )}
 
                     {/* Mutual of Omaha reset */}
-                    {isMutualOmaha && (mutualOmahaRequested || currentStatus !== 'none') && (
+                    {isMutualOmaha && currentStatus !== 'none' && (
                       <button
                         onClick={async () => {
                           setSaving('Mutual of Omaha')
@@ -378,8 +336,6 @@ export default function ContractingPage() {
                             })
                             .eq('id', agentRecord.id)
                           setCarriers(updatedCarriers)
-                          setMutualOmahaRequested(false)
-                          setMutualOmahaSurelcUnlocked(false)
                           setSaving(null)
                         }}
                         disabled={saving === 'Mutual of Omaha'}
