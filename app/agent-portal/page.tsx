@@ -374,7 +374,7 @@ export default function AgentPortalPage() {
         {stepKey === 'contracting_info' && (
           <div style={card}>
             <h2 style={{ color: '#1A1814', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>Contracting Information</h2>
-            <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '16px' }}>Please fill in your licensing details below, then complete the XFG contracting form.</p>
+            <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '16px' }}>Please fill in your licensing details below, then reach out to Nick or Finley to get started.</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
                 <label style={lbl}>National Producer Number (NPN) <span style={{ color: '#8B2635' }}>*</span></label>
@@ -385,13 +385,12 @@ export default function AgentPortalPage() {
                 <input type="text" value={formData.states_licensed} onChange={(e) => setFormData({ ...formData, states_licensed: e.target.value })} placeholder="e.g. LA, TX, FL, GA" style={inp} />
               </div>
             </div>
-              <a href="https://form.jotform.com/261576964108062" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F5EDD9', border: '1px solid #E8C87A', borderRadius: '10px', padding: '16px', textDecoration: 'none', marginTop: '8px' }}>
-                <div>
-                  <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '700', marginBottom: '2px' }}>Complete XFG Contracting Form</p>
-                  <p style={{ color: '#6B6966', fontSize: '13px' }}>Click to open and complete your official contracting paperwork</p>
-                </div>
-                <span style={{ color: '#C9A96E', fontSize: '15px', fontWeight: '600' }}>Open Form →</span>
-              </a>
+              <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', padding: '16px', marginTop: '8px' }}>
+                <p style={{ color: '#1E40AF', fontSize: '13px', fontWeight: '700', marginBottom: '4px' }}>📋 Complete Your Contracting in the CRM</p>
+                <p style={{ color: '#1D4ED8', fontSize: '13px', lineHeight: 1.7 }}>
+                  Once you reach your CRM, head to the <strong>My Contracting</strong> section to submit your carrier contracts. Your contracting team will guide you through the rest of the process from there.
+                </p>
+              </div>
             <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
               {currentStep > 0 && (
                 <button onClick={goBack} disabled={saving} style={{ flex: 1, background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#6B6966', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Back</button>
