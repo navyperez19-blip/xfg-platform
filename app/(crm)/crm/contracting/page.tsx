@@ -232,12 +232,17 @@ export default function ContractingPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={async () => {
-                          await supabase
-                            .from('agents')
-                            .update({ americo_form_submitted: true, americo_form_submitted_at: new Date().toISOString() })
-                            .eq('id', agentRecord.id)
+                          if (!agentRecord) return
+                          await supabase.from('agents').update({
+                            americo_form_submitted: true,
+                            americo_form_submitted_at: new Date().toISOString(),
+                            aig_form_submitted: true,
+                            aig_form_submitted_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString(),
+                          }).eq('id', agentRecord.id)
                           setAmericoFormSubmitted(true)
                           await updateCarrierStatus('Americo', 'submitted')
+                          await updateCarrierStatus('AIG (Core Bridge)', 'submitted')
                         }}
                         style={{ display: 'inline-block', padding: '6px 14px', backgroundColor: '#EDE9FE', color: '#5B21B6', border: '1px solid #C4B5FD', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', textDecoration: 'none', whiteSpace: 'nowrap' }}
                       >
