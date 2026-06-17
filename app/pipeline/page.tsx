@@ -224,6 +224,7 @@ export default function PipelinePage() {
                     { label: 'Model', key: 'agent_model' },
                     { label: 'Licensed', key: 'is_licensed' },
                     { label: 'NPN', key: 'npn' },
+                    { label: 'Phone', key: 'phone' },
                     { label: 'XFG Email', key: 'xfg_email' },
                     { label: 'Days in Stage', key: 'days' },
                     { label: 'Last Contact', key: 'last_contact_at' },
@@ -266,6 +267,13 @@ export default function PipelinePage() {
                       </td>
                       <td style={{ padding: '0.875rem 1rem' }}>
                         <p style={{ color: '#6B6966', fontSize: '0.8rem' }}>{agent.npn || '—'}</p>
+                      </td>
+                      <td style={{ padding: '0.875rem 1rem', color: '#1A1814', fontSize: '0.875rem' }}>
+                        {agent.phone ? (
+                          <a href={`tel:${agent.phone}`} style={{ color: '#1A1814', textDecoration: 'none', fontWeight: '500' }} onClick={e => e.stopPropagation()}>
+                            {agent.phone}
+                          </a>
+                        ) : '—'}
                       </td>
                       <td style={{ padding: '0.875rem 1rem' }}>
                         <p style={{ color: '#6B6966', fontSize: '0.8rem' }}>{agent.xfg_email || '—'}</p>
