@@ -30,7 +30,6 @@ export default function AgentDetailPage() {
   const [americoFormSubmitted, setAmericoFormSubmitted] = useState(false)
   const [aigFormSubmitted, setAigFormSubmitted] = useState(false)
   const [mutualOmahaRequested, setMutualOmahaRequested] = useState(false)
-  const [dialerSubmitted, setDialerSubmitted] = useState(false)
   const [agentLeads, setAgentLeads] = useState<any[]>([])
   const [agentActivity, setAgentActivity] = useState<any[]>([])
   const [monthlyGoal, setMonthlyGoal] = useState<number>(5000)
@@ -189,7 +188,6 @@ export default function AgentDetailPage() {
           setAmericoFormSubmitted(agentData.americo_form_submitted ?? false)
           setAigFormSubmitted((agentData as any).aig_form_submitted ?? false)
           setMutualOmahaRequested(agentData.mutual_omaha_requested ?? false)
-          setDialerSubmitted(agentData.dialer_submitted ?? false)
         }
       })
       .subscribe()
