@@ -28,6 +28,8 @@ export default function PipelinePage() {
   const [sortKey, setSortKey] = useState<SortKey>('days')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [currentUser, setCurrentUser] = useState<any>(null)
+  const [selectedAgents, setSelectedAgents] = useState<string[]>([])
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     const getAgents = async () => {
@@ -119,6 +121,24 @@ export default function PipelinePage() {
               <button onClick={() => setView('list')} style={{ padding: '0.5rem 1rem', border: 'none', background: view === 'list' ? '#F5EDD9' : 'transparent', color: view === 'list' ? '#8B6A2E' : '#6B6966', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>List</button>
               <button onClick={() => setView('board')} style={{ padding: '0.5rem 1rem', border: 'none', background: view === 'board' ? '#F5EDD9' : 'transparent', color: view === 'board' ? '#8B6A2E' : '#6B6966', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>Board</button>
             </div>
+            {selectedAgents.length > 0 && (
+              <button
+                onClick={async () => {
+                  if (!confirm(`Are you sure you want to delete ${selectedAgents.length} agent(s)? This cannot be undone.`)) return
+                  setDeleting(true)
+                  for (const id of selectedAgents) {
+                    await supabase.from('agents').delete().eq('id', id)
+                  }
+                  setSelectedAgents([])
+                  setDeleting(false)
+                  window.location.reload()
+                }}
+                disabled={deleting}
+                style={{ padding: '8px 16px', backgroundColor: '#FEE2E2', color: '#C0392B', border: '1px solid #FECACA', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit', opacity: deleting ? 0.7 : 1 }}
+              >
+                {deleting ? 'Deleting...' : `Delete Selected (${selectedAgents.length})`}
+              </button>
+            )}
             {currentUser?.role !== 'sales_director' && (
               <button onClick={() => router.push('/agents/new')} style={{ background: '#C9A96E', border: 'none', color: '#FFFFFF', padding: '0.6rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600' }}>+ New Agent</button>
             )}
@@ -161,6 +181,14 @@ export default function PipelinePage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1100px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #EBE8E3' }}>
+                  <th style={{ padding: '10px 16px', width: '40px' }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedAgents.length === filteredAgents.length && filteredAgents.length > 0}
+                      onChange={e => setSelectedAgents(e.target.checked ? filteredAgents.map((a: any) => a.id) : [])}
+                      style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                    />
+                  </th>
                   {[
                     { label: 'Agent', key: 'full_name' },
                     { label: 'Stage', key: 'current_stage' },
@@ -185,6 +213,14 @@ export default function PipelinePage() {
                   const stageLabel = STAGES.find(s => s.key === agent.current_stage)?.label || agent.current_stage
                   return (
                     <tr key={agent.id} onClick={() => router.push(`/agents/${agent.id}`)} style={{ borderBottom: index < sortedAgents.length - 1 ? '1px solid #F5F2ED' : 'none', cursor: 'pointer', transition: 'background 0.1s' }} onMouseEnter={e => (e.currentTarget.style.background = '#FAFAF9')} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                      <td style={{ padding: '10px 16px' }} onClick={e => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={selectedAgents.includes(agent.id)}
+                          onChange={e => setSelectedAgents(prev => e.target.checked ? [...prev, agent.id] : prev.filter(id => id !== agent.id))}
+                          style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                        />
+                      </td>
                       <td style={{ padding: '0.875rem 1rem' }}>
                         <p style={{ color: '#1A1814', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.15rem' }}>{agent.full_name}</p>
                         <p style={{ color: '#C9A96E', fontSize: '0.75rem', fontFamily: 'monospace' }}>{agent.xfg_id}</p>
