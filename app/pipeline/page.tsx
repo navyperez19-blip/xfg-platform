@@ -115,6 +115,7 @@ export default function PipelinePage() {
           <div>
             <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '600', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.25rem' }}>XFG · X Financial Group</p>
             <h1 style={{ color: '#1A1814', fontSize: '1.6rem', fontWeight: '700' }}>Agent Pipeline</h1>
+            {/* v2 */}
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
             <div style={{ display: 'flex', background: '#FFFFFF', border: '1px solid #EBE8E3', borderRadius: '8px', overflow: 'hidden' }}>
