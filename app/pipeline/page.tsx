@@ -22,8 +22,8 @@ export default function PipelinePage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterStages, setFilterStages] = useState<string[]>([])
-  const [filterState, setFilterState] = useState('')
-  const [filterModel, setFilterModel] = useState('')
+  const [filterStates, setFilterStates] = useState<string[]>([])
+  const [filterModels, setFilterModels] = useState<string[]>([])
   const [view, setView] = useState<'list' | 'board'>('list')
   const [sortKey, setSortKey] = useState<SortKey>('days')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
@@ -75,8 +75,8 @@ export default function PipelinePage() {
       a.email.toLowerCase().includes(search.toLowerCase()) ||
       a.xfg_id.toLowerCase().includes(search.toLowerCase())
     const matchesStage = filterStages.length === 0 || filterStages.includes(a.current_stage)
-    const matchesState = filterState === '' || a.state === filterState
-    const matchesModel = filterModel === '' || a.agent_model === filterModel
+    const matchesState = filterStates.length === 0 || filterStates.includes(a.state)
+    const matchesModel = filterModels.length === 0 || filterModels.includes(a.agent_model)
     return matchesSearch && matchesStage && matchesState && matchesModel
   })
 
@@ -169,17 +169,29 @@ export default function PipelinePage() {
         {/* Search and Filters */}
         <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
           <input type="text" placeholder="Search by name, email, or XFG ID..." value={search} onChange={(e) => setSearch(e.target.value)} style={{ background: '#FFFFFF', color: '#1A1814', border: '1px solid #EBE8E3', borderRadius: '8px', padding: '0.55rem 1rem', fontSize: '0.875rem', outline: 'none', width: '300px', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }} />
-          <select value={filterState} onChange={(e) => setFilterState(e.target.value)} style={{ background: '#FFFFFF', color: '#1A1814', border: '1px solid #EBE8E3', borderRadius: '8px', padding: '0.55rem 0.875rem', fontSize: '0.875rem', outline: 'none' }}>
-            <option value="">All States</option>
-            {uniqueStates.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-          <select value={filterModel} onChange={(e) => setFilterModel(e.target.value)} style={{ background: '#FFFFFF', color: '#1A1814', border: '1px solid #EBE8E3', borderRadius: '8px', padding: '0.55rem 0.875rem', fontSize: '0.875rem', outline: 'none' }}>
-            <option value="">All Models</option>
-            <option value="supported">Supported</option>
-            <option value="independent">Independent</option>
-          </select>
-          {(search || filterStages.length > 0 || filterState || filterModel) && (
-            <button onClick={() => { setSearch(''); setFilterStages([]); setFilterState(''); setFilterModel('') }} style={{ background: '#FFFFFF', border: '1px solid #EBE8E3', color: '#6B6966', padding: '0.55rem 0.875rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem' }}>Clear</button>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <select
+              onChange={e => { const val = e.target.value; if (val) setFilterStates(prev => prev.includes(val) ? prev.filter(s => s !== val) : [...prev, val]) }}
+              value=""
+              style={{ background: '#FFFFFF', color: '#1A1814', border: filterStates.length > 0 ? '1px solid #C9A96E' : '1px solid #EBE8E3', borderRadius: '8px', padding: '0.55rem 0.875rem', fontSize: '0.875rem', outline: 'none', cursor: 'pointer' }}
+            >
+              <option value="">States {filterStates.length > 0 ? `(${filterStates.length})` : ''}</option>
+              {uniqueStates.map(s => <option key={s} value={s} style={{ fontWeight: filterStates.includes(s) ? '700' : '400' }}>{filterStates.includes(s) ? '✓ ' : ''}{s}</option>)}
+            </select>
+          </div>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <select
+              onChange={e => { const val = e.target.value; if (val) setFilterModels(prev => prev.includes(val) ? prev.filter(m => m !== val) : [...prev, val]) }}
+              value=""
+              style={{ background: '#FFFFFF', color: '#1A1814', border: filterModels.length > 0 ? '1px solid #C9A96E' : '1px solid #EBE8E3', borderRadius: '8px', padding: '0.55rem 0.875rem', fontSize: '0.875rem', outline: 'none', cursor: 'pointer' }}
+            >
+              <option value="">Models {filterModels.length > 0 ? `(${filterModels.length})` : ''}</option>
+              <option value="supported" style={{ fontWeight: filterModels.includes('supported') ? '700' : '400' }}>{filterModels.includes('supported') ? '✓ ' : ''}Supported</option>
+              <option value="independent" style={{ fontWeight: filterModels.includes('independent') ? '700' : '400' }}>{filterModels.includes('independent') ? '✓ ' : ''}Independent</option>
+            </select>
+          </div>
+          {(search || filterStages.length > 0 || filterStates.length > 0 || filterModels.length > 0) && (
+            <button onClick={() => { setSearch(''); setFilterStages([]); setFilterStates([]); setFilterModels([]) }} style={{ background: '#FFFFFF', border: '1px solid #EBE8E3', color: '#6B6966', padding: '0.55rem 0.875rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem' }}>Clear</button>
           )}
           <span style={{ color: '#9A9890', fontSize: '0.8rem', marginLeft: 'auto' }}>{sortedAgents.length} of {agents.length} agents</span>
         </div>
