@@ -184,8 +184,8 @@ export default function PipelinePage() {
                   <th style={{ padding: '10px 16px', width: '40px' }}>
                     <input
                       type="checkbox"
-                      checked={selectedAgents.length === filteredAgents.length && filteredAgents.length > 0}
-                      onChange={e => setSelectedAgents(e.target.checked ? filteredAgents.map((a: any) => a.id) : [])}
+                      checked={selectedAgents.length === sortedAgents.length && sortedAgents.length > 0}
+                      onChange={e => setSelectedAgents(e.target.checked ? sortedAgents.map((a: any) => a.id) : [])}
                       style={{ cursor: 'pointer', width: '16px', height: '16px' }}
                     />
                   </th>
