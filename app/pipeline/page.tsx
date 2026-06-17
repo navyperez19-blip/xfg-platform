@@ -21,7 +21,7 @@ export default function PipelinePage() {
   const [agents, setAgents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [filterStage, setFilterStage] = useState('')
+  const [filterStages, setFilterStages] = useState<string[]>([])
   const [filterState, setFilterState] = useState('')
   const [filterModel, setFilterModel] = useState('')
   const [view, setView] = useState<'list' | 'board'>('list')
@@ -74,7 +74,7 @@ export default function PipelinePage() {
       a.full_name.toLowerCase().includes(search.toLowerCase()) ||
       a.email.toLowerCase().includes(search.toLowerCase()) ||
       a.xfg_id.toLowerCase().includes(search.toLowerCase())
-    const matchesStage = filterStage === '' || a.current_stage === filterStage
+    const matchesStage = filterStages.length === 0 || filterStages.includes(a.current_stage)
     const matchesState = filterState === '' || a.state === filterState
     const matchesModel = filterModel === '' || a.agent_model === filterModel
     return matchesSearch && matchesStage && matchesState && matchesModel
@@ -156,11 +156,11 @@ export default function PipelinePage() {
 
         {/* Stage Summary Bar */}
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-          <button onClick={() => setFilterStage('')} style={{ padding: '0.4rem 0.875rem', borderRadius: '20px', border: '1px solid #DDD9D2', background: filterStage === '' ? '#1A1814' : '#FFFFFF', color: filterStage === '' ? '#FFFFFF' : '#6B6966', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '500' }}>
+          <button onClick={() => setFilterStages([])} style={{ padding: '0.4rem 0.875rem', borderRadius: '20px', border: '1px solid #DDD9D2', background: filterStages.length === 0 ? '#1A1814' : '#FFFFFF', color: filterStages.length === 0 ? '#FFFFFF' : '#6B6966', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '500' }}>
             All ({agents.length})
           </button>
           {stageCounts.map(s => (
-            <button key={s.key} onClick={() => setFilterStage(s.key === filterStage ? '' : s.key)} style={{ padding: '0.4rem 0.875rem', borderRadius: '20px', border: '1px solid #DDD9D2', background: filterStage === s.key ? '#C9A96E' : '#FFFFFF', color: filterStage === s.key ? '#FFFFFF' : '#6B6966', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '500' }}>
+            <button key={s.key} onClick={() => setFilterStages(prev => prev.includes(s.key) ? prev.filter(k => k !== s.key) : [...prev, s.key])} style={{ padding: '0.4rem 0.875rem', borderRadius: '20px', border: '1px solid #DDD9D2', background: filterStages.includes(s.key) ? '#C9A96E' : '#FFFFFF', color: filterStages.includes(s.key) ? '#FFFFFF' : '#6B6966', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '500' }}>
               {s.label} ({s.count})
             </button>
           ))}
@@ -178,8 +178,8 @@ export default function PipelinePage() {
             <option value="supported">Supported</option>
             <option value="independent">Independent</option>
           </select>
-          {(search || filterStage || filterState || filterModel) && (
-            <button onClick={() => { setSearch(''); setFilterStage(''); setFilterState(''); setFilterModel('') }} style={{ background: '#FFFFFF', border: '1px solid #EBE8E3', color: '#6B6966', padding: '0.55rem 0.875rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem' }}>Clear</button>
+          {(search || filterStages.length > 0 || filterState || filterModel) && (
+            <button onClick={() => { setSearch(''); setFilterStages([]); setFilterState(''); setFilterModel('') }} style={{ background: '#FFFFFF', border: '1px solid #EBE8E3', color: '#6B6966', padding: '0.55rem 0.875rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem' }}>Clear</button>
           )}
           <span style={{ color: '#9A9890', fontSize: '0.8rem', marginLeft: 'auto' }}>{sortedAgents.length} of {agents.length} agents</span>
         </div>
