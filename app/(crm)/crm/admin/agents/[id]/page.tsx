@@ -30,6 +30,7 @@ export default function AgentDetailPage() {
   const [americoFormSubmitted, setAmericoFormSubmitted] = useState(false)
   const [aigFormSubmitted, setAigFormSubmitted] = useState(false)
   const [mutualOmahaRequested, setMutualOmahaRequested] = useState(false)
+  const [dialerSubmitted, setDialerSubmitted] = useState(false)
   const [agentLeads, setAgentLeads] = useState<any[]>([])
   const [agentActivity, setAgentActivity] = useState<any[]>([])
   const [monthlyGoal, setMonthlyGoal] = useState<number>(5000)

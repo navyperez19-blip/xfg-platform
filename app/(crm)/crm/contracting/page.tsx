@@ -105,7 +105,6 @@ export default function ContractingPage() {
           setCarriers(agent.carriers ?? {})
           setAmericoFormSubmitted(agent.americo_form_submitted ?? false)
           setAigFormSubmitted((agent as any).aig_form_submitted ?? false)
-          setMutualOmahaRequested(agent.mutual_omaha_requested ?? false)
         }
       })
       .subscribe()
