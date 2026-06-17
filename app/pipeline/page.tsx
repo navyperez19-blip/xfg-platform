@@ -116,7 +116,7 @@ export default function PipelinePage() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#F5F2ED' }}>
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+      <div style={{ maxWidth: '100%', margin: '0 auto', padding: '2rem 1.5rem' }}>
 
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -206,7 +206,7 @@ export default function PipelinePage() {
         {/* List View */}
         {view === 'list' && (
           <div style={{ background: '#FFFFFF', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1150px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1300px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #EBE8E3', backgroundColor: '#FAFAF9' }}>
                   <th style={{ padding: '10px 16px', width: '50px', minWidth: '50px', backgroundColor: '#FAFAF9', borderRight: '1px solid #EBE8E3' }}>
