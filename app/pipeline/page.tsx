@@ -25,8 +25,7 @@ export default function PipelinePage() {
   const [filterStates, setFilterStates] = useState<string[]>([])
   const [filterModels, setFilterModels] = useState<string[]>([])
   const [view, setView] = useState<'list' | 'board'>('list')
-  const [sortKey, setSortKey] = useState<SortKey>('days')
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [sortKeys, setSortKeys] = useState<{key: SortKey, dir: 'asc' | 'desc'}[]>([{key: 'days', dir: 'desc'}])
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [selectedAgents, setSelectedAgents] = useState<string[]>([])
   const [deleting, setDeleting] = useState(false)
@@ -81,19 +80,27 @@ export default function PipelinePage() {
   })
 
   const sortedAgents = [...filteredAgents].sort((a, b) => {
-    let aVal: any, bVal: any
-    if (sortKey === 'days') { aVal = getDays(a); bVal = getDays(b) }
-    else if (sortKey === 'full_name') { aVal = a.full_name; bVal = b.full_name }
-    else if (sortKey === 'current_stage') { aVal = STAGES.findIndex(s => s.key === a.current_stage); bVal = STAGES.findIndex(s => s.key === b.current_stage) }
-    else { aVal = a[sortKey] || ''; bVal = b[sortKey] || '' }
-    if (aVal < bVal) return sortDir === 'asc' ? -1 : 1
-    if (aVal > bVal) return sortDir === 'asc' ? 1 : -1
+    for (const {key, dir} of sortKeys) {
+      let aVal: any, bVal: any
+      if (key === 'days') { aVal = getDays(a); bVal = getDays(b) }
+      else if (key === 'full_name') { aVal = a.full_name; bVal = b.full_name }
+      else if (key === 'current_stage') { aVal = STAGES.findIndex(s => s.key === a.current_stage); bVal = STAGES.findIndex(s => s.key === b.current_stage) }
+      else { aVal = a[key] || ''; bVal = b[key] || '' }
+      if (aVal < bVal) return dir === 'asc' ? -1 : 1
+      if (aVal > bVal) return dir === 'asc' ? 1 : -1
+    }
     return 0
   })
 
   const handleSort = (key: SortKey) => {
-    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
-    else { setSortKey(key); setSortDir('desc') }
+    setSortKeys(prev => {
+      const existing = prev.find(s => s.key === key)
+      if (existing) {
+        if (existing.dir === 'desc') return prev.map(s => s.key === key ? {...s, dir: 'asc'} : s)
+        return prev.filter(s => s.key !== key)
+      }
+      return [...prev, {key, dir: 'desc'}]
+    })
   }
 
   const stageCounts = STAGES.map(s => ({ ...s, count: agents.filter(a => a.current_stage === s.key).length }))
@@ -221,8 +228,8 @@ export default function PipelinePage() {
                     { label: 'Days in Stage', key: 'days' },
                     { label: 'Last Contact', key: 'last_contact_at' },
                   ].map(col => (
-                    <th key={col.key} onClick={() => handleSort(col.key as SortKey)} style={{ padding: '0.875rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#6B6966', letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none', background: sortKey === col.key ? '#FAFAF9' : 'transparent' }}>
-                      {col.label} {sortKey === col.key ? (sortDir === 'desc' ? '↓' : '↑') : ''}
+                    <th key={col.key} onClick={() => handleSort(col.key as SortKey)} style={{ padding: '0.875rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#6B6966', letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none', background: sortKeys.some(s => s.key === col.key) ? '#FAFAF9' : 'transparent' }}>
+                      {col.label} {(() => { const s = sortKeys.find(s => s.key === col.key); if (!s) return ''; const idx = sortKeys.indexOf(s); return `${s.dir === 'desc' ? '↓' : '↑'}${sortKeys.length > 1 ? idx + 1 : ''}` })()}
                     </th>
                   ))}
                   <th style={{ padding: '0.875rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#6B6966', letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Status</th>
