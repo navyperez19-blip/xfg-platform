@@ -181,8 +181,8 @@ export default function PipelinePage() {
           <div style={{ background: '#FFFFFF', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1150px' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid #EBE8E3' }}>
-                  <th style={{ padding: '10px 16px', width: '44px', minWidth: '44px', backgroundColor: '#FAFAF9' }}>
+                <tr style={{ borderBottom: '1px solid #EBE8E3', backgroundColor: '#FAFAF9' }}>
+                  <th style={{ padding: '10px 16px', width: '50px', minWidth: '50px', backgroundColor: '#FAFAF9', borderRight: '1px solid #EBE8E3' }}>
                     <input
                       type="checkbox"
                       checked={selectedAgents.length === sortedAgents.length && sortedAgents.length > 0}
@@ -214,7 +214,7 @@ export default function PipelinePage() {
                   const stageLabel = STAGES.find(s => s.key === agent.current_stage)?.label || agent.current_stage
                   return (
                     <tr key={agent.id} onClick={() => router.push(`/agents/${agent.id}`)} style={{ borderBottom: index < sortedAgents.length - 1 ? '1px solid #F5F2ED' : 'none', cursor: 'pointer', transition: 'background 0.1s' }} onMouseEnter={e => (e.currentTarget.style.background = '#FAFAF9')} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                      <td style={{ padding: '10px 16px', width: '44px', minWidth: '44px' }} onClick={e => e.stopPropagation()}>
+                      <td style={{ padding: '10px 16px', width: '50px', minWidth: '50px', borderRight: '1px solid #EBE8E3' }} onClick={e => e.stopPropagation()}>
                         <input
                           type="checkbox"
                           checked={selectedAgents.includes(agent.id)}
