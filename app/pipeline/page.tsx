@@ -30,6 +30,7 @@ export default function PipelinePage() {
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [selectedAgents, setSelectedAgents] = useState<string[]>([])
   const [deleting, setDeleting] = useState(false)
+  const [selectMode, setSelectMode] = useState(false)
 
   useEffect(() => {
     const getAgents = async () => {
@@ -122,22 +123,29 @@ export default function PipelinePage() {
               <button onClick={() => setView('list')} style={{ padding: '0.5rem 1rem', border: 'none', background: view === 'list' ? '#F5EDD9' : 'transparent', color: view === 'list' ? '#8B6A2E' : '#6B6966', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>List</button>
               <button onClick={() => setView('board')} style={{ padding: '0.5rem 1rem', border: 'none', background: view === 'board' ? '#F5EDD9' : 'transparent', color: view === 'board' ? '#8B6A2E' : '#6B6966', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>Board</button>
             </div>
+            <button
+              onClick={() => { setSelectMode(!selectMode); setSelectedAgents([]) }}
+              style={{ padding: '0.6rem 1.25rem', border: '1px solid #DDD9D2', background: selectMode ? '#FEE2E2' : '#FFFFFF', color: selectMode ? '#C0392B' : '#6B6966', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600' }}
+            >
+              {selectMode ? 'Cancel' : 'Select'}
+            </button>
             {selectedAgents.length > 0 && (
               <button
                 onClick={async () => {
-                  if (!confirm(`Are you sure you want to delete ${selectedAgents.length} agent(s)? This cannot be undone.`)) return
+                  if (!confirm(`Delete ${selectedAgents.length} agent(s)? This cannot be undone.`)) return
                   setDeleting(true)
                   for (const id of selectedAgents) {
                     await supabase.from('agents').delete().eq('id', id)
                   }
                   setSelectedAgents([])
+                  setSelectMode(false)
                   setDeleting(false)
                   window.location.reload()
                 }}
                 disabled={deleting}
-                style={{ padding: '8px 16px', backgroundColor: '#FEE2E2', color: '#C0392B', border: '1px solid #FECACA', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit', opacity: deleting ? 0.7 : 1 }}
+                style={{ padding: '0.6rem 1.25rem', backgroundColor: '#C0392B', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '700' }}
               >
-                {deleting ? 'Deleting...' : `Delete Selected (${selectedAgents.length})`}
+                {deleting ? 'Deleting...' : `Delete (${selectedAgents.length})`}
               </button>
             )}
             {currentUser?.role !== 'sales_director' && (
@@ -213,7 +221,7 @@ export default function PipelinePage() {
                   const days = getDays(agent)
                   const stageLabel = STAGES.find(s => s.key === agent.current_stage)?.label || agent.current_stage
                   return (
-                    <tr key={agent.id} onClick={() => router.push(`/agents/${agent.id}`)} style={{ borderBottom: index < sortedAgents.length - 1 ? '1px solid #F5F2ED' : 'none', cursor: 'pointer', transition: 'background 0.1s' }} onMouseEnter={e => (e.currentTarget.style.background = '#FAFAF9')} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                    <tr key={agent.id} onClick={() => selectMode ? setSelectedAgents(prev => prev.includes(agent.id) ? prev.filter(id => id !== agent.id) : [...prev, agent.id]) : router.push(`/agents/${agent.id}`)} style={{ borderBottom: index < sortedAgents.length - 1 ? '1px solid #F5F2ED' : 'none', cursor: 'pointer', transition: 'background 0.1s', backgroundColor: selectedAgents.includes(agent.id) ? '#FEF2F2' : 'transparent' }} onMouseEnter={e => (e.currentTarget.style.background = selectedAgents.includes(agent.id) ? '#FEF2F2' : '#FAFAF9')} onMouseLeave={e => (e.currentTarget.style.background = selectedAgents.includes(agent.id) ? '#FEF2F2' : 'transparent')}>
                       <td style={{ padding: '10px 16px', width: '50px', minWidth: '50px', borderRight: '1px solid #EBE8E3' }} onClick={e => e.stopPropagation()}>
                         <input
                           type="checkbox"
