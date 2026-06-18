@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
         }
 
         if (!contactId) {
-          results.push({ name: agent.full_name, status: 'failed', reason: 'could not find or create contact' })
+          results.push({ name: agent.full_name, status: 'failed', reason: 'could not find or create GHL contact - check API token scopes' })
           continue
         }
 
@@ -84,8 +84,8 @@ export async function POST(req: NextRequest) {
         if (msgRes.ok) {
           results.push({ name: agent.full_name, status: 'sent' })
         } else {
-          const err = await msgRes.json()
-          results.push({ name: agent.full_name, status: 'failed', reason: JSON.stringify(err) })
+          const errText = await msgRes.text()
+          results.push({ name: agent.full_name, status: 'failed', reason: errText })
         }
 
       } catch (err) {
