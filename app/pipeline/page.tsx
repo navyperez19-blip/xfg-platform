@@ -105,10 +105,14 @@ export default function PipelinePage() {
     setSortKeys(prev => {
       const existing = prev.find(s => s.key === key)
       if (existing) {
-        if (existing.dir === 'desc') return prev.map(s => s.key === key ? {...s, dir: 'asc'} : s)
+        if (existing.dir === 'desc') {
+          // Move to front as primary sort ascending
+          return [{key, dir: 'asc'}, ...prev.filter(s => s.key !== key)]
+        }
         return prev.filter(s => s.key !== key)
       }
-      return [...prev, {key, dir: 'desc'}]
+      // New sort key becomes primary
+      return [{key, dir: 'desc'}, ...prev]
     })
   }
 
