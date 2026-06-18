@@ -20,6 +20,8 @@ export default function ProfilePage() {
     state: '',
     xfg_email: '',
     npn: '',
+    states_licensed: '',
+    notes: '',
   })
 
   useEffect(() => {
@@ -29,7 +31,7 @@ export default function ProfilePage() {
 
       const { data: agent } = await supabase
         .from('agents')
-        .select('id, full_name, email, phone, state, xfg_email, npn, xfg_id, current_stage, agent_model')
+        .select('id, full_name, email, phone, state, xfg_email, npn, xfg_id, current_stage, agent_model, states_licensed, notes')
         .eq('user_id', user.id)
         .single()
 
@@ -42,6 +44,8 @@ export default function ProfilePage() {
         state: agent.state ?? '',
         xfg_email: agent.xfg_email ?? '',
         npn: agent.npn ?? '',
+        states_licensed: agent.states_licensed ?? '',
+        notes: agent.notes ?? '',
       })
       setLoading(false)
     }
@@ -62,6 +66,8 @@ export default function ProfilePage() {
         state: form.state || null,
         xfg_email: form.xfg_email || null,
         npn: form.npn || null,
+        states_licensed: form.states_licensed || null,
+        notes: form.notes || null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', agentRecord.id)
@@ -157,6 +163,18 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        <div>
+          <label style={lbl}>States Licensed In</label>
+          <input
+            type="text"
+            style={inp}
+            value={form.states_licensed || ''}
+            onChange={e => setForm({ ...form, states_licensed: e.target.value })}
+            placeholder="e.g. LA, TX, FL, GA"
+          />
+          <p style={{ fontSize: '11px', color: '#7A7A7A', marginTop: '4px' }}>Enter all states you are licensed in, separated by commas</p>
+        </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
             <label style={lbl}>Phone Number</label>
@@ -177,6 +195,16 @@ export default function ProfilePage() {
             <label style={lbl}>NPN (National Producer Number)</label>
             <input style={inp} value={form.npn} onChange={e => setForm({ ...form, npn: e.target.value })} placeholder="Your NPN" />
           </div>
+        </div>
+
+        <div>
+          <label style={lbl}>Personal Notes</label>
+          <textarea
+            style={{ ...inp, minHeight: '100px', resize: 'vertical', fontFamily: 'inherit' }}
+            value={form.notes || ''}
+            onChange={e => setForm({ ...form, notes: e.target.value })}
+            placeholder="Any personal notes, goals, or reminders for yourself..."
+          />
         </div>
 
         <div style={{ paddingTop: '8px', borderTop: '1px solid #F0EDE8', display: 'flex', justifyContent: 'flex-end' }}>
