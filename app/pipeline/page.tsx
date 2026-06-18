@@ -30,6 +30,10 @@ export default function PipelinePage() {
   const [selectedAgents, setSelectedAgents] = useState<string[]>([])
   const [deleting, setDeleting] = useState(false)
   const [selectMode, setSelectMode] = useState(false)
+  const [showSmsModal, setShowSmsModal] = useState(false)
+  const [smsMessage, setSmsMessage] = useState('')
+  const [sending, setSending] = useState(false)
+  const [smsResult, setSmsResult] = useState<{sent: number, failed: number, skipped: number} | null>(null)
 
   useEffect(() => {
     const getAgents = async () => {
@@ -137,6 +141,13 @@ export default function PipelinePage() {
               {selectMode ? 'Cancel' : 'Select'}
             </button>
             {selectedAgents.length > 0 && (
+              <>
+              <button
+                onClick={() => { setSmsResult(null); setSmsMessage(''); setShowSmsModal(true) }}
+                style={{ padding: '0.6rem 1.25rem', backgroundColor: '#2196F3', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '700', fontFamily: 'inherit' }}
+              >
+                📱 Send Text ({selectedAgents.length})
+              </button>
               <button
                 onClick={async () => {
                   if (!confirm(`Delete ${selectedAgents.length} agent(s)? This cannot be undone.`)) return
@@ -154,6 +165,7 @@ export default function PipelinePage() {
               >
                 {deleting ? 'Deleting...' : `Delete (${selectedAgents.length})`}
               </button>
+              </>
             )}
             {currentUser?.role !== 'sales_director' && (
               <button onClick={() => router.push('/agents/new')} style={{ background: '#C9A96E', border: 'none', color: '#FFFFFF', padding: '0.6rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600' }}>+ New Agent</button>
@@ -346,6 +358,68 @@ export default function PipelinePage() {
           </div>
         )}
       </div>
+
+      {/* SMS Modal */}
+      {showSmsModal && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '500px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#1A1A1A' }}>📱 Send Text Message</h2>
+              <button onClick={() => setShowSmsModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#AAA', fontSize: '20px' }}>×</button>
+            </div>
+
+            {smsResult ? (
+              <div>
+                <div style={{ padding: '16px', backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '10px', marginBottom: '16px' }}>
+                  <p style={{ fontSize: '15px', fontWeight: '700', color: '#14532D', marginBottom: '8px' }}>✅ Messages Sent</p>
+                  <p style={{ fontSize: '13px', color: '#166534' }}>✓ Sent: {smsResult.sent}</p>
+                  {smsResult.failed > 0 && <p style={{ fontSize: '13px', color: '#C0392B' }}>✗ Failed: {smsResult.failed}</p>}
+                  {smsResult.skipped > 0 && <p style={{ fontSize: '13px', color: '#7A7A7A' }}>⚠ Skipped (no phone): {smsResult.skipped}</p>}
+                </div>
+                <button onClick={() => { setShowSmsModal(false); setSmsResult(null); setSelectMode(false); setSelectedAgents([]) }} style={{ width: '100%', padding: '12px', backgroundColor: '#C9A96E', color: '#1A1A1A', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '700', fontFamily: 'inherit' }}>Done</button>
+              </div>
+            ) : (
+              <div>
+                <div style={{ padding: '12px 16px', backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '8px', marginBottom: '16px' }}>
+                  <p style={{ fontSize: '13px', color: '#1E40AF' }}>Sending to <strong>{selectedAgents.length} agents</strong> via GHL SMS (+1 619-514-4614)</p>
+                </div>
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: '600', color: '#4A4A4A', display: 'block', marginBottom: '6px' }}>Message</label>
+                  <textarea
+                    value={smsMessage}
+                    onChange={e => setSmsMessage(e.target.value)}
+                    placeholder="Type your message here..."
+                    style={{ width: '100%', minHeight: '120px', padding: '10px 12px', fontSize: '14px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }}
+                  />
+                  <p style={{ fontSize: '11px', color: '#AAA', marginTop: '4px' }}>{smsMessage.length} characters</p>
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button onClick={() => setShowSmsModal(false)} style={{ flex: 1, padding: '12px', backgroundColor: '#F5F5F5', color: '#4A4A4A', border: '1px solid #E5E1DA', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontFamily: 'inherit' }}>Cancel</button>
+                  <button
+                    onClick={async () => {
+                      if (!smsMessage.trim()) return
+                      setSending(true)
+                      const agentsToText = sortedAgents.filter(a => selectedAgents.includes(a.id))
+                      const res = await fetch('/api/ghl/send-sms', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ agents: agentsToText, message: smsMessage })
+                      })
+                      const data = await res.json()
+                      setSmsResult(data)
+                      setSending(false)
+                    }}
+                    disabled={sending || !smsMessage.trim()}
+                    style={{ flex: 1, padding: '12px', backgroundColor: '#2196F3', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '700', fontFamily: 'inherit', opacity: sending || !smsMessage.trim() ? 0.6 : 1 }}
+                  >
+                    {sending ? 'Sending...' : `Send to ${selectedAgents.length} Agents`}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   )
 }
