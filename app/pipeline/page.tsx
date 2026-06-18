@@ -14,7 +14,7 @@ const STAGES = [
   { key: 'active', label: 'Active' },
 ]
 
-type SortKey = 'full_name' | 'current_stage' | 'state' | 'days' | 'agent_model' | 'npn' | 'xfg_email'
+type SortKey = 'full_name' | 'current_stage' | 'state' | 'days' | 'agent_model' | 'npn' | 'xfg_email' | 'is_licensed' | 'phone'
 
 export default function PipelinePage() {
   const router = useRouter()
@@ -89,6 +89,11 @@ export default function PipelinePage() {
       if (key === 'days') { aVal = getDays(a); bVal = getDays(b) }
       else if (key === 'full_name') { aVal = a.full_name; bVal = b.full_name }
       else if (key === 'current_stage') { aVal = STAGES.findIndex(s => s.key === a.current_stage); bVal = STAGES.findIndex(s => s.key === b.current_stage) }
+      else if (key === 'is_licensed') {
+        const order: Record<string, number> = { 'yes': 0, 'expired': 1, 'no': 2, '': 3 }
+        aVal = order[a.is_licensed || ''] ?? 3
+        bVal = order[b.is_licensed || ''] ?? 3
+      }
       else { aVal = a[key] || ''; bVal = b[key] || '' }
       if (aVal < bVal) return dir === 'asc' ? -1 : 1
       if (aVal > bVal) return dir === 'asc' ? 1 : -1
