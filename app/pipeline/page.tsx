@@ -8,7 +8,6 @@ import { getCurrentUser } from '../lib/auth'
 const STAGES = [
   { key: 'contacted', label: 'Contacted' },
   { key: 'licensing', label: 'Licensing' },
-  { key: 'onboarding', label: 'Onboarding' },
   { key: 'contracting', label: 'Contracting' },
   { key: 'system_setup', label: 'System Setup' },
   { key: 'active', label: 'Active' },

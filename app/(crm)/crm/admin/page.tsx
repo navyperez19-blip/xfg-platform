@@ -206,7 +206,6 @@ export default function AdminOverviewPage() {
                         <option value="">All Stages</option>
                         <option value="contacted">Contacted</option>
                         <option value="licensing">Licensing</option>
-                        <option value="onboarding">Onboarding</option>
                         <option value="contracting">Contracting</option>
                         <option value="system_setup">System Setup</option>
                         <option value="active">Active</option>
