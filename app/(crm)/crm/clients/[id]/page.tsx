@@ -555,7 +555,13 @@ export default function ClientDetailPage() {
       </div>
 
       {/* Pre-Fill Worksheet Section */}
-      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'hidden', marginTop: '20px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '12px 16px', backgroundColor: '#FFF8E1', border: '1px solid #F59E0B', borderRadius: '8px', marginTop: '20px', marginBottom: '12px' }}>
+        <span style={{ fontSize: '16px' }}>🔒</span>
+        <p style={{ fontSize: '12px', color: '#92400E', margin: 0, lineHeight: '1.5' }}>
+          <strong>Sensitive Information Notice:</strong> SSN and banking details are confidential PII. Handle per applicable state insurance regulations and federal privacy laws (GLBA). Never share, screenshot, or transmit outside secure, authorized channels.
+        </p>
+      </div>
+      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'hidden' }}>
         <div style={{ padding: '18px 24px', borderBottom: showPreFill ? '1px solid #E5E1DA' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1A1A1A' }}>Pre-Fill Worksheet</h2>
@@ -607,12 +613,6 @@ export default function ClientDetailPage() {
                       <option value="widowed">Widowed</option>
                     </select>
                   </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '12px 16px', backgroundColor: '#FFF8E1', border: '1px solid #F59E0B', borderRadius: '8px', marginBottom: '16px' }}>
-                  <span style={{ fontSize: '16px' }}>🔒</span>
-                  <p style={{ fontSize: '12px', color: '#92400E', margin: 0, lineHeight: '1.5' }}>
-                    <strong>Sensitive Information Notice:</strong> SSN and banking details are confidential PII. Handle per applicable state insurance regulations and federal privacy laws (GLBA). Never share, screenshot, or transmit outside secure, authorized channels.
-                  </p>
                 </div>
                 <div style={grid2}>
                   <div><label style={lbl}>SSN (last 4)</label><input style={inp} value={preFillForm.ssn_last4 ?? ''} onChange={e => setPreFillForm({ ...preFillForm, ssn_last4: e.target.value })} placeholder="XXXX" maxLength={4} /></div>
