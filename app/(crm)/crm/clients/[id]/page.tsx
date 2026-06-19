@@ -31,6 +31,8 @@ export default function ClientDetailPage() {
   const [savingNote, setSavingNote] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [revealRouting, setRevealRouting] = useState(false)
+  const [revealAccount, setRevealAccount] = useState(false)
 
   const [clientForm, setClientForm] = useState<any>({})
   const [policyForm, setPolicyForm] = useState<any>({
@@ -606,6 +608,12 @@ export default function ClientDetailPage() {
                     </select>
                   </div>
                 </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '12px 16px', backgroundColor: '#FFF8E1', border: '1px solid #F59E0B', borderRadius: '8px', marginBottom: '16px' }}>
+                  <span style={{ fontSize: '16px' }}>🔒</span>
+                  <p style={{ fontSize: '12px', color: '#92400E', margin: 0, lineHeight: '1.5' }}>
+                    <strong>Sensitive Information Notice:</strong> SSN and banking details are confidential PII. Handle per applicable state insurance regulations and federal privacy laws (GLBA). Never share, screenshot, or transmit outside secure, authorized channels.
+                  </p>
+                </div>
                 <div style={grid2}>
                   <div><label style={lbl}>SSN (last 4)</label><input style={inp} value={preFillForm.ssn_last4 ?? ''} onChange={e => setPreFillForm({ ...preFillForm, ssn_last4: e.target.value })} placeholder="XXXX" maxLength={4} /></div>
                   <div><label style={lbl}># of Dependents</label><input type="number" style={inp} value={preFillForm.num_dependents ?? ''} onChange={e => setPreFillForm({ ...preFillForm, num_dependents: e.target.value })} placeholder="0" /></div>
@@ -808,8 +816,38 @@ export default function ClientDetailPage() {
                   </div>
                 </div>
                 <div style={grid2}>
-                  <div><label style={lbl}>Routing Number</label><input style={inp} value={preFillForm.bank_routing ?? ''} onChange={e => setPreFillForm({ ...preFillForm, bank_routing: e.target.value })} placeholder="9 digits" maxLength={9} /></div>
-                  <div><label style={lbl}>Account Number</label><input style={inp} value={preFillForm.bank_account ?? ''} onChange={e => setPreFillForm({ ...preFillForm, bank_account: e.target.value })} /></div>
+                  <div>
+                    <label style={lbl}>Routing Number</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '14px', color: '#1A1A1A', fontFamily: 'monospace' }}>
+                        {client.bank_routing ? (revealRouting ? client.bank_routing : '****' + String(client.bank_routing).slice(-4)) : '—'}
+                      </span>
+                      {client.bank_routing && (
+                        <button
+                          onClick={() => setRevealRouting(!revealRouting)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', padding: '0' }}
+                        >
+                          {revealRouting ? '🙈' : '👁'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label style={lbl}>Account Number</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '14px', color: '#1A1A1A', fontFamily: 'monospace' }}>
+                        {client.bank_account ? (revealAccount ? client.bank_account : '****' + String(client.bank_account).slice(-4)) : '—'}
+                      </span>
+                      {client.bank_account && (
+                        <button
+                          onClick={() => setRevealAccount(!revealAccount)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', padding: '0' }}
+                        >
+                          {revealAccount ? '🙈' : '👁'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <label style={lbl}>Draft Date (day of month)</label>
