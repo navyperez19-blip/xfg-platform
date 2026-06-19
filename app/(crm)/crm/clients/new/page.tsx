@@ -251,6 +251,15 @@ export default function NewClientPage() {
             </div>
           )}
 
+          <div style={{ padding: '14px 18px', backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', marginBottom: '20px', marginTop: '8px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '18px', flexShrink: 0 }}>💡</span>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: '13px', color: '#1E40AF', lineHeight: 1.6 }}>
+                Already closed this client? You only need their basic personal information and policy details to get them logged in the CRM. Fill in what you have and you can always add more later.
+              </p>
+            </div>
+          </div>
+
           {/* Section 1 - Personal Information */}
           {sectionHeader(1, 'Personal Information')}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '12px' }}>
