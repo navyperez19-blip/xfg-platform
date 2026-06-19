@@ -2,14 +2,6 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { NextResponse } from 'next/server'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
-const resend = new Resend(process.env.RESEND_API_KEY!)
-
-const GHL_API_TOKEN = process.env.GHL_API_TOKEN!
 const GHL_LOCATION_ID = 'JF2XVvngi063A0eMpdit'
 
 const STAGE_THRESHOLDS: Record<string, number> = {
@@ -26,7 +18,7 @@ const STAGE_LABELS: Record<string, string> = {
   system_setup: 'System Setup',
 }
 
-async function sendEmail(to: string, subject: string, html: string) {
+async function sendEmail(resend: Resend, to: string, subject: string, html: string) {
   await resend.emails.send({
     from: 'XFG Team <no-reply@xfinancialgroup.com>',
     to,
@@ -35,11 +27,11 @@ async function sendEmail(to: string, subject: string, html: string) {
   })
 }
 
-async function sendSMS(phone: string, message: string) {
+async function sendSMS(ghlToken: string, phone: string, message: string) {
   await fetch('https://services.leadconnectorhq.com/conversations/messages', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${GHL_API_TOKEN}`,
+      'Authorization': `Bearer ${ghlToken}`,
       'Content-Type': 'application/json',
       'Version': '2021-04-15',
     },
@@ -93,6 +85,13 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  const resend = new Resend(process.env.RESEND_API_KEY!)
+  const GHL_API_TOKEN = process.env.GHL_API_TOKEN!
+
   const results = { pipeline: { emails: 0, sms: 0 }, followups: { emails: 0, sms: 0 }, errors: [] as string[] }
 
   try {
@@ -120,6 +119,7 @@ export async function GET(request: Request) {
       if (daysPastThreshold === 0 && agent.email) {
         try {
           await sendEmail(
+            resend,
             agent.email,
             `Time to Keep Moving, ${firstName}! 🚀`,
             pipelineEmailHtml(firstName, stageLabel, daysInStage)
@@ -133,6 +133,7 @@ export async function GET(request: Request) {
       if (daysPastThreshold >= 1 && daysPastThreshold % 2 === 1 && agent.phone) {
         try {
           await sendSMS(
+            GHL_API_TOKEN,
             agent.phone,
             `Hey ${firstName}! You've been in the ${stageLabel} stage for ${daysInStage} days. Time to keep moving! Log in here: app.xfg.software 💪 — XFG Team`
           )
@@ -173,6 +174,7 @@ export async function GET(request: Request) {
       if (daysOverdue === 1 && agent.email) {
         try {
           await sendEmail(
+            resend,
             agent.email,
             `You Have an Overdue Follow-Up, ${firstName}`,
             followUpEmailHtml(firstName, clientName, dueDate)
@@ -186,6 +188,7 @@ export async function GET(request: Request) {
       if (daysOverdue >= 2 && daysOverdue % 2 === 0 && agent.phone) {
         try {
           await sendSMS(
+            GHL_API_TOKEN,
             agent.phone,
             `Hey ${firstName}! Your follow-up with ${clientName} is overdue. Log in and take action: app.xfg.software — XFG Team`
           )
