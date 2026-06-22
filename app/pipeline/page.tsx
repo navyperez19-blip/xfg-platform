@@ -33,6 +33,14 @@ export default function PipelinePage() {
   const [smsMessage, setSmsMessage] = useState('')
   const [sending, setSending] = useState(false)
   const [smsResult, setSmsResult] = useState<{sent: number, failed: number, skipped: number} | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   useEffect(() => {
     const getAgents = async () => {
@@ -137,14 +145,14 @@ export default function PipelinePage() {
             <h1 style={{ color: '#1A1814', fontSize: '1.6rem', fontWeight: '700' }}>Agent Pipeline</h1>
             {/* v2 */}
           </div>
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <div style={isMobile ? { display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' } : { display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
             <div style={{ display: 'flex', background: '#FFFFFF', border: '1px solid #EBE8E3', borderRadius: '8px', overflow: 'hidden' }}>
               <button onClick={() => setView('list')} style={{ padding: '0.5rem 1rem', border: 'none', background: view === 'list' ? '#F5EDD9' : 'transparent', color: view === 'list' ? '#8B6A2E' : '#6B6966', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>List</button>
               <button onClick={() => setView('board')} style={{ padding: '0.5rem 1rem', border: 'none', background: view === 'board' ? '#F5EDD9' : 'transparent', color: view === 'board' ? '#8B6A2E' : '#6B6966', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>Board</button>
             </div>
             <button
               onClick={() => { setSelectMode(!selectMode); setSelectedAgents([]) }}
-              style={{ padding: '0.6rem 1.25rem', border: '1px solid #DDD9D2', background: selectMode ? '#FEE2E2' : '#FFFFFF', color: selectMode ? '#C0392B' : '#6B6966', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600' }}
+              style={{ padding: isMobile ? '0.5rem 0.75rem' : '0.6rem 1.25rem', border: '1px solid #DDD9D2', background: selectMode ? '#FEE2E2' : '#FFFFFF', color: selectMode ? '#C0392B' : '#6B6966', borderRadius: '8px', cursor: 'pointer', fontSize: isMobile ? '12px' : '0.875rem', fontWeight: '600' }}
             >
               {selectMode ? 'Cancel' : 'Select'}
             </button>
@@ -152,7 +160,7 @@ export default function PipelinePage() {
               <>
               <button
                 onClick={() => { setSmsResult(null); setSmsMessage(''); setShowSmsModal(true) }}
-                style={{ padding: '0.6rem 1.25rem', backgroundColor: '#2196F3', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '700', fontFamily: 'inherit' }}
+                style={{ padding: isMobile ? '0.5rem 0.75rem' : '0.6rem 1.25rem', backgroundColor: '#2196F3', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: isMobile ? '12px' : '0.875rem', fontWeight: '700', fontFamily: 'inherit' }}
               >
                 📱 Send Text ({selectedAgents.length})
               </button>
@@ -169,20 +177,20 @@ export default function PipelinePage() {
                   window.location.reload()
                 }}
                 disabled={deleting}
-                style={{ padding: '0.6rem 1.25rem', backgroundColor: '#C0392B', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '700' }}
+                style={{ padding: isMobile ? '0.5rem 0.75rem' : '0.6rem 1.25rem', backgroundColor: '#C0392B', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: isMobile ? '12px' : '0.875rem', fontWeight: '700' }}
               >
                 {deleting ? 'Deleting...' : `Delete (${selectedAgents.length})`}
               </button>
               </>
             )}
             {currentUser?.role !== 'sales_director' && (
-              <button onClick={() => router.push('/agents/new')} style={{ background: '#C9A96E', border: 'none', color: '#FFFFFF', padding: '0.6rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600' }}>+ New Agent</button>
+              <button onClick={() => router.push('/agents/new')} style={{ background: '#C9A96E', border: 'none', color: '#FFFFFF', padding: isMobile ? '0.5rem 0.75rem' : '0.6rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontSize: isMobile ? '12px' : '0.875rem', fontWeight: '600' }}>+ New Agent</button>
             )}
           </div>
         </div>
 
         {/* Stage Summary Bar */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+        <div style={isMobile ? { display: 'flex', gap: '6px', marginBottom: '1.5rem', overflowX: 'auto', whiteSpace: 'nowrap', paddingBottom: '8px' } : { display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
           <button onClick={() => setFilterStages([])} style={{ padding: '0.4rem 0.875rem', borderRadius: '20px', border: '1px solid #DDD9D2', background: filterStages.length === 0 ? '#1A1814' : '#FFFFFF', color: filterStages.length === 0 ? '#FFFFFF' : '#6B6966', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '500' }}>
             All ({agents.length})
           </button>
@@ -226,7 +234,7 @@ export default function PipelinePage() {
         {/* List View */}
         {view === 'list' && (
           <div style={{ background: '#FFFFFF', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1300px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1300px', display: isMobile ? 'none' : 'table' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #EBE8E3', backgroundColor: '#FAFAF9' }}>
                   <th style={{ padding: '10px 16px', width: '50px', minWidth: '50px', backgroundColor: '#FAFAF9', borderRight: '1px solid #EBE8E3' }}>
@@ -326,6 +334,93 @@ export default function PipelinePage() {
                 )}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Mobile Card List */}
+        {view === 'list' && isMobile && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '0 4px' }}>
+            {sortedAgents.map(agent => (
+              <div
+                key={agent.id}
+                onClick={() => window.location.href = `/agents/${agent.id}`}
+                style={{
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid #EBE8E3',
+                  borderRadius: '12px',
+                  padding: '14px 16px',
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                  position: 'relative'
+                }}
+              >
+                {selectMode && (
+                  <input
+                    type="checkbox"
+                    checked={selectedAgents.includes(agent.id)}
+                    onChange={e => {
+                      e.stopPropagation()
+                      setSelectedAgents(prev =>
+                        prev.includes(agent.id) ? prev.filter(id => id !== agent.id) : [...prev, agent.id]
+                      )
+                    }}
+                    style={{ position: 'absolute', top: '14px', right: '14px', width: '18px', height: '18px' }}
+                  />
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                  <div>
+                    <p style={{ fontSize: '15px', fontWeight: '700', color: '#1A1A1A', margin: 0 }}>{agent.full_name}</p>
+                    <p style={{ fontSize: '11px', color: '#AAA', margin: '2px 0 0 0' }}>{agent.xfg_id}</p>
+                  </div>
+                  <span style={{
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    padding: '3px 8px',
+                    borderRadius: '20px',
+                    backgroundColor:
+                      agent.current_stage === 'active' ? '#D1FAE5' :
+                      agent.current_stage === 'contracting' ? '#FEF3C7' :
+                      agent.current_stage === 'system_setup' ? '#DBEAFE' :
+                      agent.current_stage === 'licensing' ? '#EDE9FE' :
+                      '#F3F4F6',
+                    color:
+                      agent.current_stage === 'active' ? '#065F46' :
+                      agent.current_stage === 'contracting' ? '#92400E' :
+                      agent.current_stage === 'system_setup' ? '#1E40AF' :
+                      agent.current_stage === 'licensing' ? '#5B21B6' :
+                      '#374151'
+                  }}>
+                    {agent.current_stage?.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                  </span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px' }}>
+                  <div>
+                    <p style={{ fontSize: '10px', color: '#AAA', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>State</p>
+                    <p style={{ fontSize: '13px', color: '#1A1A1A', margin: '1px 0 0 0', fontWeight: '500' }}>{agent.state || '—'}</p>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '10px', color: '#AAA', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Model</p>
+                    <p style={{ fontSize: '13px', color: '#1A1A1A', margin: '1px 0 0 0', fontWeight: '500' }}>{agent.agent_model || '—'}</p>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '10px', color: '#AAA', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Licensed</p>
+                    <p style={{ fontSize: '13px', color: '#1A1A1A', margin: '1px 0 0 0', fontWeight: '500' }}>{agent.is_licensed ? '✅ Yes' : '❌ No'}</p>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '10px', color: '#AAA', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Days in Stage</p>
+                    <p style={{ fontSize: '13px', color: '#1A1A1A', margin: '1px 0 0 0', fontWeight: '500' }}>{agent.updated_at ? Math.floor((new Date().getTime() - new Date(agent.updated_at).getTime()) / (1000 * 60 * 60 * 24)) : '—'}</p>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '10px', color: '#AAA', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Phone</p>
+                    <p style={{ fontSize: '13px', color: '#1A1A1A', margin: '1px 0 0 0', fontWeight: '500' }}>{agent.phone || '—'}</p>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '10px', color: '#AAA', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Last Contact</p>
+                    <p style={{ fontSize: '13px', color: '#1A1A1A', margin: '1px 0 0 0', fontWeight: '500' }}>{agent.last_contact ? new Date(agent.last_contact).toLocaleDateString() : '—'}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
