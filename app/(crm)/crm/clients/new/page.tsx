@@ -27,6 +27,7 @@ export default function NewClientPage() {
     middle_name: '', gender: '', address_line1: '', best_time_to_call: '',
     ssn: '', drivers_license_number: '', drivers_license_expiration: '',
     drivers_license_state: '', us_citizen: null, country_of_birth: 'U.S.',
+    height_feet: '', height_inches: '', weight_lbs: '',
     // Employment
     employer_name: '', employer_address: '', employer_city: '',
     employer_state: '', employer_zip: '', annual_income: '',
@@ -146,6 +147,9 @@ export default function NewClientPage() {
           bank_routing_number: client.bank_routing_number || null,
           bank_account_number: client.bank_account_number || null,
           agent_notes: client.agent_notes || null,
+          height_feet: client.height_feet ? parseInt(client.height_feet) : null,
+          height_inches: client.height_inches ? parseInt(client.height_inches) : null,
+          weight_lbs: client.weight_lbs ? parseInt(client.weight_lbs) : null,
         }).eq('id', clientId)
       }
 
@@ -309,6 +313,20 @@ export default function NewClientPage() {
             </div>
             )}
             {!expressMode && (<div><label style={lbl}>Best Time to Call</label><input style={inp} value={client.best_time_to_call} onChange={e => upd('best_time_to_call', e.target.value)} placeholder="e.g. Mornings" /></div>)}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+            <div>
+              <label style={lbl}>Height (ft)</label>
+              <input type="number" min="1" max="8" value={client.height_feet} onChange={e => upd('height_feet', e.target.value)} placeholder="5" style={inp} />
+            </div>
+            <div>
+              <label style={lbl}>Height (in)</label>
+              <input type="number" min="0" max="11" value={client.height_inches} onChange={e => upd('height_inches', e.target.value)} placeholder="10" style={inp} />
+            </div>
+            <div>
+              <label style={lbl}>Weight (lbs)</label>
+              <input type="number" min="1" value={client.weight_lbs} onChange={e => upd('weight_lbs', e.target.value)} placeholder="185" style={inp} />
+            </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
             <div><label style={lbl}>Phone</label><input style={inp} value={client.phone} onChange={e => upd('phone', e.target.value)} placeholder="(555) 000-0000" /></div>
