@@ -16,6 +16,7 @@ export default function NewClientPage() {
   const [createdClientId, setCreatedClientId] = useState<string | null>(null)
   const [skipPolicy, setSkipPolicy] = useState(false)
   const [showTip, setShowTip] = useState(true)
+  const [expressMode, setExpressMode] = useState(false)
 
   const [client, setClient] = useState<any>({
     // Basic (required for quote)
@@ -236,6 +237,34 @@ export default function NewClientPage() {
       {step === 'client' && (
         <form onSubmit={handleClientSubmit}>
 
+          {/* Express Mode Toggle */}
+          <div style={{ backgroundColor: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: '12px', padding: '16px 20px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+            <div>
+              <p style={{ fontSize: '14px', fontWeight: '700', color: '#14532D', margin: '0 0 4px 0' }}>⚡ Express Mode</p>
+              <p style={{ fontSize: '12px', color: '#166534', margin: 0, lineHeight: '1.5' }}>
+                Already closed this client? Skip the full form — just enter basic info and go straight to policy details.
+              </p>
+            </div>
+            <button
+              onClick={() => setExpressMode(!expressMode)}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: expressMode ? '#16A34A' : '#FFFFFF',
+                color: expressMode ? '#FFFFFF' : '#16A34A',
+                border: '2px solid #16A34A',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: '700',
+                fontFamily: 'inherit',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}
+            >
+              {expressMode ? '✓ On' : 'Turn On'}
+            </button>
+          </div>
+
           {/* Tip Banner */}
           {showTip && (
             <div style={{ padding: '14px 18px', backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
@@ -264,11 +293,12 @@ export default function NewClientPage() {
           {sectionHeader(1, 'Personal Information')}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '12px' }}>
             <div><label style={lbl}>First Name *</label><input style={inp} value={client.first_name} onChange={e => upd('first_name', e.target.value)} placeholder="John" required /></div>
-            <div><label style={lbl}>Middle Name</label><input style={inp} value={client.middle_name} onChange={e => upd('middle_name', e.target.value)} placeholder="Michael" /></div>
+            {!expressMode && (<div><label style={lbl}>Middle Name</label><input style={inp} value={client.middle_name} onChange={e => upd('middle_name', e.target.value)} placeholder="Michael" /></div>)}
             <div><label style={lbl}>Last Name *</label><input style={inp} value={client.last_name} onChange={e => upd('last_name', e.target.value)} placeholder="Smith" required /></div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '12px' }}>
             <div><label style={lbl}>Date of Birth</label><input type="date" style={inp} value={client.date_of_birth} onChange={e => upd('date_of_birth', e.target.value)} /></div>
+            {!expressMode && (
             <div>
               <label style={lbl}>Gender</label>
               <select style={{ ...inp, cursor: 'pointer' }} value={client.gender} onChange={e => upd('gender', e.target.value)}>
@@ -277,22 +307,28 @@ export default function NewClientPage() {
                 <option value="F">Female</option>
               </select>
             </div>
-            <div><label style={lbl}>Best Time to Call</label><input style={inp} value={client.best_time_to_call} onChange={e => upd('best_time_to_call', e.target.value)} placeholder="e.g. Mornings" /></div>
+            )}
+            {!expressMode && (<div><label style={lbl}>Best Time to Call</label><input style={inp} value={client.best_time_to_call} onChange={e => upd('best_time_to_call', e.target.value)} placeholder="e.g. Mornings" /></div>)}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
             <div><label style={lbl}>Phone</label><input style={inp} value={client.phone} onChange={e => upd('phone', e.target.value)} placeholder="(555) 000-0000" /></div>
             <div><label style={lbl}>Email</label><input type="email" style={inp} value={client.email} onChange={e => upd('email', e.target.value)} placeholder="john@email.com" /></div>
           </div>
+          {!expressMode && (
           <div style={{ marginBottom: '12px' }}>
             <label style={lbl}>Street Address</label>
             <input style={inp} value={client.address_line1} onChange={e => upd('address_line1', e.target.value)} placeholder="123 Main St" />
           </div>
+          )}
+          {!expressMode && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '12px', marginBottom: '12px' }}>
             <div><label style={lbl}>SSN</label><input style={inp} value={client.ssn} onChange={e => upd('ssn', e.target.value)} placeholder="XXX-XX-XXXX" /></div>
             <div><label style={lbl}>Driver&apos;s License #</label><input style={inp} value={client.drivers_license_number} onChange={e => upd('drivers_license_number', e.target.value)} /></div>
             <div><label style={lbl}>DL Expiration</label><input type="date" style={inp} value={client.drivers_license_expiration} onChange={e => upd('drivers_license_expiration', e.target.value)} /></div>
             <div><label style={lbl}>DL State</label><input style={inp} value={client.drivers_license_state} onChange={e => upd('drivers_license_state', e.target.value)} maxLength={2} /></div>
           </div>
+          )}
+          {!expressMode && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
             <div>
               <label style={lbl}>U.S. Citizen / Resident Alien Taxpayer?</label>
@@ -304,7 +340,9 @@ export default function NewClientPage() {
             </div>
             <div><label style={lbl}>Country of Birth</label><input style={inp} value={client.country_of_birth} onChange={e => upd('country_of_birth', e.target.value)} placeholder="U.S." /></div>
           </div>
+          )}
 
+          {!expressMode && (<>
           {/* Location */}
           {sectionHeader(2, 'Location')}
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '12px', marginBottom: '12px' }}>
@@ -318,7 +356,9 @@ export default function NewClientPage() {
             </div>
             <div><label style={lbl}>ZIP Code</label><input style={inp} value={client.zip} onChange={e => upd('zip', e.target.value)} placeholder="70801" maxLength={5} /></div>
           </div>
+          </>)}
 
+          {!expressMode && (<>
           {/* Health Information */}
           {sectionHeader(3, 'Health Information')}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
@@ -347,7 +387,9 @@ export default function NewClientPage() {
             <label style={lbl}>General Notes</label>
             <textarea style={{ ...inp, minHeight: '70px', resize: 'vertical', fontFamily: 'inherit' }} value={client.notes} onChange={e => upd('notes', e.target.value)} placeholder="Any additional notes about this client..." />
           </div>
+          </>)}
 
+          {!expressMode && (<>
           {/* Divider */}
           <div style={{ margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ flex: 1, height: '1px', backgroundColor: '#E5E1DA' }} />
@@ -493,6 +535,7 @@ export default function NewClientPage() {
           <div style={{ marginBottom: '24px' }}>
             <textarea style={{ ...inp, minHeight: '100px', resize: 'vertical', fontFamily: 'inherit' }} value={client.agent_notes} onChange={e => upd('agent_notes', e.target.value)} placeholder="Any additional notes or information about this client..." />
           </div>
+          </>)}
 
           <div style={{ display: 'flex', gap: '12px', marginTop: '24px', justifyContent: 'flex-end', paddingTop: '16px', borderTop: '1px solid #E5E1DA' }}>
             <button type="button" onClick={() => router.push('/crm')} style={{ padding: '11px 20px', backgroundColor: '#FFFFFF', color: '#4A4A4A', border: '1px solid #E5E1DA', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
