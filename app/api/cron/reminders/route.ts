@@ -78,6 +78,31 @@ function followUpEmailHtml(firstName: string, clientName: string, dueDate: strin
   `
 }
 
+function activeAgentEmailHtml(firstName: string) {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
+      <img src="https://xfinancialgroup.com/logo.png" alt="XFG" style="height: 40px; margin-bottom: 24px;" />
+      <h2 style="color: #1A1A1A;">Let's Get to Work, ${firstName}! 💪</h2>
+      <p style="color: #4A4A4A; font-size: 15px; line-height: 1.6;">
+        Hey ${firstName},
+      </p>
+      <p style="color: #4A4A4A; font-size: 15px; line-height: 1.6;">
+        You're an active member of the XFG team and that means you have everything you need to start selling and building your business right now.
+      </p>
+      <p style="color: #4A4A4A; font-size: 15px; line-height: 1.6;">
+        We're looking forward to seeing you on the live dial today. Your team is out there working — come join them and let's make it happen.
+      </p>
+      <p style="color: #4A4A4A; font-size: 15px; line-height: 1.6;">
+        Every dial counts. Every conversation is an opportunity. Let's get to work!
+      </p>
+      <a href="https://app.xfg.software/crm" style="display: inline-block; margin-top: 16px; padding: 12px 24px; background-color: #C9A96E; color: #1A1A1A; text-decoration: none; border-radius: 8px; font-weight: 700;">
+        Log In to XFG →
+      </a>
+      <p style="color: #AAA; font-size: 12px; margin-top: 32px;">— The XFG Team</p>
+    </div>
+  `
+}
+
 export async function GET(request: Request) {
   // Verify cron secret to prevent unauthorized calls
   const authHeader = request.headers.get('authorization')
@@ -195,6 +220,48 @@ export async function GET(request: Request) {
           results.followups.sms++
         } catch (e) {
           results.errors.push(`Follow-up SMS failed for ${agent.phone}`)
+        }
+      }
+    }
+
+    // --- ACTIVE AGENT NUDGES (Monday, Wednesday, Friday only) ---
+    const dayOfWeek = now.getDay() // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+    const isMWF = dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5
+
+    if (isMWF) {
+      const { data: activeAgents } = await supabase
+        .from('agents')
+        .select('id, full_name, email, phone')
+        .eq('current_stage', 'active')
+
+      for (const agent of activeAgents || []) {
+        const firstName = agent.full_name?.split(' ')[0] || 'there'
+
+        if (agent.email) {
+          try {
+            await sendEmail(
+              resend,
+              agent.email,
+              `Let's Get to Work, ${firstName}! 💪`,
+              activeAgentEmailHtml(firstName)
+            )
+            results.pipeline.emails++
+          } catch (e) {
+            results.errors.push(`Active nudge email failed for ${agent.email}`)
+          }
+        }
+
+        if (agent.phone) {
+          try {
+            await sendSMS(
+              GHL_API_TOKEN,
+              agent.phone,
+              `Hey ${firstName}! 💪 You're an active member of the XFG team and you have everything you need to start building your business. We'd love to see you on the live dial today — let's get to work! Log in: app.xfg.software — XFG Team`
+            )
+            results.pipeline.sms++
+          } catch (e) {
+            results.errors.push(`Active nudge SMS failed for ${agent.phone}`)
+          }
         }
       }
     }
