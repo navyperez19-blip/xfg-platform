@@ -78,6 +78,33 @@ function followUpEmailHtml(firstName: string, clientName: string, dueDate: strin
   `
 }
 
+function launchWindowAlertEmailHtml(agentName: string, hit: boolean, apWritten: number) {
+  const color = hit ? '#22C55E' : '#EF4444'
+  const icon = hit ? '✅' : '❌'
+  const subject = hit ? 'hit' : 'missed'
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
+      <img src="https://xfinancialgroup.com/logo.png" alt="XFG" style="height: 40px; margin-bottom: 24px;" />
+      <h2 style="color: #1A1A1A;">${icon} 30-Day Launch Window Result</h2>
+      <p style="color: #4A4A4A; font-size: 15px; line-height: 1.6;">
+        <strong>${agentName}</strong> has ${subject} their 30-day $5,000 AP goal.
+      </p>
+      <div style="background: ${hit ? '#F0FDF4' : '#FEF2F2'}; border: 1px solid ${color}; border-radius: 10px; padding: 16px; margin: 16px 0">
+        <p style="font-size: 18px; font-weight: 700; color: ${color}; margin: 0;">
+          ${icon} $${apWritten.toLocaleString()} AP written in 30 days
+        </p>
+        <p style="font-size: 13px; color: #4A4A4A; margin: 8px 0 0 0;">
+          Goal: $5,000 AP
+        </p>
+      </div>
+      <a href="https://app.xfg.software/pipeline" style="display: inline-block; margin-top: 16px; padding: 12px 24px; background-color: #C9A96E; color: #1A1A1A; text-decoration: none; border-radius: 8px; font-weight: 700;">
+        View Agent in Pipeline →
+      </a>
+      <p style="color: #AAA; font-size: 12px; margin-top: 32px;">— The XFG Platform</p>
+    </div>
+  `
+}
+
 function activeAgentEmailHtml(firstName: string) {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
@@ -262,6 +289,79 @@ export async function GET(request: Request) {
           } catch (e) {
             results.errors.push(`Active nudge SMS failed for ${agent.phone}`)
           }
+        }
+      }
+    }
+
+    // --- 30-DAY LAUNCH WINDOW ALERTS ---
+    const ADMIN_EMAILS = [
+      'tristan@xfgteam.com',
+      'finley@xfgteam.com',
+      'justice@xfgteam.com',
+      'nick@xfgteam.com',
+      'tate@xfgteam.com'
+    ]
+
+    const ADMIN_PHONES = [
+      '+19852491111',
+      '+18583821349',
+      '+19858691319',
+      '+18587529085',
+      '+12174338019'
+    ]
+
+    const { data: launchAgents } = await supabase
+      .from('agents')
+      .select('id, full_name, email, phone, dialer_active, dialer_active_at, carriers')
+      .eq('current_stage', 'active')
+      .eq('dialer_active', true)
+      .not('dialer_active_at', 'is', null)
+
+    for (const agent of launchAgents || []) {
+      const agentCarriers = agent.carriers ?? {}
+      const ethosMet = agentCarriers['Ethos'] === 'submitted' || agentCarriers['Ethos'] === 'active'
+      if (!ethosMet) continue
+
+      const startDate = new Date(agent.dialer_active_at)
+      const dayNumber = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+
+      if (dayNumber !== 31) continue
+
+      const windowStart = startDate.toISOString().split('T')[0]
+      const { data: windowPolicies } = await supabase
+        .from('crm_policies')
+        .select('annual_premium')
+        .eq('agent_id', agent.id)
+        .gte('date_written', windowStart)
+        .not('status', 'in', '("cancelled","lapsed","chargedback")')
+
+      const apWritten = (windowPolicies ?? []).reduce((sum: number, p: any) => sum + (Number(p.annual_premium) || 0), 0)
+      const hitGoal = apWritten >= 5000
+
+      for (const adminEmail of ADMIN_EMAILS) {
+        try {
+          await sendEmail(
+            resend,
+            adminEmail,
+            `${hitGoal ? '✅' : '❌'} ${agent.full_name} — 30-Day Launch Window Result`,
+            launchWindowAlertEmailHtml(agent.full_name, hitGoal, apWritten)
+          )
+          results.pipeline.emails++
+        } catch (e) {
+          results.errors.push(`Launch window alert failed for ${adminEmail}`)
+        }
+      }
+
+      for (const adminPhone of ADMIN_PHONES) {
+        try {
+          await sendSMS(
+            GHL_API_TOKEN,
+            adminPhone,
+            `${hitGoal ? '✅' : '❌'} ${agent.full_name} ${hitGoal ? 'HIT' : 'MISSED'} their 30-day $5K AP goal — $${apWritten.toLocaleString()} written. Check the platform for details.`
+          )
+          results.pipeline.sms++
+        } catch (e) {
+          results.errors.push(`Launch window SMS alert failed for ${adminPhone}`)
         }
       }
     }
