@@ -27,6 +27,15 @@ export default function AgentDetailPage() {
   const [carrierMix, setCarrierMix] = useState<{ carrier: string; count: number; premium: number }[]>([])
   const [activeTab, setActiveTab] = useState<'clients' | 'policies' | 'contracting' | 'leads' | 'activity'>('policies')
   const [agentCarriers, setAgentCarriers] = useState<Record<string, string>>({})
+  const [dialerActive, setDialerActive] = useState<boolean>(false)
+  const [dialerActiveAt, setDialerActiveAt] = useState<string | null>(null)
+  const [launchWindow, setLaunchWindow] = useState<{
+    active: boolean
+    dayNumber: number
+    daysRemaining: number
+    currentAP: number
+    goal: number
+  } | null>(null)
   const [americoFormSubmitted, setAmericoFormSubmitted] = useState(false)
   const [aigFormSubmitted, setAigFormSubmitted] = useState(false)
   const [mutualOmahaRequested, setMutualOmahaRequested] = useState(false)
@@ -54,13 +63,44 @@ export default function AgentDetailPage() {
       // Get agent info
       const { data: agentData } = await supabase
         .from('agents')
-        .select('id, full_name, email, agent_model, current_stage, created_at, states_licensed, npn, carriers, americo_form_submitted, americo_surelc_unlocked, mutual_omaha_requested, mutual_omaha_surelc_unlocked, aig_form_submitted')
+        .select('id, full_name, email, agent_model, current_stage, created_at, states_licensed, npn, carriers, americo_form_submitted, americo_surelc_unlocked, mutual_omaha_requested, mutual_omaha_surelc_unlocked, aig_form_submitted, dialer_active, dialer_active_at')
         .eq('id', agentId)
         .single()
 
       if (!agentData) { router.push('/crm/admin'); return }
       setAgent(agentData)
       setAgentCarriers(agentData.carriers ?? {})
+      setDialerActive(agentData.dialer_active ?? false)
+      setDialerActiveAt(agentData.dialer_active_at ?? null)
+
+      // Calculate 30-day launch window
+      const carriers = agentData.carriers ?? {}
+      const ethosMet = carriers['Ethos'] === 'submitted' || carriers['Ethos'] === 'active'
+      if (ethosMet && agentData.dialer_active && agentData.dialer_active_at) {
+        const startDate = new Date(agentData.dialer_active_at)
+        const now = new Date()
+        const dayNumber = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+        const daysRemaining = Math.max(0, 30 - dayNumber + 1)
+
+        const windowStart = startDate.toISOString().split('T')[0]
+        const { data: windowPolicies } = await supabase
+          .from('crm_policies')
+          .select('annual_premium')
+          .eq('agent_id', agentId)
+          .gte('date_written', windowStart)
+          .not('status', 'in', '("cancelled","lapsed","chargedback")')
+
+        const currentAP = (windowPolicies ?? []).reduce((sum: number, p: any) => sum + (Number(p.annual_premium) || 0), 0)
+
+        setLaunchWindow({
+          active: dayNumber <= 30,
+          dayNumber,
+          daysRemaining,
+          currentAP,
+          goal: 5000
+        })
+      }
+
       setAmericoFormSubmitted(agentData.americo_form_submitted ?? false)
       setAigFormSubmitted((agentData as any).aig_form_submitted ?? false)
       setMutualOmahaRequested((agentData as any).mutual_omaha_requested ?? false)
@@ -325,6 +365,68 @@ export default function AgentDetailPage() {
           )}
         </div>
       </div>
+
+      {/* 30-Day Launch Window */}
+      {launchWindow && (
+        <div style={{ marginBottom: '20px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%)',
+            borderRadius: '16px',
+            padding: '20px 24px',
+            border: '1px solid #C9A96E'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
+              <div>
+                <p style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', margin: '0 0 4px 0', textTransform: 'uppercase', letterSpacing: '0.08em' }}>🚀 30-Day Launch Window</p>
+                <p style={{ fontSize: '24px', fontWeight: '800', color: '#FFFFFF', margin: '0 0 4px 0' }}>
+                  {launchWindow.active ? `Day ${launchWindow.dayNumber} of 30` : 'Window Closed'}
+                </p>
+                <p style={{ fontSize: '13px', color: '#AAA', margin: 0 }}>
+                  {launchWindow.active ? `${launchWindow.daysRemaining} days remaining` : 'Past 30-day window'}
+                </p>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <p style={{ fontSize: '12px', color: '#AAA', margin: '0 0 4px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AP Written</p>
+                <p style={{ fontSize: '24px', fontWeight: '800', color: '#FFFFFF', margin: '0 0 4px 0' }}>${launchWindow.currentAP.toLocaleString()}</p>
+                <p style={{ fontSize: '13px', color: '#AAA', margin: 0 }}>of $5,000 goal</p>
+              </div>
+            </div>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ fontSize: '12px', color: '#AAA' }}>Progress</span>
+                <span style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E' }}>{Math.min(100, Math.round((launchWindow.currentAP / launchWindow.goal) * 100))}%</span>
+              </div>
+              <div style={{ height: '8px', backgroundColor: '#3A3A3A', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%',
+                  width: `${Math.min(100, (launchWindow.currentAP / launchWindow.goal) * 100)}%`,
+                  backgroundColor:
+                    launchWindow.currentAP >= launchWindow.goal ? '#22C55E' :
+                    launchWindow.currentAP >= launchWindow.goal * 0.6 ? '#F59E0B' :
+                    '#EF4444',
+                  borderRadius: '4px',
+                  transition: 'width 0.5s ease'
+                }} />
+              </div>
+              <p style={{ fontSize: '12px', margin: '8px 0 0 0', color:
+                launchWindow.currentAP >= launchWindow.goal ? '#22C55E' :
+                launchWindow.currentAP >= launchWindow.goal * 0.6 ? '#F59E0B' :
+                '#EF4444'
+              }}>
+                {launchWindow.currentAP >= launchWindow.goal
+                  ? '✅ Goal reached!'
+                  : launchWindow.active
+                  ? launchWindow.currentAP >= launchWindow.goal * 0.6
+                    ? '⚠️ On pace — keep pushing!'
+                    : '🔴 Behind pace — needs attention!'
+                  : launchWindow.currentAP >= launchWindow.goal
+                  ? '✅ Hit the goal!'
+                  : '❌ Missed the $5K goal'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', marginBottom: '20px' }}>
