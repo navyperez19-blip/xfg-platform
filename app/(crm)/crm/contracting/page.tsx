@@ -346,14 +346,32 @@ export default function ContractingPage() {
 
                     {/* Mutual of Omaha - direct SureLC link, no unlock needed */}
                     {isMutualOmaha && (
-                      <a
-                        href="https://surelc.surancebay.com/sbweb/login.jsp?branch=Ascent%20Insurance&branchEditable=off&branchRequired=on&branchVisible=on&gaId=1279&gaName=Supreme%20Life%20Brokerage"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ display: 'inline-block', padding: '6px 14px', backgroundColor: '#E8F5E9', color: '#1B5E20', border: '1px solid #A5D6A7', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', textDecoration: 'none', whiteSpace: 'nowrap' }}
-                      >
-                        Start Mutual of Omaha Contracting on SureLC →
-                      </a>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <a
+                          href="https://surelc.surancebay.com/sbweb/login.jsp?branch=Ascent%20Insurance&branchEditable=off&branchRequired=on&branchVisible=on&gaId=1279&gaName=Supreme%20Life%20Brokerage"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => {
+                            localStorage.setItem(`mutual_omaha_surelc_clicked_${agentRecord?.id}`, 'true')
+                            setTimeout(() => window.dispatchEvent(new Event('storage')), 500)
+                          }}
+                          style={{ display: 'inline-block', padding: '10px 16px', backgroundColor: '#22C55E', color: '#FFFFFF', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', textAlign: 'center' }}
+                        >
+                          Start Mutual of Omaha Contracting on SureLC →
+                        </a>
+
+                        {typeof window !== 'undefined' && localStorage.getItem(`mutual_omaha_surelc_clicked_${agentRecord?.id}`) === 'true' && currentStatus === 'none' && (
+                          <button
+                            onClick={async () => {
+                              await updateCarrierStatus('Mutual of Omaha', 'submitted')
+                              localStorage.removeItem(`mutual_omaha_surelc_clicked_${agentRecord?.id}`)
+                            }}
+                            style={{ padding: '10px 16px', backgroundColor: '#C9A96E', color: '#1A1A1A', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit', textAlign: 'center' }}
+                          >
+                            ✅ I've Completed SureLC — Mark as Submitted
+                          </button>
+                        )}
+                      </div>
                     )}
                     {isMutualOmaha && (
                       <p style={{ fontSize: '11px', color: '#7A7A7A', marginTop: '4px' }}>This link is for <strong>Mutual of Omaha only</strong> — do not use it for other carriers.</p>
