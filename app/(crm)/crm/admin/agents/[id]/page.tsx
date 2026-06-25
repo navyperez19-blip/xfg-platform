@@ -27,8 +27,6 @@ export default function AgentDetailPage() {
   const [carrierMix, setCarrierMix] = useState<{ carrier: string; count: number; premium: number }[]>([])
   const [activeTab, setActiveTab] = useState<'clients' | 'policies' | 'contracting' | 'leads' | 'activity'>('policies')
   const [agentCarriers, setAgentCarriers] = useState<Record<string, string>>({})
-  const [dialerActive, setDialerActive] = useState<boolean>(false)
-  const [dialerActiveAt, setDialerActiveAt] = useState<string | null>(null)
   const [launchWindow, setLaunchWindow] = useState<{
     active: boolean
     dayNumber: number
@@ -70,9 +68,6 @@ export default function AgentDetailPage() {
       if (!agentData) { router.push('/crm/admin'); return }
       setAgent(agentData)
       setAgentCarriers(agentData.carriers ?? {})
-      setDialerActive(agentData.dialer_active ?? false)
-      setDialerActiveAt(agentData.dialer_active_at ?? null)
-
       // Calculate 30-day launch window
       const carriers = agentData.carriers ?? {}
       const ethosMet = carriers['Ethos'] === 'submitted' || carriers['Ethos'] === 'active'
@@ -82,12 +77,10 @@ export default function AgentDetailPage() {
         const dayNumber = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
         const daysRemaining = Math.max(0, 30 - dayNumber + 1)
 
-        const windowStart = startDate.toISOString().split('T')[0]
         const { data: windowPolicies } = await supabase
           .from('crm_policies')
           .select('annual_premium')
           .eq('agent_id', agentId)
-          .gte('date_written', windowStart)
           .not('status', 'in', '("cancelled","lapsed","chargedback")')
 
         const currentAP = (windowPolicies ?? []).reduce((sum: number, p: any) => sum + (Number(p.annual_premium) || 0), 0)

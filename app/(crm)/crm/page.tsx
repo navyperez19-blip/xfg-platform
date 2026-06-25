@@ -83,12 +83,10 @@ export default function CRMDashboard() {
           const daysRemaining = Math.max(0, 30 - dayNumber + 1)
 
           if (dayNumber <= 30) {
-            const windowStart = startDate.toISOString().split('T')[0]
             const { data: windowPolicies } = await supabase
               .from('crm_policies')
               .select('annual_premium')
               .eq('agent_id', agentRecord.id)
-              .gte('date_written', windowStart)
               .not('status', 'in', '("cancelled","lapsed","chargedback")')
 
             const currentAP = (windowPolicies ?? []).reduce((sum: number, p: any) => sum + (Number(p.annual_premium) || 0), 0)
