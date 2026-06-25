@@ -32,6 +32,15 @@ export default function CRMDashboard() {
   const [showProfileTip, setShowProfileTip] = useState(
     typeof window !== 'undefined' ? localStorage.getItem('xfg_profile_tip_dismissed') !== 'true' : true
   )
+  const [launchWindow, setLaunchWindow] = useState<{
+    active: boolean
+    dayNumber: number
+    daysRemaining: number
+    currentAP: number
+    goal: number
+    dialerActiveAt: string | null
+    ethosMet: boolean
+  } | null>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -53,6 +62,51 @@ export default function CRMDashboard() {
 
       const displayName = agentRecord?.full_name ?? userRecord?.full_name ?? ''
       setFirstName(displayName.split(' ')[0])
+
+      // 30-Day Launch Window check
+      if (agentRecord) {
+        const { data: fullAgent } = await supabase
+          .from('agents')
+          .select('dialer_active, dialer_active_at, carriers')
+          .eq('id', agentRecord.id)
+          .single()
+
+        const carriers = fullAgent?.carriers ?? {}
+        const ethosMet = carriers['Ethos'] === 'submitted' || carriers['Ethos'] === 'active'
+        const dialerActive = fullAgent?.dialer_active === true
+        const dialerActiveAt = fullAgent?.dialer_active_at
+
+        if (ethosMet && dialerActive && dialerActiveAt) {
+          const startDate = new Date(dialerActiveAt)
+          const now = new Date()
+          const dayNumber = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+          const daysRemaining = Math.max(0, 30 - dayNumber + 1)
+
+          if (dayNumber <= 30) {
+            const windowStart = startDate.toISOString().split('T')[0]
+            const { data: windowPolicies } = await supabase
+              .from('crm_policies')
+              .select('annual_premium')
+              .eq('agent_id', agentRecord.id)
+              .gte('date_written', windowStart)
+              .not('status', 'in', '("cancelled","lapsed","chargedback")')
+
+            const currentAP = (windowPolicies ?? []).reduce((sum: number, p: any) => sum + (Number(p.annual_premium) || 0), 0)
+
+            setLaunchWindow({
+              active: true,
+              dayNumber,
+              daysRemaining,
+              currentAP,
+              goal: 5000,
+              dialerActiveAt,
+              ethosMet
+            })
+          } else {
+            setLaunchWindow({ active: false, dayNumber, daysRemaining: 0, currentAP: 0, goal: 5000, dialerActiveAt, ethosMet })
+          }
+        }
+      }
 
       const now = new Date()
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
@@ -256,6 +310,66 @@ export default function CRMDashboard() {
           )}
         </div>
       </div>
+
+      {/* 30-Day Launch Window */}
+      {launchWindow?.active && (
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%)',
+            borderRadius: '16px',
+            padding: '24px',
+            border: '1px solid #C9A96E',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+              <div>
+                <p style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', margin: '0 0 4px 0', textTransform: 'uppercase', letterSpacing: '0.08em' }}>🚀 30-Day Launch Window</p>
+                <p style={{ fontSize: '28px', fontWeight: '800', color: '#FFFFFF', margin: '0 0 4px 0' }}>Day {launchWindow.dayNumber} of 30</p>
+                <p style={{ fontSize: '13px', color: '#AAA', margin: 0 }}>{launchWindow.daysRemaining} days remaining to hit your goal</p>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <p style={{ fontSize: '12px', color: '#AAA', margin: '0 0 4px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AP Written</p>
+                <p style={{ fontSize: '28px', fontWeight: '800', color: '#FFFFFF', margin: '0 0 4px 0' }}>${launchWindow.currentAP.toLocaleString()}</p>
+                <p style={{ fontSize: '13px', color: '#AAA', margin: 0 }}>of $5,000 goal</p>
+              </div>
+            </div>
+
+            {/* Progress Bar */}
+            <div style={{ marginTop: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ fontSize: '12px', color: '#AAA' }}>Progress</span>
+                <span style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E' }}>{Math.min(100, Math.round((launchWindow.currentAP / launchWindow.goal) * 100))}%</span>
+              </div>
+              <div style={{ height: '8px', backgroundColor: '#3A3A3A', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%',
+                  width: `${Math.min(100, (launchWindow.currentAP / launchWindow.goal) * 100)}%`,
+                  backgroundColor:
+                    launchWindow.currentAP >= launchWindow.goal ? '#22C55E' :
+                    launchWindow.currentAP >= launchWindow.goal * 0.6 ? '#F59E0B' :
+                    '#EF4444',
+                  borderRadius: '4px',
+                  transition: 'width 0.5s ease'
+                }} />
+              </div>
+              <div style={{ marginTop: '10px' }}>
+                <p style={{ fontSize: '12px', margin: 0, color:
+                  launchWindow.currentAP >= launchWindow.goal ? '#22C55E' :
+                  launchWindow.currentAP >= launchWindow.goal * 0.6 ? '#F59E0B' :
+                  '#EF4444'
+                }}>
+                  {launchWindow.currentAP >= launchWindow.goal
+                    ? '✅ Goal reached! Amazing work!'
+                    : launchWindow.currentAP >= launchWindow.goal * 0.6
+                    ? '⚠️ You\'re on pace — keep pushing!'
+                    : '🔴 Behind pace — time to dial!'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Top Row — YTD Goal Ring + KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '16px', marginBottom: '16px' }}>
