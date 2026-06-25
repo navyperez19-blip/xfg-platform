@@ -29,6 +29,7 @@ export default function ContractingPage() {
   const [carriers, setCarriers] = useState<Record<string, string>>({})
   const [americoFormSubmitted, setAmericoFormSubmitted] = useState<boolean | null>(null)
   const [aigFormSubmitted, setAigFormSubmitted] = useState(false)
+  const [mutualOmahaLinkClicked, setMutualOmahaLinkClicked] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -351,20 +352,17 @@ export default function ContractingPage() {
                           href="https://surelc.surancebay.com/sbweb/login.jsp?branch=Ascent%20Insurance&branchEditable=off&branchRequired=on&branchVisible=on&gaId=1279&gaName=Supreme%20Life%20Brokerage"
                           target="_blank"
                           rel="noopener noreferrer"
-                          onClick={() => {
-                            localStorage.setItem(`mutual_omaha_surelc_clicked_${agentRecord?.id}`, 'true')
-                            setTimeout(() => window.dispatchEvent(new Event('storage')), 500)
-                          }}
+                          onClick={() => setMutualOmahaLinkClicked(true)}
                           style={{ display: 'inline-block', padding: '10px 16px', backgroundColor: '#22C55E', color: '#FFFFFF', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', textAlign: 'center' }}
                         >
                           Start Mutual of Omaha Contracting on SureLC →
                         </a>
 
-                        {typeof window !== 'undefined' && localStorage.getItem(`mutual_omaha_surelc_clicked_${agentRecord?.id}`) === 'true' && currentStatus === 'none' && (
+                        {mutualOmahaLinkClicked && currentStatus === 'none' && (
                           <button
                             onClick={async () => {
                               await updateCarrierStatus('Mutual of Omaha', 'submitted')
-                              localStorage.removeItem(`mutual_omaha_surelc_clicked_${agentRecord?.id}`)
+                              setMutualOmahaLinkClicked(false)
                             }}
                             style={{ padding: '10px 16px', backgroundColor: '#C9A96E', color: '#1A1A1A', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit', textAlign: 'center' }}
                           >
