@@ -373,6 +373,43 @@ export default function AgentPortalPage() {
         {/* Contracting Info */}
         {stepKey === 'contracting_info' && (
           <div style={card}>
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ backgroundColor: '#1A1A1A', borderRadius: '12px', padding: '20px 24px', marginBottom: '16px' }}>
+                <p style={{ fontSize: '16px', fontWeight: '700', color: '#C9A96E', margin: '0 0 6px 0' }}>📹 Watch Before You Start</p>
+                <p style={{ fontSize: '13px', color: '#FFFFFF', margin: '0 0 16px 0', lineHeight: '1.6' }}>
+                  Before clicking any SureLC links or submitting anything, please watch both videos below.
+                  These will show you exactly how to set up your SureLC account and submit your contracting requests correctly.
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                  <div>
+                    <p style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Video 1 — SureLC Account Setup</p>
+                    <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: '8px', overflow: 'hidden' }}>
+                      <iframe
+                        src="https://www.youtube.com/embed/szDXN-7SpoE"
+                        title="SureLC Account Setup"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Video 2 — SureLC Requests Tutorial</p>
+                    <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: '8px', overflow: 'hidden' }}>
+                      <iframe
+                        src="https://www.youtube.com/embed/_1WDjhanKXU"
+                        title="SureLC Requests Tutorial"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <h2 style={{ color: '#1A1814', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>Contracting Information</h2>
             <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '16px' }}>Please fill in your licensing details below, then reach out to Nick or Finley to get started.</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
