@@ -168,20 +168,22 @@ export default function CRMNav({
           <span style={{ fontSize: '13px', color: '#C9A96E', fontWeight: '600' }}>Open Dialer</span>
           <span style={{ fontSize: '10px', color: '#555', marginLeft: 'auto' }}>↗</span>
         </a>
-        <Link
-          href="/pipeline"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '10px 12px',
-            borderRadius: '8px',
-            textDecoration: 'none',
-          }}
-        >
-          <span style={{ fontSize: '12px', color: '#555' }}>←</span>
-          <span style={{ fontSize: '12px', color: '#555' }}>Back to Pipeline</span>
-        </Link>
+        {isAdmin && (
+          <Link
+            href="/pipeline"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '10px 12px',
+              borderRadius: '8px',
+              textDecoration: 'none',
+            }}
+          >
+            <span style={{ fontSize: '12px', color: '#555' }}>←</span>
+            <span style={{ fontSize: '12px', color: '#555' }}>Back to Pipeline</span>
+          </Link>
+        )}
       </div>
     </aside>
   )
