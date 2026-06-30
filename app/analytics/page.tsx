@@ -441,8 +441,8 @@ export default function AnalyticsPage() {
                                       setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, dialer_active: false } : a))
                                     })
                                   : badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, async () => {
-                                      await supabase.from('agents').update({ dialer_active: true, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                                      setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, dialer_active: true } : a))
+                                      await supabase.from('agents').update({ dialer_active: true, dialer_active_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', agent.id)
+                                      setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, dialer_active: true, dialer_active_at: new Date().toISOString() } : a))
                                     })
                               )}
                             </div>
