@@ -98,138 +98,192 @@ export default function LeaderboardPage() {
   const myStats = leaderboard.find(a => a.id === myAgentId)
   const topPremium = leaderboard[0]?.mtdPremium ?? 0
 
+  const producers = leaderboard.filter(a => a.mtdPremium > 0)
+  const nonProducers = leaderboard.filter(a => a.mtdPremium === 0)
+
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 0 48px 0' }}>
+    <div>
 
       {/* Header */}
       <div style={{ marginBottom: '28px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1A1A1A', margin: '0 0 4px 0' }}>🏆 Agent Leaderboard</h1>
-        <p style={{ fontSize: '14px', color: '#7A7A7A', margin: 0 }}>Monthly production rankings · {currentMonth}</p>
+        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1A1A1A', letterSpacing: '-0.02em', marginBottom: '4px' }}>
+          🏆 Agent Leaderboard
+        </h1>
+        <p style={{ fontSize: '14px', color: '#7A7A7A' }}>
+          Monthly production rankings · {currentMonth}
+        </p>
       </div>
 
-      {/* MTD SECTION */}
-      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #EBE8E3', overflow: 'hidden', marginBottom: '32px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid #EBE8E3', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1A1A1A', margin: '0 0 2px 0' }}>📅 MTD Production Rankings</h2>
-            <p style={{ fontSize: '12px', color: '#7A7A7A', margin: 0 }}>{leaderboard.filter(a => a.mtdPremium > 0).length} agents with production this month · {leaderboard.length} total active</p>
+      {/* My Stats Card — only for non-admins */}
+      {!isAdmin && myStats && (
+        <div style={{ backgroundColor: '#1A1A1A', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#C9A96E', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: '700', color: '#1A1A1A', flexShrink: 0 }}>
+              {myRank}
+            </div>
+            <div>
+              <p style={{ fontSize: '16px', fontWeight: '700', color: '#FFFFFF', marginBottom: '2px' }}>Your Ranking</p>
+              <p style={{ fontSize: '13px', color: '#888' }}>#{myRank} out of {leaderboard.length} agents</p>
+            </div>
           </div>
-          <div style={{ fontSize: '12px', color: '#7A7A7A', backgroundColor: '#F5F2ED', padding: '6px 12px', borderRadius: '20px' }}>
-            Resets monthly
+          <div style={{ display: 'flex', gap: '32px' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '22px', fontWeight: '700', color: '#C9A96E' }}>{myStats.mtdPolicies}</div>
+              <div style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em' }}>MTD Policies</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '22px', fontWeight: '700', color: '#C9A96E' }}>${myStats.mtdPremium.toLocaleString()}</div>
+              <div style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em' }}>MTD AP</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '22px', fontWeight: '700', color: '#C9A96E' }}>{myStats.activePolicies}</div>
+              <div style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Active Policies</div>
+            </div>
           </div>
         </div>
+      )}
 
-        {/* Producers this month */}
-        {leaderboard.filter(a => a.mtdPremium > 0).length === 0 ? (
-          <div style={{ padding: '48px 24px', textAlign: 'center' }}>
-            <p style={{ fontSize: '32px', margin: '0 0 12px 0' }}>🚀</p>
-            <p style={{ fontSize: '16px', fontWeight: '700', color: '#1A1A1A', margin: '0 0 6px 0' }}>No production yet this month</p>
-            <p style={{ fontSize: '13px', color: '#7A7A7A', margin: 0 }}>Be the first to write a policy in {currentMonth}!</p>
-          </div>
-        ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#F9F7F4' }}>
-                <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.05em', width: '60px' }}>Rank</th>
-                <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Agent</th>
-                <th style={{ padding: '10px 16px', textAlign: 'center', fontSize: '11px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Policies</th>
-                <th style={{ padding: '10px 16px', textAlign: 'right', fontSize: '11px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.05em' }}>MTD AP</th>
-                <th style={{ padding: '10px 16px', textAlign: 'right', fontSize: '11px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Progress</th>
-                {isAdmin && <th style={{ padding: '10px 16px', width: '80px' }}></th>}
-              </tr>
-            </thead>
-            <tbody>
-              {leaderboard.filter(a => a.mtdPremium > 0).map((agent, index) => {
-                const isMe = agent.id === myAgentId
-                const topPremium = leaderboard.filter(a => a.mtdPremium > 0)[0]?.mtdPremium ?? 0
-                const progress = topPremium > 0 ? (agent.mtdPremium / topPremium) * 100 : 0
-                const rank = index + 1
-                const barColor = rank === 1 ? '#FFD700' : rank === 2 ? '#C0C0C0' : rank === 3 ? '#CD7F32' : '#C9A96E'
-                return (
-                  <tr key={agent.id} style={{ backgroundColor: isMe ? '#FFFBF0' : '#FFFFFF', borderTop: '1px solid #F0EDE8' }}>
-                    <td style={{ padding: '14px 16px' }}>
-                      {rank === 1 ? <span style={{ fontSize: '22px' }}>🥇</span> : rank === 2 ? <span style={{ fontSize: '22px' }}>🥈</span> : rank === 3 ? <span style={{ fontSize: '22px' }}>🥉</span> : (
-                        <div style={{ width: '26px', height: '26px', borderRadius: '50%', backgroundColor: '#F0EDE8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', color: '#7A7A7A' }}>{rank}</div>
-                      )}
-                    </td>
-                    <td style={{ padding: '14px 16px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ width: '34px', height: '34px', borderRadius: '50%', backgroundColor: '#C9A96E', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', color: '#1A1A1A', flexShrink: 0 }}>
-                          {agent.full_name?.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ fontSize: '14px', fontWeight: '600', color: '#1A1A1A' }}>{agent.full_name}</span>
-                            {isMe && <span style={{ fontSize: '10px', fontWeight: '700', backgroundColor: '#C9A96E', color: '#1A1A1A', padding: '1px 6px', borderRadius: '10px' }}>YOU</span>}
-                          </div>
-                          <span style={{ fontSize: '11px', color: '#AAA' }}>{agent.agent_model === 'independent' ? 'Independent' : 'Supported'}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td style={{ padding: '14px 16px', textAlign: 'center' }}>
-                      <span style={{ fontSize: '15px', fontWeight: '700', color: '#2196F3' }}>{agent.mtdPolicies}</span>
-                    </td>
-                    <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                      <span style={{ fontSize: '16px', fontWeight: '800', color: '#7C3AED' }}>${agent.mtdPremium.toLocaleString()}</span>
-                    </td>
-                    <td style={{ padding: '14px 16px', minWidth: '140px' }}>
-                      <div style={{ height: '6px', backgroundColor: '#F0EDE8', borderRadius: '3px', overflow: 'hidden', marginBottom: '4px' }}>
-                        <div style={{ height: '100%', width: `${progress}%`, backgroundColor: barColor, borderRadius: '3px' }} />
-                      </div>
-                      <p style={{ fontSize: '10px', color: '#AAA', margin: 0, textAlign: 'right' }}>{Math.round(progress)}% of leader</p>
-                    </td>
-                    {isAdmin && (
-                      <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                        <a href={`/crm/admin/agents/${agent.id}`} style={{ fontSize: '12px', color: '#C9A96E', fontWeight: '600', textDecoration: 'none' }}>View →</a>
-                      </td>
-                    )}
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        )}
+      {/* Leaderboard Table */}
+      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'hidden', marginBottom: '24px' }}>
+        <div style={{ padding: '18px 24px', borderBottom: '1px solid #E5E1DA', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1A1A1A' }}>
+            MTD Production Rankings
+          </h2>
+          <span style={{ fontSize: '12px', color: '#888' }}>{leaderboard.length} active agents</span>
+        </div>
 
-        {/* Separator */}
-        {leaderboard.filter(a => a.mtdPremium > 0).length > 0 && leaderboard.filter(a => a.mtdPremium === 0).length > 0 && (
-          <div style={{ padding: '10px 24px', backgroundColor: '#F9F7F4', borderTop: '1px solid #EBE8E3', borderBottom: '1px solid #EBE8E3' }}>
-            <p style={{ fontSize: '11px', fontWeight: '600', color: '#AAA', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>No MTD production yet</p>
-          </div>
-        )}
-
-        {/* Zero producers */}
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ backgroundColor: '#F9F7F4' }}>
+              {['Rank', 'Agent', 'Model', 'MTD Policies', 'MTD AP', 'Active Policies', 'All-Time AP', 'Progress'].map(h => (
+                <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.07em', borderBottom: '1px solid #E5E1DA', whiteSpace: 'nowrap' }}>
+                  {h}
+                </th>
+              ))}
+              {isAdmin && <th style={{ padding: '10px 16px', borderBottom: '1px solid #E5E1DA' }}></th>}
+            </tr>
+          </thead>
           <tbody>
-            {leaderboard.filter(a => a.mtdPremium === 0).map((agent) => {
+            {producers.map((agent, i) => {
               const isMe = agent.id === myAgentId
+              const barWidth = topPremium > 0 ? Math.round((agent.mtdPremium / topPremium) * 100) : 0
+              const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : null
               return (
-                <tr key={agent.id} style={{ backgroundColor: isMe ? '#FFFBF0' : '#FFFFFF', borderTop: '1px solid #F0EDE8' }}>
-                  <td style={{ padding: '12px 16px', width: '60px' }}>
-                    <div style={{ width: '26px', height: '26px', borderRadius: '50%', backgroundColor: '#F0EDE8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', color: '#CCC' }}>—</div>
+                <tr key={agent.id} style={{ borderBottom: '1px solid #F0EDE8', backgroundColor: isMe ? '#FFFBF0' : 'transparent' }}>
+                  <td style={{ padding: '14px 16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {medal ? (
+                        <span style={{ fontSize: '20px' }}>{medal}</span>
+                      ) : (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '26px', height: '26px', borderRadius: '50%', fontSize: '12px', fontWeight: '700', backgroundColor: '#F0EDE8', color: '#7A7A7A' }}>
+                          {i + 1}
+                        </span>
+                      )}
+                    </div>
                   </td>
-                  <td style={{ padding: '12px 16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: '#F0EDE8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700', color: '#AAA', flexShrink: 0 }}>
-                        {agent.full_name?.charAt(0).toUpperCase()}
+                  <td style={{ padding: '14px 16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: isMe ? '#C9A96E' : '#F0EDE8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', color: isMe ? '#1A1A1A' : '#7A7A7A', flexShrink: 0 }}>
+                        {agent.full_name?.[0]}
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontSize: '13px', color: '#AAA' }}>{agent.full_name}</span>
-                        {isMe && <span style={{ fontSize: '10px', fontWeight: '700', backgroundColor: '#C9A96E', color: '#1A1A1A', padding: '1px 6px', borderRadius: '10px' }}>YOU</span>}
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: isMe ? '700' : '600', color: '#1A1A1A' }}>
+                          {agent.full_name}
+                          {isMe && <span style={{ marginLeft: '6px', fontSize: '11px', color: '#C9A96E', fontWeight: '700' }}>YOU</span>}
+                        </div>
                       </div>
                     </div>
                   </td>
-                  <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                    <span style={{ fontSize: '13px', color: '#CCC' }}>0</span>
+                  <td style={{ padding: '14px 16px' }}>
+                    <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', textTransform: 'capitalize', backgroundColor: agent.agent_model === 'independent' ? '#EDE9FE' : '#FEF3C7', color: agent.agent_model === 'independent' ? '#5B21B6' : '#92400E' }}>
+                      {agent.agent_model}
+                    </span>
                   </td>
-                  <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                    <span style={{ fontSize: '13px', color: '#CCC' }}>$0</span>
+                  <td style={{ padding: '14px 16px', fontSize: '15px', fontWeight: '700', color: '#2196F3' }}>
+                    {agent.mtdPolicies}
                   </td>
-                  <td style={{ padding: '12px 16px', minWidth: '140px' }}>
-                    <div style={{ height: '6px', backgroundColor: '#F0EDE8', borderRadius: '3px' }} />
+                  <td style={{ padding: '14px 16px' }}>
+                    <span style={{ fontSize: '15px', fontWeight: '700', color: '#9C27B0' }}>
+                      ${agent.mtdPremium.toLocaleString()}
+                    </span>
+                  </td>
+                  <td style={{ padding: '14px 16px', fontSize: '14px', fontWeight: '600', color: '#27AE60' }}>
+                    {agent.activePolicies}
+                  </td>
+                  <td style={{ padding: '14px 16px' }}>
+                    <span style={{ fontSize: '14px', fontWeight: '700', color: agent.alltimePremium > 0 ? '#1A1A1A' : '#CCC' }}>
+                      ${agent.alltimePremium.toLocaleString('en-US', { minimumFractionDigits: 0 })}
+                    </span>
+                  </td>
+                  <td style={{ padding: '14px 16px', minWidth: '120px' }}>
+                    <div style={{ height: '6px', backgroundColor: '#F0EDE8', borderRadius: '3px', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${barWidth}%`, backgroundColor: i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : '#C9A96E', borderRadius: '3px', transition: 'width 0.3s ease' }} />
+                    </div>
+                    <div style={{ fontSize: '10px', color: '#AAA', marginTop: '3px' }}>{barWidth}% of leader</div>
                   </td>
                   {isAdmin && (
-                    <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                      <a href={`/crm/admin/agents/${agent.id}`} style={{ fontSize: '12px', color: '#C9A96E', fontWeight: '600', textDecoration: 'none' }}>View →</a>
+                    <td style={{ padding: '14px 16px' }}>
+                      <Link href={`/crm/admin/agents/${agent.id}`} style={{ fontSize: '12px', color: '#C9A96E', textDecoration: 'none', fontWeight: '600', whiteSpace: 'nowrap' }}>
+                        View →
+                      </Link>
+                    </td>
+                  )}
+                </tr>
+              )
+            })}
+
+            {/* Separator row */}
+            {producers.length > 0 && nonProducers.length > 0 && (
+              <tr>
+                <td colSpan={isAdmin ? 9 : 8} style={{ padding: '8px 16px', backgroundColor: '#F9F7F4', textAlign: 'center', fontSize: '12px', color: '#AAA', borderTop: '1px solid #F0EDE8', borderBottom: '1px solid #F0EDE8' }}>
+                  — No MTD production yet —
+                </td>
+              </tr>
+            )}
+
+            {/* Zero producers */}
+            {nonProducers.map((agent) => {
+              const isMe = agent.id === myAgentId
+              return (
+                <tr key={agent.id} style={{ borderBottom: '1px solid #F0EDE8', backgroundColor: isMe ? '#FFFBF0' : 'transparent' }}>
+                  <td style={{ padding: '14px 16px' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '26px', height: '26px', borderRadius: '50%', fontSize: '14px', fontWeight: '700', backgroundColor: '#F0EDE8', color: '#CCC' }}>
+                      —
+                    </span>
+                  </td>
+                  <td style={{ padding: '14px 16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#F0EDE8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', color: '#CCC', flexShrink: 0 }}>
+                        {agent.full_name?.[0]}
+                      </div>
+                      <div style={{ fontSize: '14px', fontWeight: '400', color: '#AAA' }}>
+                        {agent.full_name}
+                        {isMe && <span style={{ marginLeft: '6px', fontSize: '11px', color: '#C9A96E', fontWeight: '700' }}>YOU</span>}
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ padding: '14px 16px' }}>
+                    <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', textTransform: 'capitalize', backgroundColor: '#F9F7F4', color: '#CCC' }}>
+                      {agent.agent_model}
+                    </span>
+                  </td>
+                  <td style={{ padding: '14px 16px', fontSize: '14px', color: '#CCC' }}>0</td>
+                  <td style={{ padding: '14px 16px', fontSize: '14px', color: '#CCC' }}>$0</td>
+                  <td style={{ padding: '14px 16px', fontSize: '14px', color: '#CCC' }}>{agent.activePolicies}</td>
+                  <td style={{ padding: '14px 16px' }}>
+                    <span style={{ fontSize: '14px', fontWeight: '700', color: agent.alltimePremium > 0 ? '#AAA' : '#CCC' }}>
+                      ${agent.alltimePremium.toLocaleString('en-US', { minimumFractionDigits: 0 })}
+                    </span>
+                  </td>
+                  <td style={{ padding: '14px 16px', minWidth: '120px' }}>
+                    <div style={{ height: '6px', backgroundColor: '#F0EDE8', borderRadius: '3px' }} />
+                    <div style={{ fontSize: '10px', color: '#DDD', marginTop: '3px' }}>0% of leader</div>
+                  </td>
+                  {isAdmin && (
+                    <td style={{ padding: '14px 16px' }}>
+                      <Link href={`/crm/admin/agents/${agent.id}`} style={{ fontSize: '12px', color: '#C9A96E', textDecoration: 'none', fontWeight: '600', whiteSpace: 'nowrap' }}>
+                        View →
+                      </Link>
                     </td>
                   )}
                 </tr>
