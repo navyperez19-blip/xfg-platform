@@ -227,7 +227,7 @@ export default function LeaderboardPage() {
             {leaderboard.map((agent, i) => {
               const isMe = agent.id === myAgentId
               const barWidth = topPremium > 0 ? Math.round((agent.mtdPremium / topPremium) * 100) : 0
-              const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : null
+              const rank = i + 1
 
               return (
                 <tr
@@ -239,12 +239,8 @@ export default function LeaderboardPage() {
                 >
                   <td style={{ padding: '14px 16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      {medal ? (
-                        <span style={{ fontSize: '20px' }}>{medal}</span>
-                      ) : (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '26px', height: '26px', borderRadius: '50%', fontSize: '12px', fontWeight: '700', backgroundColor: '#F0EDE8', color: '#7A7A7A' }}>
-                          {i + 1}
-                        </span>
+                      {rank === 1 && agent.mtdPremium > 0 ? <span style={{ fontSize: '20px' }}>🥇</span> : rank === 2 && agent.mtdPremium > 0 ? <span style={{ fontSize: '20px' }}>🥈</span> : rank === 3 && agent.mtdPremium > 0 ? <span style={{ fontSize: '20px' }}>🥉</span> : (
+                        <div style={{ width: '26px', height: '26px', borderRadius: '50%', backgroundColor: '#F0EDE8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', color: '#7A7A7A' }}>{rank}</div>
                       )}
                     </div>
                   </td>
