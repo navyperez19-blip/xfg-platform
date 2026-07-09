@@ -105,7 +105,7 @@ export default function CalendarPage() {
       .order('event_date')
       .order('event_time')
 
-    if (!admin) query = query.eq('agent_id', aid)
+    query = query.eq('agent_id', aid)
 
     const { data } = await query
     setEvents(data ?? [])
