@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { LayoutDashboard, Trophy, UsersRound, Filter, Users, UserPlus, ClipboardList, Calendar, BookOpen, AlertTriangle, FileCheck, User, Shield, Phone, ArrowLeft } from 'lucide-react'
 
 type Agent = {
   id: string
@@ -19,19 +20,19 @@ export default function CRMNav({
   const pathname = usePathname()
 
   const navItems = [
-    { href: '/crm', label: 'Dashboard', icon: '⬡', exact: true },
-    { href: '/crm/leaderboard', label: 'Leaderboard', icon: '🏆' },
-    { href: '/crm/team', label: 'My Team', icon: '👥' },
-    { href: '/crm/leads', label: 'Leads Pipeline', icon: '◎' },
-    { href: '/crm/clients', label: 'My Clients', icon: '◈' },
-    { href: '/crm/clients/new', label: 'Add Client', icon: '+' },
-    { href: '/crm/activity', label: 'Activity Log', icon: '◷' },
-    { href: '/crm/calendar', label: 'Calendar', icon: '📅' },
-    { href: '/crm/book', label: 'Book of Business', icon: '◆' },
-    { href: '/crm/alerts', label: 'Policy Alerts', icon: '⚠' },
-    { href: '/crm/contracting', label: 'My Contracting', icon: '◐' },
-    { href: '/crm/profile', label: 'My Profile', icon: '◯' },
-    ...(isAdmin ? [{ href: '/crm/admin', label: 'All Agents', icon: '◉' }] : []),
+    { href: '/crm', label: 'Dashboard', icon: <LayoutDashboard size={16} />, exact: true },
+    { href: '/crm/leaderboard', label: 'Leaderboard', icon: <Trophy size={16} /> },
+    { href: '/crm/team', label: 'My Team', icon: <UsersRound size={16} /> },
+    { href: '/crm/leads', label: 'Leads Pipeline', icon: <Filter size={16} /> },
+    { href: '/crm/clients', label: 'My Clients', icon: <Users size={16} /> },
+    { href: '/crm/clients/new', label: 'Add Client', icon: <UserPlus size={16} /> },
+    { href: '/crm/activity', label: 'Activity Log', icon: <ClipboardList size={16} /> },
+    { href: '/crm/calendar', label: 'Calendar', icon: <Calendar size={16} /> },
+    { href: '/crm/book', label: 'Book of Business', icon: <BookOpen size={16} /> },
+    { href: '/crm/alerts', label: 'Policy Alerts', icon: <AlertTriangle size={16} /> },
+    { href: '/crm/contracting', label: 'My Contracting', icon: <FileCheck size={16} /> },
+    { href: '/crm/profile', label: 'My Profile', icon: <User size={16} /> },
+    ...(isAdmin ? [{ href: '/crm/admin', label: 'All Agents', icon: <Shield size={16} /> }] : []),
   ]
 
   const isActive = (href: string, exact?: boolean) => {
@@ -128,10 +129,11 @@ export default function CRMNav({
               }}
             >
               <span style={{
-                fontSize: '14px',
                 color: active ? '#C9A96E' : '#555',
                 width: '18px',
-                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}>
                 {item.icon}
               </span>
@@ -165,7 +167,7 @@ export default function CRMNav({
             border: '1px solid #C9A96E30',
           }}
         >
-          <span style={{ fontSize: '14px', color: '#C9A96E' }}>☎</span>
+          <Phone size={16} color="#C9A96E" />
           <span style={{ fontSize: '13px', color: '#C9A96E', fontWeight: '600' }}>Open Dialer</span>
           <span style={{ fontSize: '10px', color: '#555', marginLeft: 'auto' }}>↗</span>
         </a>
@@ -181,7 +183,7 @@ export default function CRMNav({
               textDecoration: 'none',
             }}
           >
-            <span style={{ fontSize: '12px', color: '#555' }}>←</span>
+            <ArrowLeft size={14} color="#555" />
             <span style={{ fontSize: '12px', color: '#555' }}>Back to Pipeline</span>
           </Link>
         )}
