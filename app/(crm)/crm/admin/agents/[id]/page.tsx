@@ -43,6 +43,10 @@ export default function AgentDetailPage() {
   const [editingGoal, setEditingGoal] = useState(false)
   const [goalInput, setGoalInput] = useState('')
   const [savingGoal, setSavingGoal] = useState(false)
+  const [uplineAgentId, setUplineAgentId] = useState<string | null>(null)
+  const [allAgents, setAllAgents] = useState<{id: string, full_name: string}[]>([])
+  const [downlineAgents, setDownlineAgents] = useState<any[]>([])
+  const [savingUpline, setSavingUpline] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -61,13 +65,59 @@ export default function AgentDetailPage() {
       // Get agent info
       const { data: agentData } = await supabase
         .from('agents')
-        .select('id, full_name, email, agent_model, current_stage, created_at, states_licensed, npn, carriers, americo_form_submitted, americo_surelc_unlocked, mutual_omaha_requested, mutual_omaha_surelc_unlocked, aig_form_submitted, dialer_active, dialer_active_at')
+        .select('id, full_name, email, agent_model, current_stage, created_at, states_licensed, npn, carriers, americo_form_submitted, americo_surelc_unlocked, mutual_omaha_requested, mutual_omaha_surelc_unlocked, aig_form_submitted, dialer_active, dialer_active_at, upline_agent_id')
         .eq('id', agentId)
         .single()
 
       if (!agentData) { router.push('/crm/admin'); return }
       setAgent(agentData)
       setAgentCarriers(agentData.carriers ?? {})
+
+      // Fetch upline
+      setUplineAgentId((agentData as any).upline_agent_id ?? null)
+
+      // Fetch all active agents for dropdown (excluding current agent)
+      const { data: agentsList } = await supabase
+        .from('agents')
+        .select('id, full_name')
+        .eq('current_stage', 'active')
+        .neq('id', agentId)
+        .order('full_name')
+      setAllAgents(agentsList ?? [])
+
+      // Fetch downline agents with their production
+      const { data: downline } = await supabase
+        .from('agents')
+        .select('id, full_name, dialer_active')
+        .eq('upline_agent_id', agentId)
+        .eq('current_stage', 'active')
+
+      if (downline && downline.length > 0) {
+        const now = new Date()
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+
+        const downlineWithStats = await Promise.all(downline.map(async (dlAgent: any) => {
+          const { data: policies } = await supabase
+            .from('crm_policies')
+            .select('annual_premium, status, date_written')
+            .eq('agent_id', dlAgent.id)
+            .not('status', 'in', '("cancelled","lapsed","chargedback")')
+
+          const mtdAP = (policies ?? [])
+            .filter((p: any) => p.date_written >= monthStart)
+            .reduce((sum: number, p: any) => sum + (Number(p.annual_premium) || 0), 0)
+
+          const activePolicies = (policies ?? [])
+            .filter((p: any) => ['active','issued','approved','submitted','pending'].includes(p.status))
+            .length
+
+          const indicator = mtdAP > 0 ? 'green' : activePolicies > 0 ? 'yellow' : 'red'
+
+          return { ...dlAgent, mtdAP, activePolicies, indicator }
+        }))
+        setDownlineAgents(downlineWithStats)
+      }
+
       // Calculate 30-day launch window
       const carriers = agentData.carriers ?? {}
       const ethosMet = carriers['Ethos'] === 'submitted' || carriers['Ethos'] === 'active'
@@ -229,6 +279,16 @@ export default function AgentDetailPage() {
       supabase.removeChannel(channel)
     }
   }, [agentId])
+
+  async function saveUpline(newUplineId: string | null) {
+    setSavingUpline(true)
+    await supabase
+      .from('agents')
+      .update({ upline_agent_id: newUplineId, updated_at: new Date().toISOString() })
+      .eq('id', agentId)
+    setUplineAgentId(newUplineId)
+    setSavingUpline(false)
+  }
 
   if (loading) {
     return (
@@ -454,6 +514,57 @@ export default function AgentDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Upline Assignment */}
+      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '20px 24px', marginBottom: '16px' }}>
+        <p style={{ fontSize: '14px', fontWeight: '700', color: '#1A1A1A', margin: '0 0 12px 0' }}>👆 Upline Agent</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <select
+            value={uplineAgentId ?? ''}
+            onChange={e => saveUpline(e.target.value || null)}
+            disabled={savingUpline}
+            style={{ flex: 1, padding: '10px 12px', fontSize: '14px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', backgroundColor: '#FFFFFF', cursor: 'pointer' }}
+          >
+            <option value=''>— No Upline (Reports directly to XFG) —</option>
+            {allAgents.map(a => (
+              <option key={a.id} value={a.id}>{a.full_name}</option>
+            ))}
+          </select>
+          {savingUpline && <span style={{ fontSize: '12px', color: '#AAA' }}>Saving...</span>}
+        </div>
+      </div>
+
+      {/* Downline Section */}
+      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '20px 24px', marginBottom: '16px' }}>
+        <p style={{ fontSize: '14px', fontWeight: '700', color: '#1A1A1A', margin: '0 0 12px 0' }}>👥 Downline Team ({downlineAgents.length})</p>
+        {downlineAgents.length === 0 ? (
+          <p style={{ fontSize: '13px', color: '#AAA', margin: 0 }}>No downline agents assigned yet.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {downlineAgents.map(dlAgent => (
+              <div key={dlAgent.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: '#F9F7F4', borderRadius: '8px', border: '1px solid #EBE8E3' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '16px' }}>
+                    {dlAgent.indicator === 'green' ? '🟢' : dlAgent.indicator === 'yellow' ? '🟡' : '🔴'}
+                  </span>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#1A1A1A' }}>{dlAgent.full_name}</span>
+                </div>
+                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                  <div style={{ textAlign: 'right' }}>
+                    <p style={{ fontSize: '10px', color: '#AAA', margin: 0, textTransform: 'uppercase' }}>MTD AP</p>
+                    <p style={{ fontSize: '13px', fontWeight: '700', color: dlAgent.mtdAP > 0 ? '#7C3AED' : '#CCC', margin: 0 }}>${dlAgent.mtdAP.toLocaleString()}</p>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <p style={{ fontSize: '10px', color: '#AAA', margin: 0, textTransform: 'uppercase' }}>Active</p>
+                    <p style={{ fontSize: '13px', fontWeight: '700', color: dlAgent.activePolicies > 0 ? '#22C55E' : '#CCC', margin: 0 }}>{dlAgent.activePolicies}</p>
+                  </div>
+                  <a href={`/crm/admin/agents/${dlAgent.id}`} style={{ fontSize: '12px', color: '#C9A96E', fontWeight: '600', textDecoration: 'none' }}>View →</a>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Tabs */}
       <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'hidden' }}>
