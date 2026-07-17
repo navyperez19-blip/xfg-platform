@@ -373,43 +373,6 @@ export default function AgentPortalPage() {
         {/* Contracting Info */}
         {stepKey === 'contracting_info' && (
           <div style={card}>
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ backgroundColor: '#1A1A1A', borderRadius: '12px', padding: '20px 24px', marginBottom: '16px' }}>
-                <p style={{ fontSize: '16px', fontWeight: '700', color: '#C9A96E', margin: '0 0 6px 0' }}>📹 Watch Before You Start</p>
-                <p style={{ fontSize: '13px', color: '#FFFFFF', margin: '0 0 16px 0', lineHeight: '1.6' }}>
-                  Before clicking any SureLC links or submitting anything, please watch both videos below.
-                  These will show you exactly how to set up your SureLC account and submit your contracting requests correctly.
-                </p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                  <div>
-                    <p style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Video 1 — SureLC Account Setup</p>
-                    <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: '8px', overflow: 'hidden' }}>
-                      <iframe
-                        src="https://www.youtube.com/embed/szDXN-7SpoE"
-                        title="SureLC Account Setup"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <p style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Video 2 — SureLC Requests Tutorial</p>
-                    <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: '8px', overflow: 'hidden' }}>
-                      <iframe
-                        src="https://www.youtube.com/embed/_1WDjhanKXU"
-                        title="SureLC Requests Tutorial"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
             <h2 style={{ color: '#1A1814', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>Contracting Information</h2>
             <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '16px' }}>Please fill in your licensing details below, then reach out to Nick or Finley to get started.</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -422,28 +385,11 @@ export default function AgentPortalPage() {
                 <input type="text" value={formData.states_licensed} onChange={(e) => setFormData({ ...formData, states_licensed: e.target.value })} placeholder="e.g. LA, TX, FL, GA" style={inp} />
               </div>
             </div>
-              <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', padding: '16px', marginTop: '8px' }}>
-                <p style={{ color: '#1E40AF', fontSize: '13px', fontWeight: '700', marginBottom: '8px' }}>📋 Complete Your Contracting in the CRM</p>
-                <p style={{ color: '#1D4ED8', fontSize: '13px', lineHeight: 1.7, marginBottom: '12px' }}>
-                  Once you reach your CRM, head to the <strong>My Contracting</strong> section to submit your carrier contracts. Your contracting team will guide you through the rest of the process from there.
+              <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '12px', padding: '16px 20px', marginTop: '16px' }}>
+                <p style={{ fontSize: '13px', fontWeight: '700', color: '#1E40AF', marginBottom: '6px' }}>What happens next?</p>
+                <p style={{ fontSize: '13px', color: '#1E40AF', lineHeight: 1.6 }}>
+                  Once you submit your NPN and licensed states, our team will reach out to walk you through getting contracted with our carriers. You&apos;ll find everything you need in the My Contracting section of your CRM once you&apos;re set up.
                 </p>
-                <div style={{ background: '#DBEAFE', borderRadius: '8px', padding: '12px 14px' }}>
-                  <p style={{ color: '#1E40AF', fontSize: '12px', fontWeight: '700', marginBottom: '8px' }}>📌 Your Contracting Order:</p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#1E40AF', color: '#FFF', fontSize: '11px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>1</span>
-                      <p style={{ color: '#1E40AF', fontSize: '12px', lineHeight: 1.5 }}><strong>Ethos</strong> — Will be submitted for you by your contracting team</p>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#1E40AF', color: '#FFF', fontSize: '11px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>2</span>
-                      <p style={{ color: '#1E40AF', fontSize: '12px', lineHeight: 1.5 }}><strong>Americo & AIG (Core Bridge)</strong> — Complete in My Contracting section of your CRM</p>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#1E40AF', color: '#FFF', fontSize: '11px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>3</span>
-                      <p style={{ color: '#1E40AF', fontSize: '12px', lineHeight: 1.5 }}><strong>Mutual of Omaha</strong> — Request access in My Contracting section of your CRM</p>
-                    </div>
-                  </div>
-                </div>
               </div>
             <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
               {currentStep > 0 && (
@@ -461,6 +407,12 @@ export default function AgentPortalPage() {
           <div style={card}>
             <h2 style={{ color: '#1A1814', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>Contact the XFG Team</h2>
             <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '20px' }}>Your information has been submitted. Please reach out to one of our contracting team members to complete the process.</p>
+            <div style={{ backgroundColor: '#FFF8E1', border: '1px solid #F59E0B', borderRadius: '12px', padding: '16px 20px', marginBottom: '20px' }}>
+              <p style={{ fontSize: '13px', fontWeight: '700', color: '#92400E', marginBottom: '6px' }}>How Contracting Works</p>
+              <p style={{ fontSize: '13px', color: '#92400E', lineHeight: 1.6 }}>
+                Our team will help you get contracted with each carrier one at a time, starting with Ethos. Reach out to Finley or Nick below to get started — they&apos;ll guide you through each step and make sure you&apos;re set up correctly with every carrier.
+              </p>
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
               <a href="tel:8587529085" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F5EDD9', border: '1px solid #E8C87A', borderRadius: '10px', padding: '16px', textDecoration: 'none' }}>
                 <div>
@@ -689,15 +641,26 @@ export default function AgentPortalPage() {
                 </a>
               </div>
 
-              {/* CRM Contracting Note */}
-              <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '12px', padding: '18px 20px', marginBottom: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '20px' }}>💡</span>
-                  <p style={{ color: '#1E40AF', fontSize: '15px', fontWeight: '700' }}>Your Carrier Contracting</p>
-                </div>
-                <p style={{ color: '#1E40AF', fontSize: '13px', lineHeight: 1.7 }}>
-                  Once you&apos;ve spoken with Finley about your dialer setup, head to the <strong>My Contracting</strong> section in your CRM to complete your carrier contracting. You should have already submitted <strong>Ethos</strong> with Finley or Nick — your next step is <strong>Americo</strong>.
+              {/* Meeting Schedule Card */}
+              <div style={{ backgroundColor: '#1A1A1A', borderRadius: '12px', padding: '20px 24px', marginTop: '16px' }}>
+                <p style={{ fontSize: '15px', fontWeight: '700', color: '#C9A96E', marginBottom: '10px' }}>🚀 Finish Your Contracting — Join Us Live</p>
+                <p style={{ fontSize: '13px', color: '#FFFFFF', lineHeight: 1.6, marginBottom: '14px' }}>
+                  To finish setting up the rest of your carrier contracting, dialer, and leads, join us for New Agent Support on <strong>Monday or Friday</strong>. All times are PST.
                 </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '14px' }}>
+                  <p style={{ fontSize: '13px', color: '#FFFFFF', margin: 0 }}>📄 <strong>9:00 AM</strong> — Contracting With Carriers</p>
+                  <p style={{ fontSize: '13px', color: '#FFFFFF', margin: 0 }}>☎️ <strong>9:30 AM</strong> — Dialer &amp; Lead Setup</p>
+                  <p style={{ fontSize: '13px', color: '#FFFFFF', margin: 0 }}>📚 <strong>10:00 AM</strong> — Script, Product, E-App Training</p>
+                </div>
+                <a
+                  href="https://us06web.zoom.us/j/6769900353?pwd=Y5Rs7E1Hj6KBgMkgP8m9VeL806AF7X.1"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ display: 'inline-block', padding: '10px 18px', backgroundColor: '#C9A96E', color: '#1A1A1A', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700' }}
+                >
+                  Join Zoom Meeting →
+                </a>
+                <p style={{ fontSize: '11px', color: '#AAA', marginTop: '10px' }}>Meeting ID: 676 990 0353 · Passcode: XFG2026</p>
               </div>
 
             </div>
