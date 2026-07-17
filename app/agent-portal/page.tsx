@@ -216,27 +216,20 @@ export default function AgentPortalPage() {
                   Enter Production CRM →
                 </a>
                 <div style={{ background: '#242220', border: '1px solid #2E2C29', borderRadius: '10px', padding: '16px 18px', textAlign: 'left' }}>
-                  <p style={{ color: '#C9A96E', fontSize: '13px', fontWeight: '700', marginBottom: '4px' }}>🚀 XFG Meeting Schedule</p>
+                  <p style={{ color: '#C9A96E', fontSize: '13px', fontWeight: '700', marginBottom: '4px' }}>🚀 New Agent Support Schedule</p>
                   <p style={{ color: '#9A9890', fontSize: '12px', marginBottom: '12px' }}>
                     All meeting times are listed in <strong style={{ color: '#F59E0B' }}>PST</strong>.
                   </p>
 
-                  <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>👥 Current / Active Team</p>
-                  <p style={{ color: '#9A9890', fontSize: '12px', marginBottom: '4px' }}>📅 Monday – Friday</p>
-                  <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '2px' }}>🏗️ <strong>7:45 AM</strong> — Leadership Meeting</p>
-                  <p style={{ color: '#9A9890', fontSize: '12px', marginBottom: '8px', paddingLeft: '20px' }}>Leadership, accountability, team building, and business growth.</p>
-                  <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '2px' }}>🎯 <strong>8:00 AM</strong> — Sales Training</p>
-                  <p style={{ color: '#9A9890', fontSize: '12px', marginBottom: '8px', paddingLeft: '20px' }}>Sales training, product knowledge, scripts, objections, systems, and company updates.</p>
-                  <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '2px' }}>🎓 <strong>5:30 PM</strong> — Onboarding Meeting</p>
-                  <p style={{ color: '#9A9890', fontSize: '12px', marginBottom: '14px', paddingLeft: '20px' }}>Invite all new and potential agents to attend. This meeting covers the opportunity, licensing, onboarding, and Q&amp;A.</p>
+                  <p style={{ color: '#9A9890', fontSize: '12px', marginBottom: '4px' }}>📅 Monday &amp; Friday</p>
+                  <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '2px' }}>📄 <strong>9:00 AM</strong> — Contracting With Carriers</p>
+                  <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '2px' }}>☎️ <strong>9:30 AM</strong> — Dialer &amp; Lead Setup</p>
+                  <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '12px' }}>📚 <strong>10:00 AM</strong> — Script, Product, E-App Training</p>
 
-                  <div style={{ borderTop: '1px solid #2E2C29', paddingTop: '12px', marginBottom: '12px' }}>
-                    <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>🆕 New Agent Support</p>
-                    <p style={{ color: '#9A9890', fontSize: '12px', marginBottom: '4px' }}>📅 Monday &amp; Friday</p>
-                    <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '2px' }}>📄 <strong>9:00 AM</strong> — Contracting With Carriers</p>
-                    <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '2px' }}>☎️ <strong>9:30 AM</strong> — Dialer &amp; Lead Setup</p>
-                    <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '8px' }}>📚 <strong>10:00 AM</strong> — Script, Product, E-App Training</p>
-                    <p style={{ color: '#9A9890', fontSize: '12px' }}>These meetings are for agents who need help getting contracted, setting up their dialer and leads, or learning the sales process.</p>
+                  <div style={{ backgroundColor: '#3A2E1A', border: '1px solid #C9A96E', borderRadius: '8px', padding: '10px 14px', marginBottom: '14px' }}>
+                    <p style={{ color: '#F5D9A0', fontSize: '12px', lineHeight: 1.6, margin: 0 }}>
+                      💡 Make sure to be there Monday and Friday so you can get your dialer set up and finish the rest of your contracting.
+                    </p>
                   </div>
 
                   <div style={{ borderTop: '1px solid #2E2C29', paddingTop: '12px' }}>
