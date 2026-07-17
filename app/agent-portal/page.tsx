@@ -215,11 +215,41 @@ export default function AgentPortalPage() {
                 <a href="/crm" style={{ display: 'block', background: '#C9A96E', color: '#1A1814', padding: '14px', borderRadius: '10px', textDecoration: 'none', fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>
                   Enter Production CRM →
                 </a>
-                <div style={{ background: '#242220', border: '1px solid #2E2C29', borderRadius: '10px', padding: '14px 16px', textAlign: 'left' }}>
-                  <p style={{ color: '#C9A96E', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>💡 Important Reminder</p>
-                  <p style={{ color: '#9A9890', fontSize: '13px', lineHeight: 1.7 }}>
-                    Once you're in your CRM, go to <strong style={{ color: '#F5F2ED' }}>My Contracting</strong> to complete your carrier contracting. You should have already submitted <strong style={{ color: '#F5F2ED' }}>Ethos</strong> with Finley or Nick — your next step is <strong style={{ color: '#F5F2ED' }}>Americo</strong>. Once you have your dialer credentials from Finley, you can log in directly from the <strong style={{ color: '#F5F2ED' }}>Open Dialer</strong> button at the bottom of your CRM sidebar.
+                <div style={{ background: '#242220', border: '1px solid #2E2C29', borderRadius: '10px', padding: '16px 18px', textAlign: 'left' }}>
+                  <p style={{ color: '#C9A96E', fontSize: '13px', fontWeight: '700', marginBottom: '4px' }}>🚀 XFG Meeting Schedule</p>
+                  <p style={{ color: '#9A9890', fontSize: '12px', marginBottom: '12px' }}>
+                    All meeting times are listed in <strong style={{ color: '#F59E0B' }}>PST</strong>.
                   </p>
+
+                  <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>👥 Current / Active Team</p>
+                  <p style={{ color: '#9A9890', fontSize: '12px', marginBottom: '4px' }}>📅 Monday – Friday</p>
+                  <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '2px' }}>🏗️ <strong>7:45 AM</strong> — Leadership Meeting</p>
+                  <p style={{ color: '#9A9890', fontSize: '12px', marginBottom: '8px', paddingLeft: '20px' }}>Leadership, accountability, team building, and business growth.</p>
+                  <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '2px' }}>🎯 <strong>8:00 AM</strong> — Sales Training</p>
+                  <p style={{ color: '#9A9890', fontSize: '12px', marginBottom: '8px', paddingLeft: '20px' }}>Sales training, product knowledge, scripts, objections, systems, and company updates.</p>
+                  <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '2px' }}>🎓 <strong>5:30 PM</strong> — Onboarding Meeting</p>
+                  <p style={{ color: '#9A9890', fontSize: '12px', marginBottom: '14px', paddingLeft: '20px' }}>Invite all new and potential agents to attend. This meeting covers the opportunity, licensing, onboarding, and Q&amp;A.</p>
+
+                  <div style={{ borderTop: '1px solid #2E2C29', paddingTop: '12px', marginBottom: '12px' }}>
+                    <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>🆕 New Agent Support</p>
+                    <p style={{ color: '#9A9890', fontSize: '12px', marginBottom: '4px' }}>📅 Monday &amp; Friday</p>
+                    <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '2px' }}>📄 <strong>9:00 AM</strong> — Contracting With Carriers</p>
+                    <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '2px' }}>☎️ <strong>9:30 AM</strong> — Dialer &amp; Lead Setup</p>
+                    <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '8px' }}>📚 <strong>10:00 AM</strong> — Script, Product, E-App Training</p>
+                    <p style={{ color: '#9A9890', fontSize: '12px' }}>These meetings are for agents who need help getting contracted, setting up their dialer and leads, or learning the sales process.</p>
+                  </div>
+
+                  <div style={{ borderTop: '1px solid #2E2C29', paddingTop: '12px' }}>
+                    <a
+                      href="https://us06web.zoom.us/j/6769900353?pwd=Y5Rs7E1Hj6KBgMkgP8m9VeL806AF7X.1"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ display: 'inline-block', padding: '8px 16px', backgroundColor: '#C9A96E', color: '#1A1A1A', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', marginBottom: '8px' }}
+                    >
+                      Join Zoom Meeting →
+                    </a>
+                    <p style={{ color: '#9A9890', fontSize: '11px' }}>Meeting ID: 676 990 0353 · Passcode: XFG2026</p>
+                  </div>
                 </div>
               </div>
 
