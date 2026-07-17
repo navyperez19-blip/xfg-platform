@@ -5,6 +5,8 @@ import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
 import AgentMessages from '../components/AgentMessages'
 
+export const dynamic = 'force-dynamic'
+
 const LICENSED_STEPS = [
   { key: 'xfg_email', title: 'Create Your XFG Email' },
   { key: 'discord', title: 'Join XFG Discord' },
