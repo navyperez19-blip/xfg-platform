@@ -644,8 +644,11 @@ export default function AgentPortalPage() {
               {/* Meeting Schedule Card */}
               <div style={{ backgroundColor: '#1A1A1A', borderRadius: '12px', padding: '20px 24px', marginTop: '16px' }}>
                 <p style={{ fontSize: '15px', fontWeight: '700', color: '#C9A96E', marginBottom: '10px' }}>🚀 Finish Your Contracting — Join Us Live</p>
-                <p style={{ fontSize: '13px', color: '#FFFFFF', lineHeight: 1.6, marginBottom: '14px' }}>
-                  To finish setting up the rest of your carrier contracting, dialer, and leads, join us for New Agent Support on <strong>Monday or Friday</strong>. All times are PST.
+                <p style={{ fontSize: '13px', color: '#FFFFFF', lineHeight: 1.6, marginBottom: '10px' }}>
+                  To finish setting up the rest of your carrier contracting, dialer, and leads, join us for New Agent Support on <strong>Monday or Friday</strong>.
+                </p>
+                <p style={{ fontSize: '12px', color: '#F59E0B', fontWeight: '700', marginBottom: '14px' }}>
+                  ⏰ Please pay close attention to your time zone — all meeting times below are listed in Pacific Standard Time (PST).
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '14px' }}>
                   <p style={{ fontSize: '13px', color: '#FFFFFF', margin: 0 }}>📄 <strong>9:00 AM</strong> — Contracting With Carriers</p>
