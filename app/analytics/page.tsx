@@ -22,6 +22,7 @@ export default function AnalyticsPage() {
   const [contractingSearch, setContractingSearch] = useState('')
   const [contractingFilter, setContractingFilter] = useState<string | null>(null)
   const [resetError, setResetError] = useState('')
+  const [overviewDetail, setOverviewDetail] = useState<'onboarding' | 'discord' | 'xfgEmail' | null>(null)
 
   const filterToGroup: Record<string, string> = {
     ethos: 'Ethos',
@@ -90,6 +91,10 @@ export default function AnalyticsPage() {
   const hasXfgEmail = agents.filter(a => a.xfg_email && a.xfg_email.trim() !== '').length
   const completedDiscord = agents.filter(a => a.wizard_step && !['xfg_email', 'discord'].includes(a.wizard_step)).length
   const totalAccountsCreated = agents.length
+
+  const onboardingAgents = agents
+  const discordAgents = agents.filter(a => a.wizard_step && !['xfg_email', 'discord'].includes(a.wizard_step))
+  const xfgEmailAgents = agents.filter(a => a.xfg_email && a.xfg_email.trim() !== '')
 
   const activeAgents = agents.filter(a => a.current_stage === 'active')
 
@@ -268,19 +273,43 @@ export default function AnalyticsPage() {
               ))}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
-              <div style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '12px', padding: '20px', textAlign: 'center' }}>
+              <div onClick={() => setOverviewDetail(overviewDetail === 'onboarding' ? null : 'onboarding')} style={{ background: overviewDetail === 'onboarding' ? '#FFFBF0' : '#FFFFFF', border: overviewDetail === 'onboarding' ? '1px solid #C9A96E' : '1px solid #DDD9D2', borderRadius: '12px', padding: '20px', textAlign: 'center', cursor: 'pointer' }}>
                 <p style={{ color: '#1A1814', fontSize: '32px', fontWeight: '700', marginBottom: '4px' }}>{totalAccountsCreated}</p>
                 <p style={{ color: '#6B6966', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Attended Onboarding Meeting</p>
               </div>
-              <div style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '12px', padding: '20px', textAlign: 'center' }}>
+              <div onClick={() => setOverviewDetail(overviewDetail === 'discord' ? null : 'discord')} style={{ background: overviewDetail === 'discord' ? '#FFFBF0' : '#FFFFFF', border: overviewDetail === 'discord' ? '1px solid #C9A96E' : '1px solid #DDD9D2', borderRadius: '12px', padding: '20px', textAlign: 'center', cursor: 'pointer' }}>
                 <p style={{ color: '#1A1814', fontSize: '32px', fontWeight: '700', marginBottom: '4px' }}>{completedDiscord}</p>
                 <p style={{ color: '#6B6966', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Joined Discord</p>
               </div>
-              <div style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '12px', padding: '20px', textAlign: 'center' }}>
+              <div onClick={() => setOverviewDetail(overviewDetail === 'xfgEmail' ? null : 'xfgEmail')} style={{ background: overviewDetail === 'xfgEmail' ? '#FFFBF0' : '#FFFFFF', border: overviewDetail === 'xfgEmail' ? '1px solid #C9A96E' : '1px solid #DDD9D2', borderRadius: '12px', padding: '20px', textAlign: 'center', cursor: 'pointer' }}>
                 <p style={{ color: '#1A1814', fontSize: '32px', fontWeight: '700', marginBottom: '4px' }}>{hasXfgEmail}</p>
                 <p style={{ color: '#6B6966', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Has XFG Email</p>
               </div>
             </div>
+
+            {overviewDetail && (
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #EBE8E3', borderRadius: '12px', padding: '20px 24px', marginBottom: '32px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                  <p style={{ fontSize: '14px', fontWeight: '700', color: '#1A1A1A', margin: 0 }}>
+                    {overviewDetail === 'onboarding' && `Attended Onboarding Meeting (${onboardingAgents.length})`}
+                    {overviewDetail === 'discord' && `Joined Discord (${discordAgents.length})`}
+                    {overviewDetail === 'xfgEmail' && `Has XFG Email (${xfgEmailAgents.length})`}
+                  </p>
+                  <button onClick={() => setOverviewDetail(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#AAA', fontSize: '18px' }}>×</button>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '8px' }}>
+                  {(overviewDetail === 'onboarding' ? onboardingAgents : overviewDetail === 'discord' ? discordAgents : xfgEmailAgents).map(a => (
+                    <a
+                      key={a.id}
+                      href={`/crm/admin/agents/${a.id}`}
+                      style={{ display: 'block', padding: '8px 12px', backgroundColor: '#F9F7F4', borderRadius: '8px', fontSize: '13px', color: '#1A1A1A', textDecoration: 'none', fontWeight: '600' }}
+                    >
+                      {a.full_name}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', borderRadius: '12px', overflow: 'hidden', marginBottom: '32px' }}>
               <div style={{ padding: '16px 24px', borderBottom: '1px solid #EBE8E3' }}>
