@@ -278,7 +278,7 @@ export default function AnalyticsPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#F5F2ED', padding: '32px 24px' }}>
-      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ margin: '0 auto' }}>
 
         <div style={{ marginBottom: '24px' }}>
           <p style={{ color: '#C9A96E', fontSize: '11px', fontWeight: '700', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>XFG · X Financial Group</p>
@@ -716,14 +716,14 @@ export default function AnalyticsPage() {
                     </div>
                   </div>
 
-                  <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1400px' }}>
+                  <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'visible' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                       <thead>
                         <tr style={{ backgroundColor: '#F9F7F4', borderBottom: '1px solid #E5E1DA' }}>
-                          <th style={{ padding: '10px 14px', textAlign: 'left', fontSize: '11px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Agent</th>
+                          <th style={{ padding: '10px 14px', textAlign: 'left', fontSize: '11px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase', whiteSpace: 'nowrap', width: '140px' }}>Agent</th>
                           <th style={{ padding: '10px 14px', textAlign: 'center', fontSize: '11px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Progress</th>
                           {getMilestones(activeAgents[0] || {}).map(m => (
-                            <th key={m.key} style={{ padding: '10px 14px', textAlign: 'center', fontSize: '10px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{m.label}</th>
+                            <th key={m.key} style={{ padding: '10px 14px', textAlign: 'center', fontSize: '10px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase', wordWrap: 'break-word', whiteSpace: 'normal' }}>{m.label}</th>
                           ))}
                         </tr>
                       </thead>
