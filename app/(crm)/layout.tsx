@@ -50,7 +50,7 @@ export default function CRMLayout({
         .eq('user_id', user.id)
         .single()
 
-      const crmEligibleStages = ['active']
+      const crmEligibleStages = ['active', 'system_setup']
       if (!agentRecord || !crmEligibleStages.includes(agentRecord.current_stage)) {
         router.push('/pipeline')
         return

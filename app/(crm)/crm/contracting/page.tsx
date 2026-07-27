@@ -126,36 +126,6 @@ export default function ContractingPage() {
 
     if (!error) {
       setCarriers(updatedCarriers)
-
-      const hasContractingStarted = Object.values(updatedCarriers).some(s => s === 'submitted' || s === 'active')
-
-      if (hasContractingStarted && agentRecord.current_stage !== 'active') {
-        const { error: stageError } = await supabase
-          .from('agents')
-          .update({ current_stage: 'active', updated_at: new Date().toISOString() })
-          .eq('id', agentRecord.id)
-
-        if (!stageError) {
-          setAgentRecord({ ...agentRecord, current_stage: 'active' })
-
-          const { data: admins } = await supabase
-            .from('users')
-            .select('id')
-            .in('role', ['superadmin', 'executive'])
-
-          if (admins && admins.length > 0) {
-            const notifications = admins.map((admin: any) => ({
-              recipient_id: admin.id,
-              agent_id: agentRecord.id,
-              type: 'agent_activated',
-              title: 'Agent Activated',
-              message: `${agentRecord.full_name} has been automatically activated — they submitted their first carrier contract.`,
-              is_read: false,
-            }))
-            await supabase.from('notifications').insert(notifications)
-          }
-        }
-      }
     }
     setSaving(null)
   }

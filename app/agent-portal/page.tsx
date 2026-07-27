@@ -155,7 +155,7 @@ export default function AgentPortalPage() {
   const progress = Math.round((currentStep / (totalSteps - 1)) * 100)
   const stepKey = steps[currentStep]?.key
 
-  if (agent.current_stage === 'active') {
+  if (agent.wizard_step === 'done') {
     return (
       <main style={{ minHeight: '100vh', background: '#F5F2ED', padding: '16px' }}>
         <div style={{ maxWidth: '600px', margin: '0 auto', paddingTop: '40px' }}>
@@ -703,14 +703,18 @@ export default function AgentPortalPage() {
                   setSaving(true)
                   const now = new Date().toISOString()
                   await supabase.from('agents').update({
-                    current_stage: 'active',
                     wizard_step: 'done',
                     updated_at: now
                   }).eq('id', agent.id)
-                  await supabase.from('stage_history').insert({ agent_id: agent.id, from_stage: agent.current_stage, to_stage: 'active', changed_by: agent.user_id })
                   const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
-                  if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'activation', title: 'Agent is now Active!', message: `${agent.full_name} has completed system setup and is now an active XFG agent` })))
-                  setAgent({ ...agent, current_stage: 'active', wizard_step: 'done' })
+                  if (admins) await supabase.from('notifications').insert(admins.map(a => ({
+                    recipient_id: a.id,
+                    agent_id: agent.id,
+                    type: 'setup_complete',
+                    title: 'Agent Completed System Setup',
+                    message: `${agent.full_name} has completed system setup and now has CRM access. They'll move to Active once a carrier and dialer are marked active.`
+                  })))
+                  setAgent({ ...agent, wizard_step: 'done' })
                   setSaving(false)
                   window.scrollTo(0, 0)
                 }} disabled={saving} style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
