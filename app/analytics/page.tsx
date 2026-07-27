@@ -474,7 +474,7 @@ export default function AnalyticsPage() {
                                 {ethos === 'none' && badgeSpan({ label: '+ Submit', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'Ethos', ethos))}
                                 {ethos === 'submitted' && (
                                   <>
-                                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
+                                    {badgeSpan({ label: '⏳ Submitted', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => resetCarrier(agent.id, 'Ethos', 'submitted'))}
                                     {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'Ethos', ethos))}
                                   </>
                                 )}
@@ -496,7 +496,7 @@ export default function AnalyticsPage() {
                                       {americo === 'none' && !agent.americo_form_submitted && emptyBadge}
                                       {americo === 'submitted' && (
                                         <>
-                                          <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
+                                          {badgeSpan({ label: '⏳ Submitted', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => resetCarrier(agent.id, 'Americo', 'submitted'))}
                                           {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'Americo', americo))}
                                         </>
                                       )}
@@ -522,7 +522,7 @@ export default function AnalyticsPage() {
                                       {aig === 'none' && !agent.aig_form_submitted && emptyBadge}
                                       {aig === 'submitted' && (
                                         <>
-                                          <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
+                                          {badgeSpan({ label: '⏳ Submitted', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => resetCarrier(agent.id, 'AIG (Core Bridge)', 'submitted'))}
                                           {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'AIG (Core Bridge)', aig))}
                                         </>
                                       )}
@@ -547,7 +547,7 @@ export default function AnalyticsPage() {
                                 )}
                                 {moOmaha === 'submitted' && (
                                   <>
-                                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
+                                    {badgeSpan({ label: '⏳ Submitted', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => resetCarrier(agent.id, 'Mutual of Omaha', 'submitted'))}
                                     {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'Mutual of Omaha', moOmaha))}
                                   </>
                                 )}
@@ -562,7 +562,7 @@ export default function AnalyticsPage() {
                                 {aflac === 'none' && badgeSpan({ label: '+ Submit', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'Aflac', aflac))}
                                 {aflac === 'submitted' && (
                                   <>
-                                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
+                                    {badgeSpan({ label: '⏳ Submitted', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => resetCarrier(agent.id, 'Aflac', 'submitted'))}
                                     {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'Aflac', aflac))}
                                   </>
                                 )}
@@ -577,7 +577,7 @@ export default function AnalyticsPage() {
                                 {trans === 'none' && badgeSpan({ label: '+ Submit', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'Transamerica', trans))}
                                 {trans === 'submitted' && (
                                   <>
-                                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
+                                    {badgeSpan({ label: '⏳ Submitted', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => resetCarrier(agent.id, 'Transamerica', 'submitted'))}
                                     {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'Transamerica', trans))}
                                   </>
                                 )}
@@ -592,7 +592,7 @@ export default function AnalyticsPage() {
                                 {uhl === 'none' && badgeSpan({ label: '+ Submit', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'UHL (United Home Life)', uhl))}
                                 {uhl === 'submitted' && (
                                   <>
-                                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
+                                    {badgeSpan({ label: '⏳ Submitted', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => resetCarrier(agent.id, 'UHL (United Home Life)', 'submitted'))}
                                     {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'UHL (United Home Life)', uhl))}
                                   </>
                                 )}
@@ -607,7 +607,7 @@ export default function AnalyticsPage() {
                                 {ahl === 'none' && badgeSpan({ label: '+ Submit', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'AHL (American Home Life)', ahl))}
                                 {ahl === 'submitted' && (
                                   <>
-                                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
+                                    {badgeSpan({ label: '⏳ Submitted', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => resetCarrier(agent.id, 'AHL (American Home Life)', 'submitted'))}
                                     {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'AHL (American Home Life)', ahl))}
                                   </>
                                 )}
