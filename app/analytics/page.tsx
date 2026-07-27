@@ -23,6 +23,22 @@ export default function AnalyticsPage() {
   const [contractingFilter, setContractingFilter] = useState<string | null>(null)
   const [resetError, setResetError] = useState('')
 
+  const filterToGroup: Record<string, string> = {
+    ethos: 'Ethos',
+    americo_form: 'Americo',
+    aig_form: 'AIG',
+    mutual_requested: 'MutualOfOmaha',
+    mutual_unlocked: 'MutualOfOmaha',
+    aflac: 'Aflac',
+    transamerica: 'Transamerica',
+    uhl: 'UHL',
+    ahl: 'AHL',
+    dialer: 'core',
+    dialer_active: 'core',
+  }
+  const activeGroup = contractingFilter ? (filterToGroup[contractingFilter] ?? null) : null
+  const isColumnVisible = (group: string) => !contractingFilter || group === 'core' || group === activeGroup
+
   useEffect(() => {
     const load = async () => {
       const user = await getCurrentUser()
@@ -167,18 +183,18 @@ export default function AnalyticsPage() {
   }
 
   const HEADERS = [
-    { label: 'Agent',           filter: null },
-    { label: 'Status',          filter: null },
-    { label: 'Ethos',           filter: 'ethos' },
-    { label: 'Americo Form',    filter: 'americo_form' },
-    { label: 'AIG Form',        filter: 'aig_form' },
-    { label: 'Mutual of Omaha', filter: 'mutual_requested' },
-    { label: 'Aflac',           filter: 'aflac' },
-    { label: 'Transamerica',    filter: 'transamerica' },
-    { label: 'UHL',             filter: 'uhl' },
-    { label: 'AHL',             filter: 'ahl' },
-    { label: 'Dialer',          filter: 'dialer' },
-    { label: 'Last Updated',    filter: null },
+    { label: 'Agent',           filter: null,              group: 'core' },
+    { label: 'Status',          filter: null,              group: 'core' },
+    { label: 'Ethos',           filter: 'ethos',           group: 'Ethos' },
+    { label: 'Americo Form',    filter: 'americo_form',    group: 'Americo' },
+    { label: 'AIG Form',        filter: 'aig_form',        group: 'AIG' },
+    { label: 'Mutual of Omaha', filter: 'mutual_requested',group: 'MutualOfOmaha' },
+    { label: 'Aflac',           filter: 'aflac',           group: 'Aflac' },
+    { label: 'Transamerica',    filter: 'transamerica',    group: 'Transamerica' },
+    { label: 'UHL',             filter: 'uhl',             group: 'UHL' },
+    { label: 'AHL',             filter: 'ahl',             group: 'AHL' },
+    { label: 'Dialer',          filter: 'dialer',          group: 'core' },
+    { label: 'Last Updated',    filter: null,              group: 'core' },
   ]
 
   const thStyle = (filter: string | null) => ({
@@ -359,9 +375,11 @@ export default function AnalyticsPage() {
                   <thead>
                     <tr style={{ background: '#F9F7F4' }}>
                       {HEADERS.map(h => (
-                        <th key={h.label} onClick={() => h.filter && setContractingFilter(contractingFilter === h.filter ? null : h.filter)} style={thStyle(h.filter)}>
-                          {h.label} {h.filter ? (contractingFilter === h.filter ? '▼' : '↕') : ''}
-                        </th>
+                        isColumnVisible(h.group) ? (
+                          <th key={h.label} onClick={() => h.filter && setContractingFilter(contractingFilter === h.filter ? null : h.filter)} style={thStyle(h.filter)}>
+                            {h.label} {h.filter ? (contractingFilter === h.filter ? '▼' : '↕') : ''}
+                          </th>
+                        ) : null
                       ))}
                     </tr>
                   </thead>
@@ -403,137 +421,153 @@ export default function AnalyticsPage() {
                             })()}
                           </td>
                           {/* Ethos */}
-                          <td style={{ padding: '12px 14px' }}>
-                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
-                              {ethos === 'none' && badgeSpan({ label: '+ Submit', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'Ethos', ethos))}
-                              {ethos === 'submitted' && (
-                                <>
-                                  <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
-                                  {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'Ethos', ethos))}
-                                </>
-                              )}
-                              {ethos === 'active' && badgeSpan(statusBadge(ethos), true, () => resetCarrier(agent.id, 'Ethos', ethos))}
-                            </div>
-                          </td>
+                          {isColumnVisible('Ethos') && (
+                            <td style={{ padding: '12px 14px' }}>
+                              <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                {ethos === 'none' && badgeSpan({ label: '+ Submit', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'Ethos', ethos))}
+                                {ethos === 'submitted' && (
+                                  <>
+                                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
+                                    {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'Ethos', ethos))}
+                                  </>
+                                )}
+                                {ethos === 'active' && badgeSpan(statusBadge(ethos), true, () => resetCarrier(agent.id, 'Ethos', ethos))}
+                              </div>
+                            </td>
+                          )}
                           {/* Americo */}
-                          <td style={{ padding: '12px 14px' }}>
-                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
-                              {(() => {
-                                const americo = getCarrierStatus(agent, 'Americo')
-                                return (
-                                  <>
-                                    {americo === 'none' && agent.americo_form_submitted && (
-                                      <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>📋 Form Submitted</span>
-                                    )}
-                                    {americo === 'none' && !agent.americo_form_submitted && emptyBadge}
-                                    {americo === 'submitted' && (
-                                      <>
-                                        <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
-                                        {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'Americo', americo))}
-                                      </>
-                                    )}
-                                    {americo === 'active' && badgeSpan(statusBadge(americo), true, () => resetCarrier(agent.id, 'Americo', americo))}
-                                    {americo === 'none' && agent.americo_form_submitted && badgeSpan({ label: 'Mark Submitted', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'Americo', 'none'))}
-                                  </>
-                                )
-                              })()}
-                            </div>
-                          </td>
+                          {isColumnVisible('Americo') && (
+                            <td style={{ padding: '12px 14px' }}>
+                              <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                {(() => {
+                                  const americo = getCarrierStatus(agent, 'Americo')
+                                  return (
+                                    <>
+                                      {americo === 'none' && agent.americo_form_submitted && (
+                                        <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>📋 Form Submitted</span>
+                                      )}
+                                      {americo === 'none' && !agent.americo_form_submitted && emptyBadge}
+                                      {americo === 'submitted' && (
+                                        <>
+                                          <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
+                                          {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'Americo', americo))}
+                                        </>
+                                      )}
+                                      {americo === 'active' && badgeSpan(statusBadge(americo), true, () => resetCarrier(agent.id, 'Americo', americo))}
+                                      {americo === 'none' && agent.americo_form_submitted && badgeSpan({ label: 'Mark Submitted', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'Americo', 'none'))}
+                                    </>
+                                  )
+                                })()}
+                              </div>
+                            </td>
+                          )}
                           {/* AIG */}
-                          <td style={{ padding: '12px 14px' }}>
-                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
-                              {(() => {
-                                const aig = getCarrierStatus(agent, 'AIG (Core Bridge)')
-                                return (
-                                  <>
-                                    {aig === 'none' && agent.aig_form_submitted && (
-                                      <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#EDE9FE', color: '#5B21B6', border: '1px solid #C4B5FD', whiteSpace: 'nowrap' }}>📋 Form Submitted</span>
-                                    )}
-                                    {aig === 'none' && !agent.aig_form_submitted && emptyBadge}
-                                    {aig === 'submitted' && (
-                                      <>
-                                        <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
-                                        {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'AIG (Core Bridge)', aig))}
-                                      </>
-                                    )}
-                                    {aig === 'active' && badgeSpan(statusBadge(aig), true, () => resetCarrier(agent.id, 'AIG (Core Bridge)', aig))}
-                                    {aig === 'none' && agent.aig_form_submitted && badgeSpan({ label: 'Mark Submitted', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'AIG (Core Bridge)', 'none'))}
-                                  </>
-                                )
-                              })()}
-                            </div>
-                          </td>
+                          {isColumnVisible('AIG') && (
+                            <td style={{ padding: '12px 14px' }}>
+                              <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                {(() => {
+                                  const aig = getCarrierStatus(agent, 'AIG (Core Bridge)')
+                                  return (
+                                    <>
+                                      {aig === 'none' && agent.aig_form_submitted && (
+                                        <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#EDE9FE', color: '#5B21B6', border: '1px solid #C4B5FD', whiteSpace: 'nowrap' }}>📋 Form Submitted</span>
+                                      )}
+                                      {aig === 'none' && !agent.aig_form_submitted && emptyBadge}
+                                      {aig === 'submitted' && (
+                                        <>
+                                          <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
+                                          {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'AIG (Core Bridge)', aig))}
+                                        </>
+                                      )}
+                                      {aig === 'active' && badgeSpan(statusBadge(aig), true, () => resetCarrier(agent.id, 'AIG (Core Bridge)', aig))}
+                                      {aig === 'none' && agent.aig_form_submitted && badgeSpan({ label: 'Mark Submitted', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'AIG (Core Bridge)', 'none'))}
+                                    </>
+                                  )
+                                })()}
+                              </div>
+                            </td>
+                          )}
                           {/* Mutual of Omaha */}
-                          <td style={{ padding: '12px 14px' }}>
-                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
-                              {moOmaha === 'none' && !agent.mutual_omaha_requested && emptyBadge}
-                              {moOmaha === 'none' && agent.mutual_omaha_requested && (
-                                <>
-                                  <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#EDE9FE', color: '#5B21B6', border: '1px solid #C4B5FD', whiteSpace: 'nowrap' }}>📋 Requested</span>
-                                  {badgeSpan({ label: 'Mark Submitted', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'Mutual of Omaha', 'none'))}
-                                </>
-                              )}
-                              {moOmaha === 'submitted' && (
-                                <>
-                                  <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
-                                  {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'Mutual of Omaha', moOmaha))}
-                                </>
-                              )}
-                              {moOmaha === 'active' && badgeSpan(moStatus, true, () => resetCarrier(agent.id, 'Mutual of Omaha', moOmaha))}
-                            </div>
-                          </td>
+                          {isColumnVisible('MutualOfOmaha') && (
+                            <td style={{ padding: '12px 14px' }}>
+                              <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                {moOmaha === 'none' && !agent.mutual_omaha_requested && emptyBadge}
+                                {moOmaha === 'none' && agent.mutual_omaha_requested && (
+                                  <>
+                                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#EDE9FE', color: '#5B21B6', border: '1px solid #C4B5FD', whiteSpace: 'nowrap' }}>📋 Requested</span>
+                                    {badgeSpan({ label: 'Mark Submitted', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'Mutual of Omaha', 'none'))}
+                                  </>
+                                )}
+                                {moOmaha === 'submitted' && (
+                                  <>
+                                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
+                                    {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'Mutual of Omaha', moOmaha))}
+                                  </>
+                                )}
+                                {moOmaha === 'active' && badgeSpan(moStatus, true, () => resetCarrier(agent.id, 'Mutual of Omaha', moOmaha))}
+                              </div>
+                            </td>
+                          )}
                           {/* Aflac */}
-                          <td style={{ padding: '12px 14px' }}>
-                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
-                              {aflac === 'none' && badgeSpan({ label: '+ Submit', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'Aflac', aflac))}
-                              {aflac === 'submitted' && (
-                                <>
-                                  <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
-                                  {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'Aflac', aflac))}
-                                </>
-                              )}
-                              {aflac === 'active' && badgeSpan(statusBadge(aflac), true, () => resetCarrier(agent.id, 'Aflac', aflac))}
-                            </div>
-                          </td>
+                          {isColumnVisible('Aflac') && (
+                            <td style={{ padding: '12px 14px' }}>
+                              <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                {aflac === 'none' && badgeSpan({ label: '+ Submit', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'Aflac', aflac))}
+                                {aflac === 'submitted' && (
+                                  <>
+                                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
+                                    {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'Aflac', aflac))}
+                                  </>
+                                )}
+                                {aflac === 'active' && badgeSpan(statusBadge(aflac), true, () => resetCarrier(agent.id, 'Aflac', aflac))}
+                              </div>
+                            </td>
+                          )}
                           {/* Transamerica */}
-                          <td style={{ padding: '12px 14px' }}>
-                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
-                              {trans === 'none' && badgeSpan({ label: '+ Submit', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'Transamerica', trans))}
-                              {trans === 'submitted' && (
-                                <>
-                                  <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
-                                  {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'Transamerica', trans))}
-                                </>
-                              )}
-                              {trans === 'active' && badgeSpan(statusBadge(trans), true, () => resetCarrier(agent.id, 'Transamerica', trans))}
-                            </div>
-                          </td>
+                          {isColumnVisible('Transamerica') && (
+                            <td style={{ padding: '12px 14px' }}>
+                              <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                {trans === 'none' && badgeSpan({ label: '+ Submit', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'Transamerica', trans))}
+                                {trans === 'submitted' && (
+                                  <>
+                                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
+                                    {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'Transamerica', trans))}
+                                  </>
+                                )}
+                                {trans === 'active' && badgeSpan(statusBadge(trans), true, () => resetCarrier(agent.id, 'Transamerica', trans))}
+                              </div>
+                            </td>
+                          )}
                           {/* UHL */}
-                          <td style={{ padding: '12px 14px' }}>
-                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
-                              {uhl === 'none' && badgeSpan({ label: '+ Submit', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'UHL (United Home Life)', uhl))}
-                              {uhl === 'submitted' && (
-                                <>
-                                  <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
-                                  {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'UHL (United Home Life)', uhl))}
-                                </>
-                              )}
-                              {uhl === 'active' && badgeSpan(statusBadge(uhl), true, () => resetCarrier(agent.id, 'UHL (United Home Life)', uhl))}
-                            </div>
-                          </td>
+                          {isColumnVisible('UHL') && (
+                            <td style={{ padding: '12px 14px' }}>
+                              <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                {uhl === 'none' && badgeSpan({ label: '+ Submit', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'UHL (United Home Life)', uhl))}
+                                {uhl === 'submitted' && (
+                                  <>
+                                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
+                                    {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'UHL (United Home Life)', uhl))}
+                                  </>
+                                )}
+                                {uhl === 'active' && badgeSpan(statusBadge(uhl), true, () => resetCarrier(agent.id, 'UHL (United Home Life)', uhl))}
+                              </div>
+                            </td>
+                          )}
                           {/* AHL */}
-                          <td style={{ padding: '12px 14px' }}>
-                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
-                              {ahl === 'none' && badgeSpan({ label: '+ Submit', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'AHL (American Home Life)', ahl))}
-                              {ahl === 'submitted' && (
-                                <>
-                                  <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
-                                  {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'AHL (American Home Life)', ahl))}
-                                </>
-                              )}
-                              {ahl === 'active' && badgeSpan(statusBadge(ahl), true, () => resetCarrier(agent.id, 'AHL (American Home Life)', ahl))}
-                            </div>
-                          </td>
+                          {isColumnVisible('AHL') && (
+                            <td style={{ padding: '12px 14px' }}>
+                              <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                {ahl === 'none' && badgeSpan({ label: '+ Submit', bg: '#F5F5F5', color: '#555', border: '#E5E1DA' }, true, () => advanceCarrier(agent.id, 'AHL (American Home Life)', ahl))}
+                                {ahl === 'submitted' && (
+                                  <>
+                                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', whiteSpace: 'nowrap' }}>⏳ Submitted</span>
+                                    {badgeSpan({ label: 'Mark Active', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' }, true, () => advanceCarrier(agent.id, 'AHL (American Home Life)', ahl))}
+                                  </>
+                                )}
+                                {ahl === 'active' && badgeSpan(statusBadge(ahl), true, () => resetCarrier(agent.id, 'AHL (American Home Life)', ahl))}
+                              </div>
+                            </td>
+                          )}
                           <td style={{ padding: '12px 14px' }}>
                             <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
                               {!agent.dialer_submitted && (
