@@ -55,6 +55,9 @@ export default function AgentDetailPage() {
   const [stageHistory, setStageHistory] = useState<any[]>([])
   const [contactLogs, setContactLogs] = useState<any[]>([])
   const [crmSnapshot, setCrmSnapshot] = useState<any>(null)
+  const [uplineAgentId, setUplineAgentId] = useState<string | null>(null)
+  const [allActiveAgents, setAllActiveAgents] = useState<{id: string, full_name: string}[]>([])
+  const [savingUpline, setSavingUpline] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -99,6 +102,15 @@ export default function AgentDetailPage() {
           mtdPremium,
           openLeads: openLeads.length,
         })
+
+        setUplineAgentId(data.upline_agent_id ?? null)
+        const { data: agentsList } = await supabase
+          .from('agents')
+          .select('id, full_name')
+          .eq('current_stage', 'active')
+          .neq('id', params.id)
+          .order('full_name')
+        setAllActiveAgents(agentsList ?? [])
       }
       const user2 = await getCurrentUser()
       setCurrentUser(user2)
@@ -163,6 +175,16 @@ export default function AgentDetailPage() {
   const wizardSteps = agent.is_licensed === 'no' ? UNLICENSED_STEPS : LICENSED_STEPS
   const wizardStepIndex = wizardSteps.findIndex(s => s.key === agent.wizard_step)
   const wizardProgress = wizardStepIndex >= 0 ? Math.round((wizardStepIndex / (wizardSteps.length - 1)) * 100) : 0
+
+  async function saveUpline(newUplineId: string | null) {
+    setSavingUpline(true)
+    await supabase
+      .from('agents')
+      .update({ upline_agent_id: newUplineId, updated_at: new Date().toISOString() })
+      .eq('id', agent.id)
+    setUplineAgentId(newUplineId)
+    setSavingUpline(false)
+  }
 
   return (
     <main style={{ minHeight: '100vh', background: '#F5F2ED', fontFamily: 'Inter, sans-serif' }}>
@@ -443,6 +465,25 @@ export default function AgentDetailPage() {
                   </button>
                 </div>
               )}
+            </div>
+
+            {/* Upline Agent */}
+            <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '20px 24px', marginBottom: '16px' }}>
+              <p style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Upline Agent</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <select
+                  value={uplineAgentId ?? ''}
+                  onChange={e => saveUpline(e.target.value || null)}
+                  disabled={savingUpline}
+                  style={{ flex: 1, padding: '10px 12px', fontSize: '14px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', backgroundColor: '#FFFFFF', cursor: 'pointer' }}
+                >
+                  <option value=''>— No Upline (Reports directly to XFG) —</option>
+                  {allActiveAgents.map(a => (
+                    <option key={a.id} value={a.id}>{a.full_name}</option>
+                  ))}
+                </select>
+                {savingUpline && <span style={{ fontSize: '12px', color: '#AAA' }}>Saving...</span>}
+              </div>
             </div>
 
             {/* Executive Override */}
