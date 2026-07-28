@@ -88,9 +88,8 @@ export default function AgentDetailPage() {
       // Fetch downline agents with their production
       const { data: downline } = await supabase
         .from('agents')
-        .select('id, full_name, dialer_active')
+        .select('id, full_name, dialer_active, current_stage')
         .eq('upline_agent_id', agentId)
-        .eq('current_stage', 'active')
 
       if (downline && downline.length > 0) {
         const now = new Date()

@@ -34,9 +34,8 @@ export default function MyTeamPage() {
       // Fetch downline agents
       const { data: downlineAgents } = await supabase
         .from('agents')
-        .select('id, full_name, dialer_active')
+        .select('id, full_name, dialer_active, current_stage')
         .eq('upline_agent_id', agentRecord.id)
-        .eq('current_stage', 'active')
 
       if (downlineAgents && downlineAgents.length > 0) {
         const now = new Date()
