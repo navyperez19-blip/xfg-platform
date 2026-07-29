@@ -497,36 +497,6 @@ export default function AgentDetailPage() {
               )}
             </div>
 
-            {launchWindow && (
-              <div style={{ marginBottom: '16px' }}>
-                <div style={{ background: 'linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%)', borderRadius: '16px', padding: '20px 24px', border: '1px solid #C9A96E' }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
-                    <div>
-                      <p style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', margin: '0 0 4px 0', textTransform: 'uppercase' }}>🚀 30-Day Launch Window</p>
-                      <p style={{ fontSize: '24px', fontWeight: '800', color: '#FFFFFF', margin: '0 0 4px 0' }}>
-                        {launchWindow.active ? `Day ${launchWindow.dayNumber} of 30` : 'Window Closed'}
-                      </p>
-                      <p style={{ fontSize: '13px', color: '#AAA', margin: 0 }}>
-                        {launchWindow.active ? `${launchWindow.daysRemaining} days remaining` : 'Past 30-day window'}
-                      </p>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <p style={{ fontSize: '12px', color: '#AAA', margin: '0 0 4px 0', textTransform: 'uppercase' }}>AP Written</p>
-                      <p style={{ fontSize: '24px', fontWeight: '800', color: '#FFFFFF', margin: '0 0 4px 0' }}>${launchWindow.currentAP.toLocaleString()}</p>
-                      <p style={{ fontSize: '13px', color: '#AAA', margin: 0 }}>of $5,000 goal</p>
-                    </div>
-                  </div>
-                  <div style={{ height: '8px', backgroundColor: '#3A3A3A', borderRadius: '4px', overflow: 'hidden' }}>
-                    <div style={{
-                      height: '100%', width: `${Math.min(100, (launchWindow.currentAP / launchWindow.goal) * 100)}%`,
-                      backgroundColor: launchWindow.currentAP >= launchWindow.goal ? '#22C55E' : launchWindow.currentAP >= launchWindow.goal * 0.6 ? '#F59E0B' : '#EF4444',
-                      borderRadius: '4px'
-                    }} />
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Upline Agent */}
             <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '20px 24px', marginBottom: '16px' }}>
               <p style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Upline Agent</p>
