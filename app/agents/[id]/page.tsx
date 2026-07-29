@@ -497,56 +497,6 @@ export default function AgentDetailPage() {
               )}
             </div>
 
-            {stats && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '16px' }}>
-                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '16px', textAlign: 'center' }}>
-                  <p style={{ fontSize: '22px', fontWeight: '800', color: '#1A1A1A', margin: 0 }}>{stats.totalPolicies}</p>
-                  <p style={{ fontSize: '11px', color: '#7A7A7A', margin: 0, textTransform: 'uppercase' }}>Total Policies</p>
-                </div>
-                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '16px', textAlign: 'center' }}>
-                  <p style={{ fontSize: '22px', fontWeight: '800', color: '#22C55E', margin: 0 }}>{stats.activePolicies}</p>
-                  <p style={{ fontSize: '11px', color: '#7A7A7A', margin: 0, textTransform: 'uppercase' }}>Active Policies</p>
-                </div>
-                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '16px', textAlign: 'center' }}>
-                  <p style={{ fontSize: '22px', fontWeight: '800', color: '#7C3AED', margin: 0 }}>${stats.mtdPremium.toLocaleString()}</p>
-                  <p style={{ fontSize: '11px', color: '#7A7A7A', margin: 0, textTransform: 'uppercase' }}>MTD Premium</p>
-                </div>
-                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '16px', textAlign: 'center' }}>
-                  <p style={{ fontSize: '22px', fontWeight: '800', color: '#1A1A1A', margin: 0 }}>${stats.ytdPremium.toLocaleString()}</p>
-                  <p style={{ fontSize: '11px', color: '#7A7A7A', margin: 0, textTransform: 'uppercase' }}>YTD Premium</p>
-                </div>
-                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '16px', textAlign: 'center' }}>
-                  <p style={{ fontSize: '22px', fontWeight: '800', color: '#1A1A1A', margin: 0 }}>${stats.totalPremium.toLocaleString()}</p>
-                  <p style={{ fontSize: '11px', color: '#7A7A7A', margin: 0, textTransform: 'uppercase' }}>Total Premium</p>
-                </div>
-                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '16px', textAlign: 'center' }}>
-                  <p style={{ fontSize: '22px', fontWeight: '800', color: '#1A1A1A', margin: 0 }}>{stats.mtdPolicies}</p>
-                  <p style={{ fontSize: '11px', color: '#7A7A7A', margin: 0, textTransform: 'uppercase' }}>MTD Policies</p>
-                </div>
-              </div>
-            )}
-
-            {carrierMix.length > 0 && (
-              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '18px 20px', marginBottom: '16px' }}>
-                <p style={{ fontSize: '13px', fontWeight: '700', color: '#1A1A1A', margin: '0 0 12px 0' }}>Carrier Mix</p>
-                {carrierMix.map((c, i) => {
-                  const maxCount = Math.max(...carrierMix.map(x => x.count))
-                  const colors = ['#C9A96E', '#2196F3', '#22C55E', '#7C3AED', '#F59E0B', '#EF4444', '#06B6D4']
-                  return (
-                    <div key={c.carrier} style={{ marginBottom: i < carrierMix.length - 1 ? '10px' : 0 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                        <span style={{ fontSize: '12px', color: '#4A4A4A' }}>{c.carrier}</span>
-                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#1A1A1A' }}>{c.count}</span>
-                      </div>
-                      <div style={{ height: '6px', backgroundColor: '#F0EDE8', borderRadius: '3px', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${(c.count / maxCount) * 100}%`, backgroundColor: colors[i % colors.length], borderRadius: '3px' }} />
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-
             {launchWindow && (
               <div style={{ marginBottom: '16px' }}>
                 <div style={{ background: 'linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%)', borderRadius: '16px', padding: '20px 24px', border: '1px solid #C9A96E' }}>
