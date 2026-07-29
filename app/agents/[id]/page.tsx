@@ -58,6 +58,12 @@ export default function AgentDetailPage() {
   const [uplineAgentId, setUplineAgentId] = useState<string | null>(null)
   const [allActiveAgents, setAllActiveAgents] = useState<{id: string, full_name: string}[]>([])
   const [savingUpline, setSavingUpline] = useState(false)
+  const [isLeader, setIsLeader] = useState(false)
+  const [isTopPerformer, setIsTopPerformer] = useState(false)
+  const [stats, setStats] = useState<any>(null)
+  const [carrierMix, setCarrierMix] = useState<{ carrier: string; count: number }[]>([])
+  const [launchWindow, setLaunchWindow] = useState<any>(null)
+  const [downlineAgents, setDownlineAgents] = useState<any[]>([])
 
   useEffect(() => {
     const load = async () => {
@@ -104,6 +110,77 @@ export default function AgentDetailPage() {
         })
 
         setUplineAgentId(data.upline_agent_id ?? null)
+        setIsLeader(data.is_leader ?? false)
+        setIsTopPerformer(data.is_top_performer ?? false)
+
+        // Stats, carrier mix
+        const { data: policies } = await supabase
+          .from('crm_policies')
+          .select('*')
+          .eq('agent_id', data.id)
+          .not('status', 'in', '("cancelled","lapsed","chargedback")')
+
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+        const yearStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
+
+        const mtdPolicies = (policies ?? []).filter((p: any) => p.date_written >= monthStart)
+        const ytdPolicies = (policies ?? []).filter((p: any) => p.date_written >= yearStart)
+        const activePolicies2 = (policies ?? []).filter((p: any) => ['active','issued','approved','submitted','pending'].includes(p.status))
+
+        setStats({
+          totalPolicies: (policies ?? []).length,
+          activePolicies: activePolicies2.length,
+          mtdPolicies: mtdPolicies.length,
+          mtdPremium: mtdPolicies.reduce((sum: number, p: any) => sum + (Number(p.annual_premium) || 0), 0),
+          ytdPremium: ytdPolicies.reduce((sum: number, p: any) => sum + (Number(p.annual_premium) || 0), 0),
+          totalPremium: (policies ?? []).reduce((sum: number, p: any) => sum + (Number(p.annual_premium) || 0), 0),
+        })
+
+        const carrierCounts: Record<string, number> = {}
+        activePolicies2.forEach((p: any) => {
+          if (p.carrier) carrierCounts[p.carrier] = (carrierCounts[p.carrier] || 0) + 1
+        })
+        setCarrierMix(Object.entries(carrierCounts).map(([carrier, count]) => ({ carrier, count })).sort((a, b) => b.count - a.count))
+
+        // 30-Day Launch Window
+        const carriers = data.carriers ?? {}
+        const ethosMet = carriers['Ethos'] === 'submitted' || carriers['Ethos'] === 'active'
+        if (ethosMet && data.dialer_active && data.dialer_active_at) {
+          const startDate = new Date(data.dialer_active_at)
+          const dayNumber = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+          const daysRemaining = Math.max(0, 30 - dayNumber + 1)
+          const currentAP = (policies ?? []).reduce((sum: number, p: any) => sum + (Number(p.annual_premium) || 0), 0)
+          setLaunchWindow({ active: dayNumber <= 30, dayNumber, daysRemaining, currentAP, goal: 5000 })
+        }
+
+        // Downline
+        const { data: downline } = await supabase
+          .from('agents')
+          .select('id, full_name, dialer_active')
+          .eq('upline_agent_id', data.id)
+
+        if (downline && downline.length > 0) {
+          const downlineWithStats = await Promise.all(downline.map(async (dlAgent) => {
+            const { data: dlPolicies } = await supabase
+              .from('crm_policies')
+              .select('annual_premium, status, date_written')
+              .eq('agent_id', dlAgent.id)
+              .not('status', 'in', '("cancelled","lapsed","chargedback")')
+
+            const dlMtdAP = (dlPolicies ?? [])
+              .filter((p: any) => p.date_written >= monthStart)
+              .reduce((sum: number, p: any) => sum + (Number(p.annual_premium) || 0), 0)
+
+            const dlActivePolicies = (dlPolicies ?? [])
+              .filter((p: any) => ['active','issued','approved','submitted','pending'].includes(p.status))
+              .length
+
+            const indicator = dlMtdAP > 0 ? 'green' : dlActivePolicies > 0 ? 'yellow' : 'red'
+            return { ...dlAgent, mtdAP: dlMtdAP, activePolicies: dlActivePolicies, indicator }
+          }))
+          setDownlineAgents(downlineWithStats)
+        }
+
         const { data: agentsList } = await supabase
           .from('agents')
           .select('id, full_name')
@@ -175,6 +252,18 @@ export default function AgentDetailPage() {
   const wizardSteps = agent.is_licensed === 'no' ? UNLICENSED_STEPS : LICENSED_STEPS
   const wizardStepIndex = wizardSteps.findIndex(s => s.key === agent.wizard_step)
   const wizardProgress = wizardStepIndex >= 0 ? Math.round((wizardStepIndex / (wizardSteps.length - 1)) * 100) : 0
+
+  async function toggleLeader() {
+    const newValue = !isLeader
+    await supabase.from('agents').update({ is_leader: newValue, updated_at: new Date().toISOString() }).eq('id', agent.id)
+    setIsLeader(newValue)
+  }
+
+  async function toggleTopPerformer() {
+    const newValue = !isTopPerformer
+    await supabase.from('agents').update({ is_top_performer: newValue, updated_at: new Date().toISOString() }).eq('id', agent.id)
+    setIsTopPerformer(newValue)
+  }
 
   async function saveUpline(newUplineId: string | null) {
     setSavingUpline(true)
@@ -467,6 +556,86 @@ export default function AgentDetailPage() {
               )}
             </div>
 
+            {stats && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '16px' }}>
+                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '16px', textAlign: 'center' }}>
+                  <p style={{ fontSize: '22px', fontWeight: '800', color: '#1A1A1A', margin: 0 }}>{stats.totalPolicies}</p>
+                  <p style={{ fontSize: '11px', color: '#7A7A7A', margin: 0, textTransform: 'uppercase' }}>Total Policies</p>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '16px', textAlign: 'center' }}>
+                  <p style={{ fontSize: '22px', fontWeight: '800', color: '#22C55E', margin: 0 }}>{stats.activePolicies}</p>
+                  <p style={{ fontSize: '11px', color: '#7A7A7A', margin: 0, textTransform: 'uppercase' }}>Active Policies</p>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '16px', textAlign: 'center' }}>
+                  <p style={{ fontSize: '22px', fontWeight: '800', color: '#7C3AED', margin: 0 }}>${stats.mtdPremium.toLocaleString()}</p>
+                  <p style={{ fontSize: '11px', color: '#7A7A7A', margin: 0, textTransform: 'uppercase' }}>MTD Premium</p>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '16px', textAlign: 'center' }}>
+                  <p style={{ fontSize: '22px', fontWeight: '800', color: '#1A1A1A', margin: 0 }}>${stats.ytdPremium.toLocaleString()}</p>
+                  <p style={{ fontSize: '11px', color: '#7A7A7A', margin: 0, textTransform: 'uppercase' }}>YTD Premium</p>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '16px', textAlign: 'center' }}>
+                  <p style={{ fontSize: '22px', fontWeight: '800', color: '#1A1A1A', margin: 0 }}>${stats.totalPremium.toLocaleString()}</p>
+                  <p style={{ fontSize: '11px', color: '#7A7A7A', margin: 0, textTransform: 'uppercase' }}>Total Premium</p>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '16px', textAlign: 'center' }}>
+                  <p style={{ fontSize: '22px', fontWeight: '800', color: '#1A1A1A', margin: 0 }}>{stats.mtdPolicies}</p>
+                  <p style={{ fontSize: '11px', color: '#7A7A7A', margin: 0, textTransform: 'uppercase' }}>MTD Policies</p>
+                </div>
+              </div>
+            )}
+
+            {carrierMix.length > 0 && (
+              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '18px 20px', marginBottom: '16px' }}>
+                <p style={{ fontSize: '13px', fontWeight: '700', color: '#1A1A1A', margin: '0 0 12px 0' }}>Carrier Mix</p>
+                {carrierMix.map((c, i) => {
+                  const maxCount = Math.max(...carrierMix.map(x => x.count))
+                  const colors = ['#C9A96E', '#2196F3', '#22C55E', '#7C3AED', '#F59E0B', '#EF4444', '#06B6D4']
+                  return (
+                    <div key={c.carrier} style={{ marginBottom: i < carrierMix.length - 1 ? '10px' : 0 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                        <span style={{ fontSize: '12px', color: '#4A4A4A' }}>{c.carrier}</span>
+                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#1A1A1A' }}>{c.count}</span>
+                      </div>
+                      <div style={{ height: '6px', backgroundColor: '#F0EDE8', borderRadius: '3px', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${(c.count / maxCount) * 100}%`, backgroundColor: colors[i % colors.length], borderRadius: '3px' }} />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {launchWindow && (
+              <div style={{ marginBottom: '16px' }}>
+                <div style={{ background: 'linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%)', borderRadius: '16px', padding: '20px 24px', border: '1px solid #C9A96E' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
+                    <div>
+                      <p style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', margin: '0 0 4px 0', textTransform: 'uppercase' }}>🚀 30-Day Launch Window</p>
+                      <p style={{ fontSize: '24px', fontWeight: '800', color: '#FFFFFF', margin: '0 0 4px 0' }}>
+                        {launchWindow.active ? `Day ${launchWindow.dayNumber} of 30` : 'Window Closed'}
+                      </p>
+                      <p style={{ fontSize: '13px', color: '#AAA', margin: 0 }}>
+                        {launchWindow.active ? `${launchWindow.daysRemaining} days remaining` : 'Past 30-day window'}
+                      </p>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <p style={{ fontSize: '12px', color: '#AAA', margin: '0 0 4px 0', textTransform: 'uppercase' }}>AP Written</p>
+                      <p style={{ fontSize: '24px', fontWeight: '800', color: '#FFFFFF', margin: '0 0 4px 0' }}>${launchWindow.currentAP.toLocaleString()}</p>
+                      <p style={{ fontSize: '13px', color: '#AAA', margin: 0 }}>of $5,000 goal</p>
+                    </div>
+                  </div>
+                  <div style={{ height: '8px', backgroundColor: '#3A3A3A', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{
+                      height: '100%', width: `${Math.min(100, (launchWindow.currentAP / launchWindow.goal) * 100)}%`,
+                      backgroundColor: launchWindow.currentAP >= launchWindow.goal ? '#22C55E' : launchWindow.currentAP >= launchWindow.goal * 0.6 ? '#F59E0B' : '#EF4444',
+                      borderRadius: '4px'
+                    }} />
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Upline Agent */}
             <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '20px 24px', marginBottom: '16px' }}>
               <p style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Upline Agent</p>
@@ -484,6 +653,51 @@ export default function AgentDetailPage() {
                 </select>
                 {savingUpline && <span style={{ fontSize: '12px', color: '#AAA' }}>Saving...</span>}
               </div>
+            </div>
+
+            {/* Special Tracking */}
+            <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '20px 24px', marginBottom: '16px' }}>
+              <p style={{ fontSize: '14px', fontWeight: '700', color: '#1A1A1A', margin: '0 0 14px 0' }}>⭐ Special Tracking</p>
+              <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', color: '#1A1A1A' }}>
+                  <input type="checkbox" checked={isLeader} onChange={toggleLeader} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+                  Leadership Team
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', color: '#1A1A1A' }}>
+                  <input type="checkbox" checked={isTopPerformer} onChange={toggleTopPerformer} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+                  Top 1% Performer
+                </label>
+              </div>
+            </div>
+
+            {/* Downline Team */}
+            <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '20px 24px', marginBottom: '16px' }}>
+              <p style={{ fontSize: '14px', fontWeight: '700', color: '#1A1A1A', margin: '0 0 12px 0' }}>👥 Downline Team ({downlineAgents.length})</p>
+              {downlineAgents.length === 0 ? (
+                <p style={{ fontSize: '13px', color: '#AAA', margin: 0 }}>No downline agents assigned yet.</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {downlineAgents.map(dlAgent => (
+                    <div key={dlAgent.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: '#F9F7F4', borderRadius: '8px', border: '1px solid #EBE8E3' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '16px' }}>{dlAgent.indicator === 'green' ? '🟢' : dlAgent.indicator === 'yellow' ? '🟡' : '🔴'}</span>
+                        <span style={{ fontSize: '14px', fontWeight: '600', color: '#1A1A1A' }}>{dlAgent.full_name}</span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                        <div style={{ textAlign: 'right' }}>
+                          <p style={{ fontSize: '10px', color: '#AAA', margin: 0 }}>MTD AP</p>
+                          <p style={{ fontSize: '13px', fontWeight: '700', color: dlAgent.mtdAP > 0 ? '#7C3AED' : '#CCC', margin: 0 }}>${dlAgent.mtdAP.toLocaleString()}</p>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <p style={{ fontSize: '10px', color: '#AAA', margin: 0 }}>Active</p>
+                          <p style={{ fontSize: '13px', fontWeight: '700', color: dlAgent.activePolicies > 0 ? '#22C55E' : '#CCC', margin: 0 }}>{dlAgent.activePolicies}</p>
+                        </div>
+                        <a href={`/agents/${dlAgent.id}`} style={{ fontSize: '12px', color: '#C9A96E', fontWeight: '600', textDecoration: 'none' }}>View →</a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Executive Override */}
