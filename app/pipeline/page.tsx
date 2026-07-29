@@ -166,6 +166,52 @@ export default function PipelinePage() {
               </button>
               <button
                 onClick={async () => {
+                  if (!confirm(`Add ${selectedAgents.length} agent(s) to Leadership Team?`)) return
+                  for (const id of selectedAgents) {
+                    await supabase.from('agents').update({ is_leader: true, updated_at: new Date().toISOString() }).eq('id', id)
+                  }
+                  setSelectedAgents([])
+                  setSelectMode(false)
+                  window.location.reload()
+                }}
+                style={{
+                  padding: isMobile ? '0.5rem 0.75rem' : '0.6rem 1.25rem',
+                  backgroundColor: '#7C3AED',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: isMobile ? '12px' : '0.875rem',
+                  fontWeight: '700'
+                }}
+              >
+                ⭐ Add to Leadership ({selectedAgents.length})
+              </button>
+              <button
+                onClick={async () => {
+                  if (!confirm(`Add ${selectedAgents.length} agent(s) to Top 1% Performers?`)) return
+                  for (const id of selectedAgents) {
+                    await supabase.from('agents').update({ is_top_performer: true, updated_at: new Date().toISOString() }).eq('id', id)
+                  }
+                  setSelectedAgents([])
+                  setSelectMode(false)
+                  window.location.reload()
+                }}
+                style={{
+                  padding: isMobile ? '0.5rem 0.75rem' : '0.6rem 1.25rem',
+                  backgroundColor: '#F59E0B',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: isMobile ? '12px' : '0.875rem',
+                  fontWeight: '700'
+                }}
+              >
+                🏆 Add to Top 1% ({selectedAgents.length})
+              </button>
+              <button
+                onClick={async () => {
                   if (!confirm(`Delete ${selectedAgents.length} agent(s)? This cannot be undone.`)) return
                   setDeleting(true)
                   for (const id of selectedAgents) {
