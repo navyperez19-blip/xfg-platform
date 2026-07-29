@@ -333,7 +333,7 @@ export default function AnalyticsPage() {
                   {(overviewDetail === 'onboarding' ? onboardingAgents : overviewDetail === 'discord' ? discordAgents : xfgEmailAgents).map(a => (
                     <a
                       key={a.id}
-                      href={`/crm/admin/agents/${a.id}`}
+                      href={`/agents/${a.id}`}
                       style={{ display: 'block', padding: '8px 12px', backgroundColor: '#F9F7F4', borderRadius: '8px', fontSize: '13px', color: '#1A1A1A', textDecoration: 'none', fontWeight: '600' }}
                     >
                       {a.full_name}
@@ -482,7 +482,7 @@ export default function AnalyticsPage() {
                       return (
                         <tr key={agent.id} style={{ borderBottom: i < filteredContracting.length - 1 ? '1px solid #F0EDE8' : 'none' }}>
                           <td style={{ padding: '12px 14px', fontWeight: '600', color: '#1A1A1A', fontSize: '13px', whiteSpace: 'nowrap' }}>
-                            <a href={`/crm/admin/agents/${agent.id}`} style={{ color: '#1A1A1A', textDecoration: 'none', fontWeight: '600' }}>{agent.full_name}</a>
+                            <a href={`/agents/${agent.id}`} style={{ color: '#1A1A1A', textDecoration: 'none', fontWeight: '600' }}>{agent.full_name}</a>
                           </td>
                           {/* Status Indicator */}
                           <td style={{ padding: '12px 14px' }}>
@@ -734,7 +734,7 @@ export default function AnalyticsPage() {
                           return (
                             <tr key={agent.id} style={{ borderBottom: i < activeAgents.length - 1 ? '1px solid #F0EDE8' : 'none' }}>
                               <td style={{ padding: '10px 14px', fontWeight: '600', color: '#1A1A1A', fontSize: '13px', whiteSpace: 'nowrap' }}>
-                                <a href={`/crm/admin/agents/${agent.id}`} style={{ color: '#1A1A1A', textDecoration: 'none', fontWeight: '600' }}>{agent.full_name}</a>
+                                <a href={`/agents/${agent.id}`} style={{ color: '#1A1A1A', textDecoration: 'none', fontWeight: '600' }}>{agent.full_name}</a>
                               </td>
                               <td style={{ padding: '10px 14px', textAlign: 'center' }}>
                                 <span style={{ fontSize: '12px', fontWeight: '700', color: progress === 100 ? '#27AE60' : progress >= 50 ? '#C9A96E' : '#C0392B' }}>{progress}%</span>
@@ -785,12 +785,12 @@ export default function AnalyticsPage() {
                         const team = agents.filter(a => a.upline_agent_id === leader.id)
                         return (
                           <div key={leader.id} style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '18px 20px' }}>
-                            <a href={`/crm/admin/agents/${leader.id}`} style={{ fontSize: '15px', fontWeight: '700', color: '#1A1A1A', textDecoration: 'none' }}>{leader.full_name}</a>
+                            <a href={`/agents/${leader.id}`} style={{ fontSize: '15px', fontWeight: '700', color: '#1A1A1A', textDecoration: 'none' }}>{leader.full_name}</a>
                             <p style={{ fontSize: '12px', color: '#7A7A7A', margin: '2px 0 12px 0' }}>{team.length} team member{team.length !== 1 ? 's' : ''}</p>
                             {team.length > 0 ? (
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                 {team.map(member => (
-                                  <a key={member.id} href={`/crm/admin/agents/${member.id}`} style={{ fontSize: '13px', color: '#1A1A1A', textDecoration: 'none', padding: '6px 10px', backgroundColor: '#F9F7F4', borderRadius: '6px' }}>
+                                  <a key={member.id} href={`/agents/${member.id}`} style={{ fontSize: '13px', color: '#1A1A1A', textDecoration: 'none', padding: '6px 10px', backgroundColor: '#F9F7F4', borderRadius: '6px' }}>
                                     {member.full_name}
                                   </a>
                                 ))}
@@ -838,7 +838,7 @@ export default function AnalyticsPage() {
                           {topPerformers.map((agent, i) => (
                             <tr key={agent.id} style={{ borderBottom: i < topPerformers.length - 1 ? '1px solid #F0EDE8' : 'none' }}>
                               <td style={{ padding: '12px 14px', fontWeight: '600', fontSize: '13px' }}>
-                                <a href={`/crm/admin/agents/${agent.id}`} style={{ color: '#1A1A1A', textDecoration: 'none', fontWeight: '600' }}>{agent.full_name}</a>
+                                <a href={`/agents/${agent.id}`} style={{ color: '#1A1A1A', textDecoration: 'none', fontWeight: '600' }}>{agent.full_name}</a>
                               </td>
                               <td style={{ padding: '12px 14px', fontSize: '13px', color: '#4A4A4A' }}>{agent.phone || '—'}</td>
                               <td style={{ padding: '12px 14px', fontSize: '13px', color: '#4A4A4A' }}>{agent.email || '—'}</td>

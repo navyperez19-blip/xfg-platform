@@ -588,7 +588,7 @@ export default function AgentDetailPage() {
                     <p style={{ fontSize: '10px', color: '#AAA', margin: 0, textTransform: 'uppercase' }}>Active</p>
                     <p style={{ fontSize: '13px', fontWeight: '700', color: dlAgent.activePolicies > 0 ? '#22C55E' : '#CCC', margin: 0 }}>{dlAgent.activePolicies}</p>
                   </div>
-                  <a href={`/crm/admin/agents/${dlAgent.id}`} style={{ fontSize: '12px', color: '#C9A96E', fontWeight: '600', textDecoration: 'none' }}>View →</a>
+                  <a href={`/agents/${dlAgent.id}`} style={{ fontSize: '12px', color: '#C9A96E', fontWeight: '600', textDecoration: 'none' }}>View →</a>
                 </div>
               </div>
             ))}
