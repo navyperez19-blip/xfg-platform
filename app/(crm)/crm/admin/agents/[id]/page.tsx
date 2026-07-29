@@ -47,6 +47,8 @@ export default function AgentDetailPage() {
   const [allAgents, setAllAgents] = useState<{id: string, full_name: string}[]>([])
   const [downlineAgents, setDownlineAgents] = useState<any[]>([])
   const [savingUpline, setSavingUpline] = useState(false)
+  const [isLeader, setIsLeader] = useState(false)
+  const [isTopPerformer, setIsTopPerformer] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -75,6 +77,8 @@ export default function AgentDetailPage() {
 
       // Fetch upline
       setUplineAgentId((agentData as any).upline_agent_id ?? null)
+      setIsLeader((agentData as any).is_leader ?? false)
+      setIsTopPerformer((agentData as any).is_top_performer ?? false)
 
       // Fetch all active agents for dropdown (excluding current agent)
       const { data: agentsList } = await supabase
@@ -278,6 +282,18 @@ export default function AgentDetailPage() {
       supabase.removeChannel(channel)
     }
   }, [agentId])
+
+  async function toggleLeader() {
+    const newValue = !isLeader
+    await supabase.from('agents').update({ is_leader: newValue, updated_at: new Date().toISOString() }).eq('id', agentId)
+    setIsLeader(newValue)
+  }
+
+  async function toggleTopPerformer() {
+    const newValue = !isTopPerformer
+    await supabase.from('agents').update({ is_top_performer: newValue, updated_at: new Date().toISOString() }).eq('id', agentId)
+    setIsTopPerformer(newValue)
+  }
 
   async function saveUpline(newUplineId: string | null) {
     setSavingUpline(true)
@@ -530,6 +546,21 @@ export default function AgentDetailPage() {
             ))}
           </select>
           {savingUpline && <span style={{ fontSize: '12px', color: '#AAA' }}>Saving...</span>}
+        </div>
+      </div>
+
+      {/* Special Tracking */}
+      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '20px 24px', marginBottom: '16px' }}>
+        <p style={{ fontSize: '14px', fontWeight: '700', color: '#1A1A1A', margin: '0 0 14px 0' }}>⭐ Special Tracking</p>
+        <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', color: '#1A1A1A' }}>
+            <input type="checkbox" checked={isLeader} onChange={toggleLeader} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+            Leadership Team
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', color: '#1A1A1A' }}>
+            <input type="checkbox" checked={isTopPerformer} onChange={toggleTopPerformer} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+            Top 1% Performer
+          </label>
         </div>
       </div>
 
