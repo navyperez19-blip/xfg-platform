@@ -18,11 +18,13 @@ export default function AnalyticsPage() {
   const [agents, setAgents] = useState<any[]>([])
   const [history, setHistory] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'overview' | 'contracting' | 'agentTracker' | 'leadership' | 'topPerformers'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'contracting' | 'agentTracker' | 'leadership' | 'topPerformers' | 'sales'>('overview')
   const [contractingSearch, setContractingSearch] = useState('')
   const [contractingFilter, setContractingFilter] = useState<string | null>(null)
   const [resetError, setResetError] = useState('')
   const [overviewDetail, setOverviewDetail] = useState<'onboarding' | 'discord' | 'xfgEmail' | null>(null)
+  const [allSalesSnapshots, setAllSalesSnapshots] = useState<any[]>([])
+  const [salesPeriod, setSalesPeriod] = useState<'weekly' | 'monthly' | 'allTime'>('weekly')
 
   const filterToGroup: Record<string, string> = {
     ethos: 'Ethos',
@@ -57,6 +59,16 @@ export default function AnalyticsPage() {
         .limit(20)
       setAgents(agentsData || [])
       setHistory(historyData || [])
+
+      const { data: salesSnapshots } = await supabase
+        .from('weekly_sales_snapshot')
+        .select('*')
+        .order('week_start', { ascending: false })
+
+      if (salesSnapshots) {
+        setAllSalesSnapshots(salesSnapshots)
+      }
+
       setLoading(false)
     }
     load()
@@ -136,6 +148,52 @@ export default function AnalyticsPage() {
     const { error } = await supabase.from('agents').update({ [field]: !currentValue, updated_at: new Date().toISOString() }).eq('id', agentId)
     if (!error) {
       setAgents((prev: any[]) => prev.map(a => a.id === agentId ? { ...a, [field]: !currentValue } : a))
+    }
+  }
+
+  function getAggregatedSales(snapshots: any[], period: 'weekly' | 'monthly' | 'allTime') {
+    if (snapshots.length === 0) return null
+
+    let filtered = snapshots
+    if (period === 'weekly') {
+      filtered = [snapshots[0]]
+    } else if (period === 'monthly') {
+      const now = new Date()
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+      filtered = snapshots.filter(s => new Date(s.week_start) >= monthStart)
+    }
+
+    const carrierMap: Record<string, { totalAP: number; count: number }> = {}
+    const agentMap: Record<string, { totalAP: number; carriers: Set<string> }> = {}
+
+    filtered.forEach(snap => {
+      (snap.by_carrier || []).forEach((c: any) => {
+        if (!carrierMap[c.carrier]) carrierMap[c.carrier] = { totalAP: 0, count: 0 }
+        carrierMap[c.carrier].totalAP += c.totalAP
+        carrierMap[c.carrier].count += c.count
+      })
+      ;(snap.by_agent || []).forEach((a: any) => {
+        if (!agentMap[a.agent]) agentMap[a.agent] = { totalAP: 0, carriers: new Set() }
+        agentMap[a.agent].totalAP += a.totalAP
+        a.carriers.forEach((c: string) => agentMap[a.agent].carriers.add(c))
+      })
+    })
+
+    const byCarrier = Object.entries(carrierMap).map(([carrier, d]) => ({ carrier, totalAP: Math.round(d.totalAP * 100) / 100, count: d.count })).sort((a, b) => b.totalAP - a.totalAP)
+    const byAgent = Object.entries(agentMap).map(([agent, d]) => ({ agent, totalAP: Math.round(d.totalAP * 100) / 100, carriers: Array.from(d.carriers) })).sort((a, b) => b.totalAP - a.totalAP)
+    const totalAP = byCarrier.reduce((sum, c) => sum + c.totalAP, 0)
+    const totalSales = byCarrier.reduce((sum, c) => sum + c.count, 0)
+
+    return {
+      totalAP: Math.round(totalAP * 100) / 100,
+      totalSales,
+      byCarrier,
+      byAgent,
+      periodLabel: period === 'weekly'
+        ? `Week of ${new Date(filtered[0].week_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — ${new Date(filtered[0].week_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+        : period === 'monthly'
+        ? new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+        : 'All-Time'
     }
   }
 
@@ -286,8 +344,8 @@ export default function AnalyticsPage() {
         </div>
 
         <div style={{ display: 'flex', borderBottom: '2px solid #E5E1DA', marginBottom: '24px', gap: '4px' }}>
-          {[{ key: 'overview', label: 'Overview' }, { key: 'contracting', label: 'Contracting Tracker' }, { key: 'agentTracker', label: 'Agent Tracker' }, { key: 'leadership', label: 'Leadership' }, { key: 'topPerformers', label: 'Top 1%' }].map(tab => (
-            <button key={tab.key} onClick={() => setActiveTab(tab.key as 'overview' | 'contracting' | 'agentTracker' | 'leadership' | 'topPerformers')} style={{ padding: '12px 24px', border: 'none', backgroundColor: 'transparent', fontSize: '14px', fontWeight: activeTab === tab.key ? '700' : '500', color: activeTab === tab.key ? '#1A1814' : '#7A7A7A', cursor: 'pointer', borderBottom: activeTab === tab.key ? '2px solid #C9A96E' : '2px solid transparent', marginBottom: '-2px', fontFamily: 'inherit' }}>
+          {[{ key: 'overview', label: 'Overview' }, { key: 'contracting', label: 'Contracting Tracker' }, { key: 'agentTracker', label: 'Agent Tracker' }, { key: 'leadership', label: 'Leadership' }, { key: 'topPerformers', label: 'Top 1%' }, { key: 'sales', label: 'Sales' }].map(tab => (
+            <button key={tab.key} onClick={() => setActiveTab(tab.key as 'overview' | 'contracting' | 'agentTracker' | 'leadership' | 'topPerformers' | 'sales')} style={{ padding: '12px 24px', border: 'none', backgroundColor: 'transparent', fontSize: '14px', fontWeight: activeTab === tab.key ? '700' : '500', color: activeTab === tab.key ? '#1A1814' : '#7A7A7A', cursor: 'pointer', borderBottom: activeTab === tab.key ? '2px solid #C9A96E' : '2px solid transparent', marginBottom: '-2px', fontFamily: 'inherit' }}>
               {tab.label}
             </button>
           ))}
@@ -853,6 +911,98 @@ export default function AnalyticsPage() {
                       </table>
                     </div>
                   )}
+                </>
+              )
+            })()}
+          </div>
+        )}
+
+        {/* SALES TAB */}
+        {activeTab === 'sales' && (
+          <div>
+            {allSalesSnapshots.length === 0 ? (
+              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '48px 24px', textAlign: 'center' }}>
+                <p style={{ fontSize: '14px', color: '#AAA' }}>No sales data yet. This updates automatically every Monday at 8AM CST from the Discord sales channel.</p>
+              </div>
+            ) : (() => {
+              const data = getAggregatedSales(allSalesSnapshots, salesPeriod)
+              if (!data) return null
+              return (
+                <>
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
+                    {[{ key: 'weekly', label: 'Weekly' }, { key: 'monthly', label: 'Monthly' }, { key: 'allTime', label: 'All-Time' }].map(p => (
+                      <button
+                        key={p.key}
+                        onClick={() => setSalesPeriod(p.key as 'weekly' | 'monthly' | 'allTime')}
+                        style={{
+                          padding: '8px 20px',
+                          borderRadius: '20px',
+                          border: salesPeriod === p.key ? '1px solid #C9A96E' : '1px solid #E5E1DA',
+                          backgroundColor: salesPeriod === p.key ? '#1A1A1A' : '#FFFFFF',
+                          color: salesPeriod === p.key ? '#C9A96E' : '#7A7A7A',
+                          fontSize: '13px',
+                          fontWeight: '700',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div style={{ background: 'linear-gradient(135deg, #0D0D0D 0%, #1F1F1F 60%, #2D2D2D 100%)', borderRadius: '20px', padding: '32px 36px', marginBottom: '24px', border: '1px solid #C9A96E', position: 'relative', overflow: 'hidden' }}>
+                    <p style={{ fontSize: '11px', fontWeight: '700', color: '#C9A96E', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{data.periodLabel}</p>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '48px', flexWrap: 'wrap' }}>
+                      <div>
+                        <p style={{ fontSize: '44px', fontWeight: '800', color: '#FFFFFF', margin: 0, letterSpacing: '-0.02em' }}>${data.totalAP.toLocaleString()}</p>
+                        <p style={{ fontSize: '12px', color: '#8A8A8A', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Total Annual Premium</p>
+                      </div>
+                      <div>
+                        <p style={{ fontSize: '28px', fontWeight: '700', color: '#C9A96E', margin: 0 }}>{data.totalSales}</p>
+                        <p style={{ fontSize: '12px', color: '#8A8A8A', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Policies Sold</p>
+                      </div>
+                      <div>
+                        <p style={{ fontSize: '28px', fontWeight: '700', color: '#C9A96E', margin: 0 }}>${data.totalSales > 0 ? Math.round(data.totalAP / data.totalSales).toLocaleString() : 0}</p>
+                        <p style={{ fontSize: '12px', color: '#8A8A8A', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Avg AP / Sale</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E5E1DA', overflow: 'hidden' }}>
+                      <div style={{ padding: '16px 24px', borderBottom: '1px solid #E5E1DA', backgroundColor: '#FAFAF8' }}>
+                        <p style={{ fontSize: '13px', fontWeight: '700', color: '#1A1A1A', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>By Carrier</p>
+                      </div>
+                      <div style={{ padding: '8px 24px' }}>
+                        {data.byCarrier.map((c: any, i: number) => (
+                          <div key={c.carrier} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderTop: i > 0 ? '1px solid #F0EDE8' : 'none' }}>
+                            <span style={{ fontSize: '14px', color: '#1A1A1A', fontWeight: '600' }}>{c.carrier}</span>
+                            <div style={{ textAlign: 'right' }}>
+                              <p style={{ fontSize: '15px', fontWeight: '800', color: '#7C3AED', margin: 0 }}>${c.totalAP.toLocaleString()}</p>
+                              <p style={{ fontSize: '11px', color: '#AAA', margin: 0 }}>{c.count} sale{c.count !== 1 ? 's' : ''}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E5E1DA', overflow: 'hidden' }}>
+                      <div style={{ padding: '16px 24px', borderBottom: '1px solid #E5E1DA', backgroundColor: '#FAFAF8' }}>
+                        <p style={{ fontSize: '13px', fontWeight: '700', color: '#1A1A1A', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>By Agent</p>
+                      </div>
+                      <div style={{ padding: '8px 24px' }}>
+                        {data.byAgent.map((a: any, i: number) => (
+                          <div key={a.agent} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderTop: i > 0 ? '1px solid #F0EDE8' : 'none' }}>
+                            <div>
+                              <p style={{ fontSize: '14px', color: '#1A1A1A', fontWeight: '600', margin: 0 }}>{a.agent}</p>
+                              <p style={{ fontSize: '11px', color: '#AAA', margin: 0 }}>{a.carriers.join(', ')}</p>
+                            </div>
+                            <p style={{ fontSize: '15px', fontWeight: '800', color: '#22C55E', margin: 0 }}>${a.totalAP.toLocaleString()}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </>
               )
             })()}
