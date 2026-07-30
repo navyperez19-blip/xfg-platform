@@ -322,7 +322,12 @@ export default function ContractingPage() {
                           href="https://surelc.surancebay.com/sbweb/login.jsp?branch=Ascent%20Insurance&branchEditable=off&branchRequired=on&branchVisible=on&gaId=1279&gaName=Supreme%20Life%20Brokerage"
                           target="_blank"
                           rel="noopener noreferrer"
-                          onClick={() => setMutualOmahaLinkClicked(true)}
+                          onClick={async () => {
+                          setMutualOmahaLinkClicked(true)
+                          if (currentStatus === 'none') {
+                            await updateCarrierStatus('Mutual of Omaha', 'submitted')
+                          }
+                        }}
                           style={{ display: 'inline-block', padding: '10px 16px', backgroundColor: '#22C55E', color: '#FFFFFF', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', textAlign: 'center' }}
                         >
                           Start Mutual of Omaha Contracting on SureLC →
