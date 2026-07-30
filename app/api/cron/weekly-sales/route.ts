@@ -94,7 +94,7 @@ export async function GET(request: Request) {
     const totalAP = byCarrierArray.reduce((sum, c) => sum + c.totalAP, 0)
     const totalSales = byCarrierArray.reduce((sum, c) => sum + c.count, 0)
 
-    await supabase.from('weekly_sales_snapshot').insert({
+    const { error: insertError } = await supabase.from('weekly_sales_snapshot').insert({
       week_start: weekStart.toISOString().split('T')[0],
       week_end: weekEnd.toISOString().split('T')[0],
       by_carrier: byCarrierArray,
@@ -102,6 +102,10 @@ export async function GET(request: Request) {
       total_ap: totalAP,
       total_sales: totalSales,
     })
+
+    if (insertError) {
+      return NextResponse.json({ success: false, insertError: insertError.message, totalAP, totalSales }, { status: 500 })
+    }
 
     return NextResponse.json({ success: true, totalAP, totalSales, byCarrierArray, byAgentArray })
   } catch (e: any) {
