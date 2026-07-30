@@ -41,19 +41,17 @@ export async function GET(request: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
-
     const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN!
     const CHANNEL_ID = process.env.DISCORD_SALES_CHANNEL_ID!
 
     const now = new Date()
-    const weekEnd = new Date(now)
-    const weekStart = new Date(now)
-    weekStart.setDate(weekStart.getDate() - 7)
+    const lookback = new Date(now)
+    lookback.setDate(lookback.getDate() - 10) // small overlap buffer, ON CONFLICT handles dupes
 
     let allMessages: any[] = []
     let before: string | null = null
 
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 10; i++) {
       let url = `https://discord.com/api/v10/channels/${CHANNEL_ID}/messages?limit=100`
       if (before) url += `&before=${before}`
 
@@ -67,20 +65,18 @@ export async function GET(request: Request) {
       allMessages = allMessages.concat(batch)
       before = batch[batch.length - 1].id
       const lastTs = new Date(batch[batch.length - 1].timestamp)
-      if (lastTs < weekStart) break
+      if (lastTs < lookback) break
     }
 
-    const weekMessages = allMessages.filter(m => new Date(m.timestamp) >= weekStart)
-
+    const recentMessages = allMessages.filter(m => new Date(m.timestamp) >= lookback)
     const displayNames = await getDiscordDisplayNames(DISCORD_BOT_TOKEN, GUILD_ID)
 
-    const byCarrier: Record<string, { totalAP: number; count: number }> = {}
-    const byAgent: Record<string, { totalAP: number; carriers: Set<string>; count: number }> = {}
-
-    for (const msg of weekMessages) {
+    const records: any[] = []
+    for (const msg of recentMessages) {
       const content = msg.content as string
       const rawUsername = msg.author.username as string
-      const author = displayNames[rawUsername] || rawUsername
+
+      if (rawUsername.toLowerCase() === 'mikeibraimi') continue
 
       let foundCarrier: string | null = null
       for (const c of CARRIERS) {
@@ -89,50 +85,38 @@ export async function GET(request: Request) {
           break
         }
       }
-
       if (!foundCarrier) continue
 
       const numMatch = content.match(/\$?([\d,]+(?:\.\d+)?)/)
       if (!numMatch) continue
-
       const amount = parseFloat(numMatch[1].replace(/,/g, ''))
       if (isNaN(amount) || amount <= 0) continue
 
-      if (!byCarrier[foundCarrier]) byCarrier[foundCarrier] = { totalAP: 0, count: 0 }
-      byCarrier[foundCarrier].totalAP += amount
-      byCarrier[foundCarrier].count += 1
+      const displayName = displayNames[rawUsername] || rawUsername
+      const saleDate = new Date(msg.timestamp).toISOString().split('T')[0]
 
-      if (!byAgent[author]) byAgent[author] = { totalAP: 0, carriers: new Set(), count: 0 }
-      byAgent[author].totalAP += amount
-      byAgent[author].carriers.add(foundCarrier)
-      byAgent[author].count += 1
+      records.push({
+        discord_message_id: msg.id,
+        sale_date: saleDate,
+        agent_name: displayName,
+        carrier: foundCarrier,
+        amount: amount
+      })
     }
 
-    const byCarrierArray = Object.entries(byCarrier).map(([carrier, data]) => ({
-      carrier, totalAP: Math.round(data.totalAP * 100) / 100, count: data.count
-    })).sort((a, b) => b.totalAP - a.totalAP)
+    let inserted = 0
+    if (records.length > 0) {
+      const { error, count } = await supabase
+        .from('discord_sales_records')
+        .upsert(records, { onConflict: 'discord_message_id', ignoreDuplicates: true, count: 'exact' })
 
-    const byAgentArray = Object.entries(byAgent).map(([agent, data]) => ({
-      agent, totalAP: Math.round(data.totalAP * 100) / 100, carriers: Array.from(data.carriers), count: data.count
-    })).sort((a, b) => b.totalAP - a.totalAP)
-
-    const totalAP = byCarrierArray.reduce((sum, c) => sum + c.totalAP, 0)
-    const totalSales = byCarrierArray.reduce((sum, c) => sum + c.count, 0)
-
-    const { error: insertError } = await supabase.from('weekly_sales_snapshot').insert({
-      week_start: weekStart.toISOString().split('T')[0],
-      week_end: weekEnd.toISOString().split('T')[0],
-      by_carrier: byCarrierArray,
-      by_agent: byAgentArray,
-      total_ap: totalAP,
-      total_sales: totalSales,
-    })
-
-    if (insertError) {
-      return NextResponse.json({ success: false, insertError: insertError.message, totalAP, totalSales }, { status: 500 })
+      if (error) {
+        return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+      }
+      inserted = count || 0
     }
 
-    return NextResponse.json({ success: true, totalAP, totalSales, byCarrierArray, byAgentArray })
+    return NextResponse.json({ success: true, messagesScanned: recentMessages.length, recordsProcessed: records.length })
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 })
   }

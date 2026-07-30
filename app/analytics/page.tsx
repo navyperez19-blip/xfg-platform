@@ -23,8 +23,9 @@ export default function AnalyticsPage() {
   const [contractingFilter, setContractingFilter] = useState<string | null>(null)
   const [resetError, setResetError] = useState('')
   const [overviewDetail, setOverviewDetail] = useState<'onboarding' | 'discord' | 'xfgEmail' | null>(null)
-  const [allSalesSnapshots, setAllSalesSnapshots] = useState<any[]>([])
+  const [salesRecords, setSalesRecords] = useState<any[]>([])
   const [salesPeriod, setSalesPeriod] = useState<'weekly' | 'monthly' | 'allTime'>('weekly')
+  const [selectedMonth, setSelectedMonth] = useState<string>('')
 
   const filterToGroup: Record<string, string> = {
     ethos: 'Ethos',
@@ -60,13 +61,17 @@ export default function AnalyticsPage() {
       setAgents(agentsData || [])
       setHistory(historyData || [])
 
-      const { data: salesSnapshots } = await supabase
-        .from('weekly_sales_snapshot')
+      const { data: records } = await supabase
+        .from('discord_sales_records')
         .select('*')
-        .order('week_start', { ascending: false })
+        .order('sale_date', { ascending: false })
 
-      if (salesSnapshots) {
-        setAllSalesSnapshots(salesSnapshots)
+      if (records) {
+        setSalesRecords(records)
+        if (records.length > 0 && !selectedMonth) {
+          const latestMonth = records[0].sale_date.slice(0, 7)
+          setSelectedMonth(latestMonth)
+        }
       }
 
       setLoading(false)
@@ -151,33 +156,38 @@ export default function AnalyticsPage() {
     }
   }
 
-  function getAggregatedSales(snapshots: any[], period: 'weekly' | 'monthly' | 'allTime') {
-    if (snapshots.length === 0) return null
+  function aggregateSalesRecords(records: any[], period: 'weekly' | 'monthly' | 'allTime', selectedMonth?: string) {
+    if (records.length === 0) return null
 
-    let filtered = snapshots
+    let filtered = records
+    let periodLabel = 'All-Time'
+
     if (period === 'weekly') {
-      filtered = [snapshots[0]]
-    } else if (period === 'monthly') {
       const now = new Date()
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-      filtered = snapshots.filter(s => new Date(s.week_start) >= monthStart)
+      const weekAgo = new Date(now)
+      weekAgo.setDate(weekAgo.getDate() - 7)
+      filtered = records.filter(r => new Date(r.sale_date) >= weekAgo)
+      periodLabel = `Last 7 Days (${weekAgo.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`
+    } else if (period === 'monthly' && selectedMonth) {
+      filtered = records.filter(r => r.sale_date.slice(0, 7) === selectedMonth)
+      const [year, month] = selectedMonth.split('-')
+      periodLabel = new Date(parseInt(year), parseInt(month) - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
     }
 
     const carrierMap: Record<string, { totalAP: number; count: number }> = {}
     const agentMap: Record<string, { totalAP: number; carriers: Set<string>; count: number }> = {}
 
-    filtered.forEach(snap => {
-      (snap.by_carrier || []).forEach((c: any) => {
-        if (!carrierMap[c.carrier]) carrierMap[c.carrier] = { totalAP: 0, count: 0 }
-        carrierMap[c.carrier].totalAP += c.totalAP
-        carrierMap[c.carrier].count += c.count
-      })
-      ;(snap.by_agent || []).forEach((a: any) => {
-        if (!agentMap[a.agent]) agentMap[a.agent] = { totalAP: 0, carriers: new Set(), count: 0 }
-        agentMap[a.agent].totalAP += a.totalAP
-        a.carriers.forEach((c: string) => agentMap[a.agent].carriers.add(c))
-        agentMap[a.agent].count += (a.count || 0)
-      })
+    filtered.forEach(r => {
+      const c = r.carrier
+      if (!carrierMap[c]) carrierMap[c] = { totalAP: 0, count: 0 }
+      carrierMap[c].totalAP += Number(r.amount)
+      carrierMap[c].count += 1
+
+      const a = r.agent_name
+      if (!agentMap[a]) agentMap[a] = { totalAP: 0, carriers: new Set(), count: 0 }
+      agentMap[a].totalAP += Number(r.amount)
+      agentMap[a].carriers.add(c)
+      agentMap[a].count += 1
     })
 
     const byCarrier = Object.entries(carrierMap).map(([carrier, d]) => ({ carrier, totalAP: Math.round(d.totalAP * 100) / 100, count: d.count })).sort((a, b) => b.totalAP - a.totalAP)
@@ -190,12 +200,14 @@ export default function AnalyticsPage() {
       totalSales,
       byCarrier,
       byAgent,
-      periodLabel: period === 'weekly'
-        ? `Week of ${new Date(filtered[0].week_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — ${new Date(filtered[0].week_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
-        : period === 'monthly'
-        ? new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-        : 'All-Time'
+      periodLabel
     }
+  }
+
+  function getAvailableMonths(records: any[]): string[] {
+    const months = new Set<string>()
+    records.forEach(r => months.add(r.sale_date.slice(0, 7)))
+    return Array.from(months).sort().reverse()
   }
 
   const statusBadge = (status: string) => {
@@ -921,16 +933,17 @@ export default function AnalyticsPage() {
         {/* SALES TAB */}
         {activeTab === 'sales' && (
           <div>
-            {allSalesSnapshots.length === 0 ? (
+            {salesRecords.length === 0 ? (
               <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '48px 24px', textAlign: 'center' }}>
                 <p style={{ fontSize: '14px', color: '#AAA' }}>No sales data yet. This updates automatically every Monday at 8AM CST from the Discord sales channel.</p>
               </div>
             ) : (() => {
-              const data = getAggregatedSales(allSalesSnapshots, salesPeriod)
+              const availableMonths = getAvailableMonths(salesRecords)
+              const data = aggregateSalesRecords(salesRecords, salesPeriod, selectedMonth)
               if (!data) return null
               return (
                 <>
-                  <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
                     {[{ key: 'weekly', label: 'Weekly' }, { key: 'monthly', label: 'Monthly' }, { key: 'allTime', label: 'All-Time' }].map(p => (
                       <button
                         key={p.key}
@@ -949,9 +962,22 @@ export default function AnalyticsPage() {
                         {p.label}
                       </button>
                     ))}
+                    {salesPeriod === 'monthly' && (
+                      <select
+                        value={selectedMonth}
+                        onChange={e => setSelectedMonth(e.target.value)}
+                        style={{ padding: '8px 16px', borderRadius: '20px', border: '1px solid #E5E1DA', fontSize: '13px', fontWeight: '600', color: '#1A1A1A', backgroundColor: '#FFFFFF', cursor: 'pointer' }}
+                      >
+                        {availableMonths.map(m => {
+                          const [year, month] = m.split('-')
+                          const label = new Date(parseInt(year), parseInt(month) - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                          return <option key={m} value={m}>{label}</option>
+                        })}
+                      </select>
+                    )}
                   </div>
 
-                  <div style={{ background: 'linear-gradient(135deg, #0D0D0D 0%, #1F1F1F 60%, #2D2D2D 100%)', borderRadius: '20px', padding: '32px 36px', marginBottom: '24px', border: '1px solid #C9A96E', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ background: 'linear-gradient(135deg, #0D0D0D 0%, #1F1F1F 60%, #2D2D2D 100%)', borderRadius: '20px', padding: '32px 36px', marginBottom: '24px', border: '1px solid #C9A96E' }}>
                     <p style={{ fontSize: '11px', fontWeight: '700', color: '#C9A96E', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{data.periodLabel}</p>
                     <div style={{ display: 'flex', alignItems: 'flex-end', gap: '48px', flexWrap: 'wrap' }}>
                       <div>
