@@ -15,15 +15,15 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-
-  const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN!
-  const CHANNEL_ID = process.env.DISCORD_SALES_CHANNEL_ID!
-
   try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN!
+    const CHANNEL_ID = process.env.DISCORD_SALES_CHANNEL_ID!
+
     const now = new Date()
     const weekEnd = new Date(now)
     const weekStart = new Date(now)
