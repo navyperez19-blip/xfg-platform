@@ -2,11 +2,32 @@ import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
 const CARRIERS = ['Ethos', 'Americo', 'Mutual of Omaha', 'MOO', 'AIG', 'Core Bridge', 'Corebridge', 'Aflac', 'Transamerica', 'UHL', 'AHL']
+const GUILD_ID = '1497790255238086787'
 
 function normalizeCarrier(carrier: string): string {
   if (carrier === 'MOO') return 'Mutual of Omaha'
   if (carrier === 'Core Bridge' || carrier === 'Corebridge') return 'Corebridge'
   return carrier
+}
+
+async function getDiscordDisplayNames(botToken: string, guildId: string): Promise<Record<string, string>> {
+  const nameMap: Record<string, string> = {}
+  try {
+    const res = await fetch(`https://discord.com/api/v10/guilds/${guildId}/members?limit=1000`, {
+      headers: { Authorization: `Bot ${botToken}` }
+    })
+    const members = await res.json()
+    if (Array.isArray(members)) {
+      for (const m of members) {
+        const username = m.user?.username
+        const displayName = m.nick || m.user?.global_name || username
+        if (username) nameMap[username] = displayName
+      }
+    }
+  } catch (e) {
+    // fail silently, fall back to usernames
+  }
+  return nameMap
 }
 
 export async function GET(request: Request) {
@@ -51,12 +72,15 @@ export async function GET(request: Request) {
 
     const weekMessages = allMessages.filter(m => new Date(m.timestamp) >= weekStart)
 
+    const displayNames = await getDiscordDisplayNames(DISCORD_BOT_TOKEN, GUILD_ID)
+
     const byCarrier: Record<string, { totalAP: number; count: number }> = {}
     const byAgent: Record<string, { totalAP: number; carriers: Set<string> }> = {}
 
     for (const msg of weekMessages) {
       const content = msg.content as string
-      const author = msg.author.username as string
+      const rawUsername = msg.author.username as string
+      const author = displayNames[rawUsername] || rawUsername
 
       let foundCarrier: string | null = null
       for (const c of CARRIERS) {
