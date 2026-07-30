@@ -164,7 +164,7 @@ export default function AnalyticsPage() {
     }
 
     const carrierMap: Record<string, { totalAP: number; count: number }> = {}
-    const agentMap: Record<string, { totalAP: number; carriers: Set<string> }> = {}
+    const agentMap: Record<string, { totalAP: number; carriers: Set<string>; count: number }> = {}
 
     filtered.forEach(snap => {
       (snap.by_carrier || []).forEach((c: any) => {
@@ -173,14 +173,15 @@ export default function AnalyticsPage() {
         carrierMap[c.carrier].count += c.count
       })
       ;(snap.by_agent || []).forEach((a: any) => {
-        if (!agentMap[a.agent]) agentMap[a.agent] = { totalAP: 0, carriers: new Set() }
+        if (!agentMap[a.agent]) agentMap[a.agent] = { totalAP: 0, carriers: new Set(), count: 0 }
         agentMap[a.agent].totalAP += a.totalAP
         a.carriers.forEach((c: string) => agentMap[a.agent].carriers.add(c))
+        agentMap[a.agent].count += (a.count || 0)
       })
     })
 
     const byCarrier = Object.entries(carrierMap).map(([carrier, d]) => ({ carrier, totalAP: Math.round(d.totalAP * 100) / 100, count: d.count })).sort((a, b) => b.totalAP - a.totalAP)
-    const byAgent = Object.entries(agentMap).map(([agent, d]) => ({ agent, totalAP: Math.round(d.totalAP * 100) / 100, carriers: Array.from(d.carriers) })).sort((a, b) => b.totalAP - a.totalAP)
+    const byAgent = Object.entries(agentMap).map(([agent, d]) => ({ agent, totalAP: Math.round(d.totalAP * 100) / 100, carriers: Array.from(d.carriers), count: d.count })).sort((a, b) => b.totalAP - a.totalAP)
     const totalAP = byCarrier.reduce((sum, c) => sum + c.totalAP, 0)
     const totalSales = byCarrier.reduce((sum, c) => sum + c.count, 0)
 
@@ -995,7 +996,7 @@ export default function AnalyticsPage() {
                           <div key={a.agent} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderTop: i > 0 ? '1px solid #F0EDE8' : 'none' }}>
                             <div>
                               <p style={{ fontSize: '14px', color: '#1A1A1A', fontWeight: '600', margin: 0 }}>{a.agent}</p>
-                              <p style={{ fontSize: '11px', color: '#AAA', margin: 0 }}>{a.carriers.join(', ')}</p>
+                              <p style={{ fontSize: '11px', color: '#AAA', margin: 0 }}>{a.carriers.join(', ')} · {a.count} polic{a.count !== 1 ? 'ies' : 'y'}</p>
                             </div>
                             <p style={{ fontSize: '15px', fontWeight: '800', color: '#22C55E', margin: 0 }}>${a.totalAP.toLocaleString()}</p>
                           </div>

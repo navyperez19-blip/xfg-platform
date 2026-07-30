@@ -75,7 +75,7 @@ export async function GET(request: Request) {
     const displayNames = await getDiscordDisplayNames(DISCORD_BOT_TOKEN, GUILD_ID)
 
     const byCarrier: Record<string, { totalAP: number; count: number }> = {}
-    const byAgent: Record<string, { totalAP: number; carriers: Set<string> }> = {}
+    const byAgent: Record<string, { totalAP: number; carriers: Set<string>; count: number }> = {}
 
     for (const msg of weekMessages) {
       const content = msg.content as string
@@ -102,9 +102,10 @@ export async function GET(request: Request) {
       byCarrier[foundCarrier].totalAP += amount
       byCarrier[foundCarrier].count += 1
 
-      if (!byAgent[author]) byAgent[author] = { totalAP: 0, carriers: new Set() }
+      if (!byAgent[author]) byAgent[author] = { totalAP: 0, carriers: new Set(), count: 0 }
       byAgent[author].totalAP += amount
       byAgent[author].carriers.add(foundCarrier)
+      byAgent[author].count += 1
     }
 
     const byCarrierArray = Object.entries(byCarrier).map(([carrier, data]) => ({
@@ -112,7 +113,7 @@ export async function GET(request: Request) {
     })).sort((a, b) => b.totalAP - a.totalAP)
 
     const byAgentArray = Object.entries(byAgent).map(([agent, data]) => ({
-      agent, totalAP: Math.round(data.totalAP * 100) / 100, carriers: Array.from(data.carriers)
+      agent, totalAP: Math.round(data.totalAP * 100) / 100, carriers: Array.from(data.carriers), count: data.count
     })).sort((a, b) => b.totalAP - a.totalAP)
 
     const totalAP = byCarrierArray.reduce((sum, c) => sum + c.totalAP, 0)
