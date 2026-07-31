@@ -935,8 +935,27 @@ export default function AnalyticsPage() {
           <div>
             <style>{`
               @keyframes xfgPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-              @keyframes xfgSweep { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+              @keyframes xfgFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
+              @keyframes xfgHolo { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
               .xfg-hud-num { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+              .xfg-hero-num {
+                background: linear-gradient(110deg, #FFFFFF 20%, #C9A96E 35%, #00E5A8 50%, #C9A96E 65%, #FFFFFF 80%);
+                background-size: 250% auto;
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+                animation: xfgFloat 4s ease-in-out infinite, xfgHolo 6s linear infinite;
+                display: inline-block;
+                transition: filter 0.3s ease;
+                cursor: default;
+              }
+              .xfg-hero-num:hover { filter: brightness(1.25) drop-shadow(0 0 20px rgba(0,229,168,0.5)); }
+              .xfg-substat-num {
+                display: inline-block;
+                animation: xfgFloat 4s ease-in-out infinite;
+                transition: transform 0.25s ease, color 0.25s ease;
+              }
+              .xfg-substat-num:hover { transform: translateY(-8px) scale(1.05); color: #00E5A8 !important; }
             `}</style>
             {salesRecords.length === 0 ? (
               <div style={{ backgroundColor: '#0A0A0C', borderRadius: '16px', border: '1px solid #232328', padding: '48px 24px', textAlign: 'center' }}>
@@ -1021,17 +1040,17 @@ export default function AnalyticsPage() {
 
                     <div style={{ display: 'flex', alignItems: 'flex-end', gap: '56px', flexWrap: 'wrap', marginTop: '14px' }}>
                       <div style={{ position: 'relative' }}>
-                        <p className="xfg-hud-num" style={{ fontSize: '52px', fontWeight: '700', color: '#FFFFFF', margin: 0, letterSpacing: '-0.01em', textShadow: '0 0 30px rgba(201,169,110,0.35)' }}>
+                        <p className="xfg-hud-num xfg-hero-num" style={{ fontSize: '52px', fontWeight: '700', margin: 0, letterSpacing: '-0.01em' }}>
                           ${data.totalAP.toLocaleString()}
                         </p>
                         <p style={{ fontSize: '11px', color: '#6B6B76', margin: '4px 0 0 0', textTransform: 'uppercase', letterSpacing: '0.14em', fontFamily: 'ui-monospace, monospace' }}>Total Annual Premium</p>
                       </div>
                       <div style={{ borderLeft: '1px solid #232328', paddingLeft: '32px' }}>
-                        <p className="xfg-hud-num" style={{ fontSize: '30px', fontWeight: '700', color: '#C9A96E', margin: 0 }}>{data.totalSales}</p>
+                        <p className="xfg-hud-num xfg-substat-num" style={{ fontSize: '30px', fontWeight: '700', color: '#C9A96E', margin: 0, animationDelay: '0.3s' }}>{data.totalSales}</p>
                         <p style={{ fontSize: '11px', color: '#6B6B76', margin: '4px 0 0 0', textTransform: 'uppercase', letterSpacing: '0.14em', fontFamily: 'ui-monospace, monospace' }}>Policies Sold</p>
                       </div>
                       <div style={{ borderLeft: '1px solid #232328', paddingLeft: '32px' }}>
-                        <p className="xfg-hud-num" style={{ fontSize: '30px', fontWeight: '700', color: '#C9A96E', margin: 0 }}>${data.totalSales > 0 ? Math.round(data.totalAP / data.totalSales).toLocaleString() : 0}</p>
+                        <p className="xfg-hud-num xfg-substat-num" style={{ fontSize: '30px', fontWeight: '700', color: '#C9A96E', margin: 0, animationDelay: '0.6s' }}>${data.totalSales > 0 ? Math.round(data.totalAP / data.totalSales).toLocaleString() : 0}</p>
                         <p style={{ fontSize: '11px', color: '#6B6B76', margin: '4px 0 0 0', textTransform: 'uppercase', letterSpacing: '0.14em', fontFamily: 'ui-monospace, monospace' }}>Avg AP / Sale</p>
                       </div>
                     </div>
