@@ -933,98 +933,149 @@ export default function AnalyticsPage() {
         {/* SALES TAB */}
         {activeTab === 'sales' && (
           <div>
+            <style>{`
+              @keyframes xfgPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+              @keyframes xfgSweep { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+              .xfg-hud-num { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+            `}</style>
             {salesRecords.length === 0 ? (
-              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '48px 24px', textAlign: 'center' }}>
-                <p style={{ fontSize: '14px', color: '#AAA' }}>No sales data yet. This updates automatically every Monday at 8AM CST from the Discord sales channel.</p>
+              <div style={{ backgroundColor: '#0A0A0C', borderRadius: '16px', border: '1px solid #232328', padding: '48px 24px', textAlign: 'center' }}>
+                <p style={{ fontSize: '13px', color: '#6B6B76', fontFamily: 'ui-monospace, monospace' }}>NO DATA STREAM — awaiting first sync from #daily-sales</p>
               </div>
             ) : (() => {
               const availableMonths = getAvailableMonths(salesRecords)
               const data = aggregateSalesRecords(salesRecords, salesPeriod, selectedMonth)
               if (!data) return null
+
+              const periods = [{ key: 'weekly', label: 'WEEKLY' }, { key: 'monthly', label: 'MONTHLY' }, { key: 'allTime', label: 'ALL-TIME' }]
+              const activeIndex = periods.findIndex(p => p.key === salesPeriod)
+
               return (
                 <>
-                  <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    {[{ key: 'weekly', label: 'Weekly' }, { key: 'monthly', label: 'Monthly' }, { key: 'allTime', label: 'All-Time' }].map(p => (
-                      <button
-                        key={p.key}
-                        onClick={() => setSalesPeriod(p.key as 'weekly' | 'monthly' | 'allTime')}
-                        style={{
-                          padding: '8px 20px',
-                          borderRadius: '20px',
-                          border: salesPeriod === p.key ? '1px solid #C9A96E' : '1px solid #E5E1DA',
-                          backgroundColor: salesPeriod === p.key ? '#1A1A1A' : '#FFFFFF',
-                          color: salesPeriod === p.key ? '#C9A96E' : '#7A7A7A',
-                          fontSize: '13px',
-                          fontWeight: '700',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        {p.label}
-                      </button>
-                    ))}
+                  {/* Segmented control */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
+                    <div style={{ position: 'relative', display: 'inline-flex', backgroundColor: '#131316', border: '1px solid #232328', borderRadius: '10px', padding: '4px' }}>
+                      <div style={{
+                        position: 'absolute', top: '4px', bottom: '4px', left: `calc(4px + ${activeIndex} * 88px)`,
+                        width: '84px', backgroundColor: '#C9A96E', borderRadius: '7px',
+                        transition: 'left 0.25s cubic-bezier(0.4, 0, 0.2, 1)', boxShadow: '0 0 16px rgba(201,169,110,0.5)'
+                      }} />
+                      {periods.map(p => (
+                        <button
+                          key={p.key}
+                          onClick={() => setSalesPeriod(p.key as 'weekly' | 'monthly' | 'allTime')}
+                          style={{
+                            position: 'relative', width: '84px', padding: '9px 0', border: 'none', background: 'transparent',
+                            fontSize: '11px', fontWeight: '700', letterSpacing: '0.08em', cursor: 'pointer', fontFamily: 'ui-monospace, monospace',
+                            color: salesPeriod === p.key ? '#0A0A0C' : '#6B6B76', transition: 'color 0.25s ease', zIndex: 1
+                          }}
+                        >
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+
                     {salesPeriod === 'monthly' && (
                       <select
                         value={selectedMonth}
                         onChange={e => setSelectedMonth(e.target.value)}
-                        style={{ padding: '8px 16px', borderRadius: '20px', border: '1px solid #E5E1DA', fontSize: '13px', fontWeight: '600', color: '#1A1A1A', backgroundColor: '#FFFFFF', cursor: 'pointer' }}
+                        style={{
+                          padding: '9px 16px', borderRadius: '10px', border: '1px solid #232328', fontSize: '12px', fontWeight: '700',
+                          color: '#C9A96E', backgroundColor: '#131316', cursor: 'pointer', fontFamily: 'ui-monospace, monospace', letterSpacing: '0.04em'
+                        }}
                       >
                         {availableMonths.map(m => {
                           const [year, month] = m.split('-')
                           const label = new Date(parseInt(year), parseInt(month) - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-                          return <option key={m} value={m}>{label}</option>
+                          return <option key={m} value={m}>{label.toUpperCase()}</option>
                         })}
                       </select>
                     )}
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
+                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#00E5A8', animation: 'xfgPulse 2s ease-in-out infinite' }} />
+                      <span style={{ fontSize: '10px', color: '#6B6B76', fontFamily: 'ui-monospace, monospace', letterSpacing: '0.1em' }}>LIVE · SYNCS MON 8AM CST</span>
+                    </div>
                   </div>
 
-                  <div style={{ background: 'linear-gradient(135deg, #0D0D0D 0%, #1F1F1F 60%, #2D2D2D 100%)', borderRadius: '20px', padding: '32px 36px', marginBottom: '24px', border: '1px solid #C9A96E' }}>
-                    <p style={{ fontSize: '11px', fontWeight: '700', color: '#C9A96E', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{data.periodLabel}</p>
-                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '48px', flexWrap: 'wrap' }}>
-                      <div>
-                        <p style={{ fontSize: '44px', fontWeight: '800', color: '#FFFFFF', margin: 0, letterSpacing: '-0.02em' }}>${data.totalAP.toLocaleString()}</p>
-                        <p style={{ fontSize: '12px', color: '#8A8A8A', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Total Annual Premium</p>
+                  {/* Hero HUD panel */}
+                  <div style={{
+                    position: 'relative', background: '#0A0A0C', borderRadius: '20px', padding: '36px 40px', marginBottom: '24px',
+                    border: '1px solid #232328', overflow: 'hidden',
+                    backgroundImage: 'repeating-linear-gradient(115deg, rgba(201,169,110,0.03) 0px, rgba(201,169,110,0.03) 1px, transparent 1px, transparent 40px)'
+                  }}>
+                    {/* corner brackets */}
+                    {[
+                      { top: 14, left: 14, borderTop: '2px solid #C9A96E', borderLeft: '2px solid #C9A96E' },
+                      { top: 14, right: 14, borderTop: '2px solid #C9A96E', borderRight: '2px solid #C9A96E' },
+                      { bottom: 14, left: 14, borderBottom: '2px solid #C9A96E', borderLeft: '2px solid #C9A96E' },
+                      { bottom: 14, right: 14, borderBottom: '2px solid #C9A96E', borderRight: '2px solid #C9A96E' },
+                    ].map((pos, i) => (
+                      <div key={i} style={{ position: 'absolute', width: '18px', height: '18px', ...pos }} />
+                    ))}
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <span style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#00E5A8' }} />
+                      <p style={{ fontSize: '11px', fontWeight: '700', color: '#00E5A8', margin: 0, textTransform: 'uppercase', letterSpacing: '0.16em', fontFamily: 'ui-monospace, monospace' }}>{data.periodLabel}</p>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '56px', flexWrap: 'wrap', marginTop: '14px' }}>
+                      <div style={{ position: 'relative' }}>
+                        <p className="xfg-hud-num" style={{ fontSize: '52px', fontWeight: '700', color: '#FFFFFF', margin: 0, letterSpacing: '-0.01em', textShadow: '0 0 30px rgba(201,169,110,0.35)' }}>
+                          ${data.totalAP.toLocaleString()}
+                        </p>
+                        <p style={{ fontSize: '11px', color: '#6B6B76', margin: '4px 0 0 0', textTransform: 'uppercase', letterSpacing: '0.14em', fontFamily: 'ui-monospace, monospace' }}>Total Annual Premium</p>
                       </div>
-                      <div>
-                        <p style={{ fontSize: '28px', fontWeight: '700', color: '#C9A96E', margin: 0 }}>{data.totalSales}</p>
-                        <p style={{ fontSize: '12px', color: '#8A8A8A', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Policies Sold</p>
+                      <div style={{ borderLeft: '1px solid #232328', paddingLeft: '32px' }}>
+                        <p className="xfg-hud-num" style={{ fontSize: '30px', fontWeight: '700', color: '#C9A96E', margin: 0 }}>{data.totalSales}</p>
+                        <p style={{ fontSize: '11px', color: '#6B6B76', margin: '4px 0 0 0', textTransform: 'uppercase', letterSpacing: '0.14em', fontFamily: 'ui-monospace, monospace' }}>Policies Sold</p>
                       </div>
-                      <div>
-                        <p style={{ fontSize: '28px', fontWeight: '700', color: '#C9A96E', margin: 0 }}>${data.totalSales > 0 ? Math.round(data.totalAP / data.totalSales).toLocaleString() : 0}</p>
-                        <p style={{ fontSize: '12px', color: '#8A8A8A', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Avg AP / Sale</p>
+                      <div style={{ borderLeft: '1px solid #232328', paddingLeft: '32px' }}>
+                        <p className="xfg-hud-num" style={{ fontSize: '30px', fontWeight: '700', color: '#C9A96E', margin: 0 }}>${data.totalSales > 0 ? Math.round(data.totalAP / data.totalSales).toLocaleString() : 0}</p>
+                        <p style={{ fontSize: '11px', color: '#6B6B76', margin: '4px 0 0 0', textTransform: 'uppercase', letterSpacing: '0.14em', fontFamily: 'ui-monospace, monospace' }}>Avg AP / Sale</p>
                       </div>
                     </div>
                   </div>
 
+                  {/* By Carrier / By Agent */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                    <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E5E1DA', overflow: 'hidden' }}>
-                      <div style={{ padding: '16px 24px', borderBottom: '1px solid #E5E1DA', backgroundColor: '#FAFAF8' }}>
-                        <p style={{ fontSize: '13px', fontWeight: '700', color: '#1A1A1A', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>By Carrier</p>
+                    <div style={{ backgroundColor: '#0A0A0C', borderRadius: '16px', border: '1px solid #232328', overflow: 'hidden' }}>
+                      <div style={{ padding: '14px 22px', borderBottom: '1px solid #232328', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#C9A96E' }} />
+                        <p style={{ fontSize: '11px', fontWeight: '700', color: '#C9A96E', margin: 0, textTransform: 'uppercase', letterSpacing: '0.14em', fontFamily: 'ui-monospace, monospace' }}>By Carrier</p>
                       </div>
-                      <div style={{ padding: '8px 24px' }}>
+                      <div style={{ padding: '4px 22px' }}>
                         {data.byCarrier.map((c: any, i: number) => (
-                          <div key={c.carrier} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderTop: i > 0 ? '1px solid #F0EDE8' : 'none' }}>
-                            <span style={{ fontSize: '14px', color: '#1A1A1A', fontWeight: '600' }}>{c.carrier}</span>
+                          <div key={c.carrier} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 0', borderTop: i > 0 ? '1px solid #1A1A1E' : 'none' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <span className="xfg-hud-num" style={{ fontSize: '10px', color: '#3A3A40', width: '16px' }}>{String(i + 1).padStart(2, '0')}</span>
+                              <span style={{ fontSize: '13px', color: '#E5E5E5', fontWeight: '600' }}>{c.carrier}</span>
+                            </div>
                             <div style={{ textAlign: 'right' }}>
-                              <p style={{ fontSize: '15px', fontWeight: '800', color: '#7C3AED', margin: 0 }}>${c.totalAP.toLocaleString()}</p>
-                              <p style={{ fontSize: '11px', color: '#AAA', margin: 0 }}>{c.count} sale{c.count !== 1 ? 's' : ''}</p>
+                              <p className="xfg-hud-num" style={{ fontSize: '14px', fontWeight: '700', color: '#00E5A8', margin: 0 }}>${c.totalAP.toLocaleString()}</p>
+                              <p style={{ fontSize: '10px', color: '#6B6B76', margin: 0, fontFamily: 'ui-monospace, monospace' }}>{c.count} sale{c.count !== 1 ? 's' : ''}</p>
                             </div>
                           </div>
                         ))}
                       </div>
                     </div>
 
-                    <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E5E1DA', overflow: 'hidden' }}>
-                      <div style={{ padding: '16px 24px', borderBottom: '1px solid #E5E1DA', backgroundColor: '#FAFAF8' }}>
-                        <p style={{ fontSize: '13px', fontWeight: '700', color: '#1A1A1A', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>By Agent</p>
+                    <div style={{ backgroundColor: '#0A0A0C', borderRadius: '16px', border: '1px solid #232328', overflow: 'hidden' }}>
+                      <div style={{ padding: '14px 22px', borderBottom: '1px solid #232328', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#C9A96E' }} />
+                        <p style={{ fontSize: '11px', fontWeight: '700', color: '#C9A96E', margin: 0, textTransform: 'uppercase', letterSpacing: '0.14em', fontFamily: 'ui-monospace, monospace' }}>By Agent</p>
                       </div>
-                      <div style={{ padding: '8px 24px' }}>
+                      <div style={{ padding: '4px 22px' }}>
                         {data.byAgent.map((a: any, i: number) => (
-                          <div key={a.agent} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderTop: i > 0 ? '1px solid #F0EDE8' : 'none' }}>
-                            <div>
-                              <p style={{ fontSize: '14px', color: '#1A1A1A', fontWeight: '600', margin: 0 }}>{a.agent}</p>
-                              <p style={{ fontSize: '11px', color: '#AAA', margin: 0 }}>{a.carriers.join(', ')} · {a.count} polic{a.count !== 1 ? 'ies' : 'y'}</p>
+                          <div key={a.agent} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 0', borderTop: i > 0 ? '1px solid #1A1A1E' : 'none' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <span className="xfg-hud-num" style={{ fontSize: '10px', color: '#3A3A40', width: '16px' }}>{String(i + 1).padStart(2, '0')}</span>
+                              <div>
+                                <p style={{ fontSize: '13px', color: '#E5E5E5', fontWeight: '600', margin: 0 }}>{a.agent}</p>
+                                <p style={{ fontSize: '10px', color: '#6B6B76', margin: 0, fontFamily: 'ui-monospace, monospace' }}>{a.carriers.join(', ')} · {a.count} polic{a.count !== 1 ? 'ies' : 'y'}</p>
+                              </div>
                             </div>
-                            <p style={{ fontSize: '15px', fontWeight: '800', color: '#22C55E', margin: 0 }}>${a.totalAP.toLocaleString()}</p>
+                            <p className="xfg-hud-num" style={{ fontSize: '14px', fontWeight: '700', color: '#00E5A8', margin: 0 }}>${a.totalAP.toLocaleString()}</p>
                           </div>
                         ))}
                       </div>
