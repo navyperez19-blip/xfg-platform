@@ -96,6 +96,14 @@ export async function GET(request: Request) {
 
       if (rawUsername.toLowerCase() === 'mikeibraimi') continue
 
+      // Skip replies (celebratory/hype responses), only process original top-level posts
+      if (msg.message_reference) continue
+
+      // Require the dollar/number amount to appear near the start of the message,
+      // matching the real sale-post format (e.g. "$904.80 Ethos Whole Life")
+      const startsWithAmount = /^\s*\$?[\d,]+(?:\.\d+)?/.test(content)
+      if (!startsWithAmount) continue
+
       let foundCarrier: string | null = null
       for (const c of CARRIERS) {
         if (content.toLowerCase().includes(c.toLowerCase())) {
