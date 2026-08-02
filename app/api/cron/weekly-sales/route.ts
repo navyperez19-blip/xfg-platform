@@ -10,6 +10,24 @@ function normalizeCarrier(carrier: string): string {
   return carrier
 }
 
+const MANUAL_NAME_OVERRIDES: Record<string, string> = {
+  'brandon_goff': 'Brandon Goff',
+  'jslzr.': 'Jesus Salazar',
+  'vomalities': 'Ryan Keeling',
+  'maryemmaclark': 'MaryEmma Mcrae',
+  'alexlines.xfg': 'Alex Lines',
+  'caden_heck10': 'Caden Heck',
+  'rfanning.': 'Richard Fanning',
+  'karleysells': 'Karley Lipke',
+  'tristanperez1': 'Tristan Perez',
+  'the_takiyah': 'Takiyah Campbell',
+  'lathanb': 'Lathan Bourgeois',
+  '22jchap': 'Justice Chapman',
+  'andrew_higdon': 'Andy Higdon',
+  'david_73668': 'David Snyder',
+  'pdstuffy': 'Ben Smedshammer',
+}
+
 async function getDiscordDisplayNames(botToken: string, guildId: string): Promise<Record<string, string>> {
   const nameMap: Record<string, string> = {}
   try {
@@ -20,7 +38,7 @@ async function getDiscordDisplayNames(botToken: string, guildId: string): Promis
     if (Array.isArray(members)) {
       for (const m of members) {
         const username = m.user?.username
-        const displayName = m.nick || m.user?.global_name || username
+        const displayName = MANUAL_NAME_OVERRIDES[username] || m.nick || m.user?.global_name || username
         if (username) nameMap[username] = displayName
       }
     }
