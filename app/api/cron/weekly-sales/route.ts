@@ -1,12 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-const CARRIERS = ['Ethos', 'Americo', 'Mutual of Omaha', 'MOO', 'AIG', 'Core Bridge', 'Corebridge', 'Aflac', 'Transamerica', 'UHL', 'AHL']
+const CARRIERS = ['Ethos', 'Americo', 'Mutual of Omaha', 'MOO', 'AIG', 'Core Bridge', 'Corebridge', 'Core', 'Aflac', 'Transamerica', 'UHL', 'AHL']
 const GUILD_ID = '1497790255238086787'
 
 function normalizeCarrier(carrier: string): string {
   if (carrier === 'MOO') return 'Mutual of Omaha'
-  if (carrier === 'Core Bridge' || carrier === 'Corebridge') return 'Corebridge'
+  if (carrier === 'Core Bridge' || carrier === 'Corebridge' || carrier === 'Core') return 'Corebridge'
   return carrier
 }
 
