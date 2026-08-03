@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
 import CRMNav from '@/components/crm/CRMNav'
+import { Toaster } from 'sonner'
 
 export default function CRMLayout({
   children,
@@ -124,6 +125,7 @@ export default function CRMLayout({
       }}>
         {children}
       </main>
+      <Toaster position="bottom-right" richColors closeButton />
     </div>
   )
 }
