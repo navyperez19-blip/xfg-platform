@@ -60,6 +60,7 @@ export default function AgentDetailPage() {
   const [savingUpline, setSavingUpline] = useState(false)
   const [isLeader, setIsLeader] = useState(false)
   const [isTopPerformer, setIsTopPerformer] = useState(false)
+  const [compLevel, setCompLevel] = useState<string | null>(null)
   const [stats, setStats] = useState<any>(null)
   const [carrierMix, setCarrierMix] = useState<{ carrier: string; count: number }[]>([])
   const [launchWindow, setLaunchWindow] = useState<any>(null)
@@ -82,6 +83,7 @@ export default function AgentDetailPage() {
         setUplineAgentId(data.upline_agent_id ?? null)
         setIsLeader(data.is_leader ?? false)
         setIsTopPerformer(data.is_top_performer ?? false)
+        setCompLevel(data.comp_level ?? null)
 
         // Stats, carrier mix
         const { data: policies } = await supabase
@@ -233,6 +235,12 @@ export default function AgentDetailPage() {
     const newValue = !isTopPerformer
     await supabase.from('agents').update({ is_top_performer: newValue, updated_at: new Date().toISOString() }).eq('id', agent.id)
     setIsTopPerformer(newValue)
+  }
+
+  async function toggleCompLevel(level: string) {
+    const newLevel = compLevel === level ? null : level
+    await supabase.from('agents').update({ comp_level: newLevel, updated_at: new Date().toISOString() }).eq('id', agent.id)
+    setCompLevel(newLevel)
   }
 
   async function saveUpline(newUplineId: string | null) {
@@ -513,6 +521,32 @@ export default function AgentDetailPage() {
                   ))}
                 </select>
                 {savingUpline && <span style={{ fontSize: '12px', color: '#AAA' }}>Saving...</span>}
+              </div>
+            </div>
+
+            {/* Comp Level */}
+            <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '20px 24px', marginBottom: '16px' }}>
+              <p style={{ fontSize: '14px', fontWeight: '700', color: '#1A1A1A', margin: '0 0 14px 0' }}>🎖️ Comp Level</p>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                {['Builder', 'Producer', 'Leader', 'Partner'].map(level => (
+                  <button
+                    key={level}
+                    onClick={() => toggleCompLevel(level)}
+                    style={{
+                      padding: '10px 20px',
+                      borderRadius: '20px',
+                      border: compLevel === level ? '2px solid #C9A96E' : '1px solid #E5E1DA',
+                      backgroundColor: compLevel === level ? '#C9A96E' : '#FFFFFF',
+                      color: compLevel === level ? '#1A1A1A' : '#4A4A4A',
+                      fontSize: '13px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    {level}
+                  </button>
+                ))}
               </div>
             </div>
 
