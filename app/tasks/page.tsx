@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
+import { toast } from 'sonner'
 
 export default function TasksPage() {
   const router = useRouter()
@@ -89,6 +90,7 @@ export default function TasksPage() {
         completed_date: today
       }).select().single()
       if (data) setCompletions(prev => [...prev, data])
+      if (data) toast.success('Nice work! ✓')
     }
   }
 
@@ -117,6 +119,7 @@ export default function TasksPage() {
 
     if (!error && data) {
       setTasks(prev => [data, ...prev])
+      toast.success(`Task assigned to ${staffUsers.find(u => u.id === newTask.assigned_to)?.full_name}`)
 
       await supabase.from('notifications').insert({
         recipient_id: newTask.assigned_to,
@@ -134,6 +137,7 @@ export default function TasksPage() {
   async function archiveTask(taskId: string) {
     if (!confirm('Remove this task?')) return
     await supabase.from('admin_tasks').update({ is_active: false }).eq('id', taskId)
+    toast.success('Task removed')
     setTasks(prev => prev.filter(t => t.id !== taskId))
   }
 
