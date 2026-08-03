@@ -12,7 +12,6 @@ export default function TasksPage() {
   const [completions, setCompletions] = useState<any[]>([])
   const [staffUsers, setStaffUsers] = useState<any[]>([])
   const [showCreateForm, setShowCreateForm] = useState(false)
-  const [filterAssignee, setFilterAssignee] = useState<string>('all')
 
   const [newTask, setNewTask] = useState({
     title: '',
@@ -146,184 +145,152 @@ export default function TasksPage() {
     </div>
   )
 
-  const filteredTasks = filterAssignee === 'all' ? tasks : tasks.filter(t => t.assigned_to === filterAssignee)
-  const dailyTasks = filteredTasks.filter(t => t.task_type === 'daily')
-  const oneOffTasks = filteredTasks.filter(t => t.task_type === 'one_off' && !t.completed)
-  const completedOneOff = filteredTasks.filter(t => t.task_type === 'one_off' && t.completed)
-
-  const getUserName = (id: string) => staffUsers.find(u => u.id === id)?.full_name || 'Unknown'
-
   return (
-    <div>
-      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
-          <div>
-            <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1A1A1A', margin: '0 0 4px 0' }}>✅ Admin Tasks</h1>
-            <p style={{ fontSize: '14px', color: '#7A7A7A', margin: 0 }}>Daily checklist and assigned tasks for the team</p>
-          </div>
-          {canCreateTasks && (
-            <button
-              onClick={() => setShowCreateForm(!showCreateForm)}
-              style={{ padding: '10px 20px', backgroundColor: '#C9A96E', color: '#1A1A1A', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700' }}
-            >
-              {showCreateForm ? 'Cancel' : '+ New Task'}
-            </button>
-          )}
+    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px 24px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
+        <div>
+          <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1A1A1A', margin: '0 0 4px 0' }}>✅ Admin Tasks</h1>
+          <p style={{ fontSize: '14px', color: '#7A7A7A', margin: 0 }}>Daily checklist and assigned tasks for the team</p>
         </div>
+        {canCreateTasks && (
+          <button
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            style={{ padding: '10px 20px', backgroundColor: '#C9A96E', color: '#1A1A1A', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700' }}
+          >
+            {showCreateForm ? 'Cancel' : '+ New Task'}
+          </button>
+        )}
+      </div>
 
-        {showCreateForm && canCreateTasks && (
-          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '20px 24px', marginBottom: '24px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <input
-                type="text"
-                placeholder="Task title"
-                value={newTask.title}
-                onChange={e => setNewTask({ ...newTask, title: e.target.value })}
-                style={{ padding: '10px 12px', fontSize: '14px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit' }}
-              />
-              <textarea
-                placeholder="Description (optional)"
-                value={newTask.description}
-                onChange={e => setNewTask({ ...newTask, description: e.target.value })}
-                style={{ padding: '10px 12px', fontSize: '14px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', minHeight: '70px', resize: 'vertical' }}
-              />
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <select
-                  value={newTask.task_type}
-                  onChange={e => setNewTask({ ...newTask, task_type: e.target.value as 'daily' | 'one_off' })}
-                  style={{ flex: 1, padding: '10px 12px', fontSize: '14px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', minWidth: '160px' }}
-                >
-                  <option value="daily">Daily Recurring</option>
-                  <option value="one_off">One-Off Task</option>
-                </select>
-                <select
-                  value={newTask.assigned_to}
-                  onChange={e => setNewTask({ ...newTask, assigned_to: e.target.value })}
-                  style={{ flex: 1, padding: '10px 12px', fontSize: '14px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', minWidth: '160px' }}
-                >
-                  <option value="">Assign to...</option>
-                  {staffUsers.map(u => (
-                    <option key={u.id} value={u.id}>{u.full_name}</option>
-                  ))}
-                </select>
-                {newTask.task_type === 'one_off' && (
-                  <input
-                    type="date"
-                    value={newTask.due_date}
-                    onChange={e => setNewTask({ ...newTask, due_date: e.target.value })}
-                    style={{ padding: '10px 12px', fontSize: '14px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit' }}
-                  />
+      {showCreateForm && canCreateTasks && (
+        <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '20px 24px', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <input
+              type="text"
+              placeholder="Task title"
+              value={newTask.title}
+              onChange={e => setNewTask({ ...newTask, title: e.target.value })}
+              style={{ padding: '10px 12px', fontSize: '14px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit' }}
+            />
+            <textarea
+              placeholder="Description (optional)"
+              value={newTask.description}
+              onChange={e => setNewTask({ ...newTask, description: e.target.value })}
+              style={{ padding: '10px 12px', fontSize: '14px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', minHeight: '70px', resize: 'vertical' }}
+            />
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <select
+                value={newTask.task_type}
+                onChange={e => setNewTask({ ...newTask, task_type: e.target.value as 'daily' | 'one_off' })}
+                style={{ flex: 1, padding: '10px 12px', fontSize: '14px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', minWidth: '160px' }}
+              >
+                <option value="daily">Daily Recurring</option>
+                <option value="one_off">One-Off Task</option>
+              </select>
+              <select
+                value={newTask.assigned_to}
+                onChange={e => setNewTask({ ...newTask, assigned_to: e.target.value })}
+                style={{ flex: 1, padding: '10px 12px', fontSize: '14px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', minWidth: '160px' }}
+              >
+                <option value="">Assign to...</option>
+                {staffUsers.map(u => (
+                  <option key={u.id} value={u.id}>{u.full_name}</option>
+                ))}
+              </select>
+              {newTask.task_type === 'one_off' && (
+                <input
+                  type="date"
+                  value={newTask.due_date}
+                  onChange={e => setNewTask({ ...newTask, due_date: e.target.value })}
+                  style={{ padding: '10px 12px', fontSize: '14px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit' }}
+                />
+              )}
+            </div>
+            <button
+              onClick={createTask}
+              style={{ padding: '10px 20px', backgroundColor: '#1A1A1A', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', alignSelf: 'flex-start' }}
+            >
+              Create Task
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${staffUsers.length}, minmax(260px, 1fr))`, gap: '16px', overflowX: 'auto', paddingBottom: '8px' }}>
+        {staffUsers.map(user => {
+          const userTasks = tasks.filter(t => t.assigned_to === user.id)
+          const userDaily = userTasks.filter(t => t.task_type === 'daily')
+          const userOneOffPending = userTasks.filter(t => t.task_type === 'one_off' && !t.completed)
+          const userOneOffDone = userTasks.filter(t => t.task_type === 'one_off' && t.completed)
+          const totalOpen = userDaily.filter(t => !isCompletedToday(t.id)).length + userOneOffPending.length
+
+          return (
+            <div key={user.id} style={{ backgroundColor: '#F4F1EB', borderRadius: '14px', border: '1px solid #E5E1DA', display: 'flex', flexDirection: 'column', minHeight: '200px' }}>
+              <div style={{ padding: '14px 16px', borderBottom: '1px solid #E5E1DA', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#C9A96E', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700', color: '#1A1A1A' }}>
+                    {user.full_name?.charAt(0).toUpperCase()}
+                  </div>
+                  <p style={{ fontSize: '13px', fontWeight: '700', color: '#1A1A1A', margin: 0 }}>{user.full_name}</p>
+                </div>
+                {totalOpen > 0 && (
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: '#1A1A1A', backgroundColor: '#FFFFFF', padding: '2px 8px', borderRadius: '10px', border: '1px solid #E5E1DA' }}>{totalOpen}</span>
                 )}
               </div>
-              <button
-                onClick={createTask}
-                style={{ padding: '10px 20px', backgroundColor: '#1A1A1A', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', alignSelf: 'flex-start' }}
-              >
-                Create Task
-              </button>
-            </div>
-          </div>
-        )}
 
-        <div style={{ marginBottom: '20px' }}>
-          <select
-            value={filterAssignee}
-            onChange={e => setFilterAssignee(e.target.value)}
-            style={{ padding: '8px 14px', fontSize: '13px', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', backgroundColor: '#FFFFFF' }}
-          >
-            <option value="all">Everyone</option>
-            {staffUsers.map(u => (
-              <option key={u.id} value={u.id}>{u.full_name}</option>
-            ))}
-          </select>
-        </div>
+              <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+                {userDaily.length === 0 && userOneOffPending.length === 0 && userOneOffDone.length === 0 && (
+                  <p style={{ fontSize: '12px', color: '#AAA', textAlign: 'center', padding: '20px 0' }}>No tasks</p>
+                )}
 
-        {/* Daily Recurring Tasks */}
-        <div style={{ marginBottom: '28px' }}>
-          <p style={{ fontSize: '13px', fontWeight: '700', color: '#C9A96E', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>📅 Daily Checklist</p>
-          {dailyTasks.length === 0 ? (
-            <p style={{ fontSize: '13px', color: '#AAA' }}>No daily tasks assigned yet.</p>
-          ) : (
-            <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'hidden' }}>
-              {dailyTasks.map((task, i) => {
-                const done = isCompletedToday(task.id)
-                return (
-                  <div key={task.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 20px', borderTop: i > 0 ? '1px solid #F0EDE8' : 'none' }}>
-                    <input
-                      type="checkbox"
-                      checked={done}
-                      onChange={() => toggleDailyCompletion(task)}
-                      style={{ width: '20px', height: '20px', cursor: 'pointer', flexShrink: 0 }}
-                    />
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: '14px', fontWeight: '600', color: done ? '#AAA' : '#1A1A1A', margin: 0, textDecoration: done ? 'line-through' : 'none' }}>{task.title}</p>
-                      {task.description && <p style={{ fontSize: '12px', color: '#AAA', margin: '2px 0 0 0' }}>{task.description}</p>}
-                      <p style={{ fontSize: '11px', color: '#C9A96E', margin: '4px 0 0 0', fontWeight: '600' }}>{getUserName(task.assigned_to)}</p>
+                {userDaily.map(task => {
+                  const done = isCompletedToday(task.id)
+                  return (
+                    <div key={task.id} onClick={() => toggleDailyCompletion(task)} style={{ backgroundColor: '#FFFFFF', borderRadius: '10px', border: '1px solid #E5E1DA', padding: '10px 12px', cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: '10px', opacity: done ? 0.6 : 1 }}>
+                      <input type="checkbox" checked={done} onChange={() => toggleDailyCompletion(task)} onClick={e => e.stopPropagation()} style={{ width: '17px', height: '17px', cursor: 'pointer', marginTop: '1px', flexShrink: 0 }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                          <span style={{ fontSize: '9px', fontWeight: '700', color: '#7C3AED', backgroundColor: '#EDE9FE', padding: '1px 6px', borderRadius: '8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Daily</span>
+                        </div>
+                        <p style={{ fontSize: '13px', fontWeight: '600', color: done ? '#AAA' : '#1A1A1A', margin: 0, textDecoration: done ? 'line-through' : 'none' }}>{task.title}</p>
+                        {task.description && <p style={{ fontSize: '11px', color: '#AAA', margin: '3px 0 0 0' }}>{task.description}</p>}
+                      </div>
+                      {canCreateTasks && (
+                        <button onClick={e => { e.stopPropagation(); archiveTask(task.id) }} style={{ background: 'none', border: 'none', color: '#CCC', cursor: 'pointer', fontSize: '16px', flexShrink: 0, padding: 0 }}>×</button>
+                      )}
+                    </div>
+                  )
+                })}
+
+                {userOneOffPending.map(task => (
+                  <div key={task.id} onClick={() => toggleOneOffCompletion(task)} style={{ backgroundColor: '#FFFFFF', borderRadius: '10px', border: '1px solid #E5E1DA', padding: '10px 12px', cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                    <input type="checkbox" checked={task.completed} onChange={() => toggleOneOffCompletion(task)} onClick={e => e.stopPropagation()} style={{ width: '17px', height: '17px', cursor: 'pointer', marginTop: '1px', flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                        <span style={{ fontSize: '9px', fontWeight: '700', color: '#C9A96E', backgroundColor: '#FBF3E3', padding: '1px 6px', borderRadius: '8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Task</span>
+                        {task.due_date && <span style={{ fontSize: '9px', fontWeight: '700', color: '#EF4444' }}>Due {new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+                      </div>
+                      <p style={{ fontSize: '13px', fontWeight: '600', color: '#1A1A1A', margin: 0 }}>{task.title}</p>
+                      {task.description && <p style={{ fontSize: '11px', color: '#AAA', margin: '3px 0 0 0' }}>{task.description}</p>}
                     </div>
                     {canCreateTasks && (
-                      <button onClick={() => archiveTask(task.id)} style={{ background: 'none', border: 'none', color: '#CCC', cursor: 'pointer', fontSize: '18px' }}>×</button>
+                      <button onClick={e => { e.stopPropagation(); archiveTask(task.id) }} style={{ background: 'none', border: 'none', color: '#CCC', cursor: 'pointer', fontSize: '16px', flexShrink: 0, padding: 0 }}>×</button>
                     )}
                   </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
+                ))}
 
-        {/* One-Off Tasks */}
-        <div style={{ marginBottom: '28px' }}>
-          <p style={{ fontSize: '13px', fontWeight: '700', color: '#C9A96E', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>📌 Assigned Tasks</p>
-          {oneOffTasks.length === 0 ? (
-            <p style={{ fontSize: '13px', color: '#AAA' }}>No pending tasks.</p>
-          ) : (
-            <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'hidden' }}>
-              {oneOffTasks.map((task, i) => (
-                <div key={task.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 20px', borderTop: i > 0 ? '1px solid #F0EDE8' : 'none' }}>
-                  <input
-                    type="checkbox"
-                    checked={task.completed}
-                    onChange={() => toggleOneOffCompletion(task)}
-                    style={{ width: '20px', height: '20px', cursor: 'pointer', flexShrink: 0 }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontSize: '14px', fontWeight: '600', color: '#1A1A1A', margin: 0 }}>{task.title}</p>
-                    {task.description && <p style={{ fontSize: '12px', color: '#AAA', margin: '2px 0 0 0' }}>{task.description}</p>}
-                    <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
-                      <p style={{ fontSize: '11px', color: '#C9A96E', margin: 0, fontWeight: '600' }}>{getUserName(task.assigned_to)}</p>
-                      {task.due_date && <p style={{ fontSize: '11px', color: '#EF4444', margin: 0, fontWeight: '600' }}>Due {new Date(task.due_date).toLocaleDateString()}</p>}
+                {userOneOffDone.map(task => (
+                  <div key={task.id} onClick={() => toggleOneOffCompletion(task)} style={{ backgroundColor: '#FAFAF8', borderRadius: '10px', border: '1px solid #EBE8E3', padding: '10px 12px', cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: '10px', opacity: 0.55 }}>
+                    <input type="checkbox" checked={task.completed} onChange={() => toggleOneOffCompletion(task)} onClick={e => e.stopPropagation()} style={{ width: '17px', height: '17px', cursor: 'pointer', marginTop: '1px', flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: '13px', fontWeight: '600', color: '#AAA', margin: 0, textDecoration: 'line-through' }}>{task.title}</p>
                     </div>
                   </div>
-                  {canCreateTasks && (
-                    <button onClick={() => archiveTask(task.id)} style={{ background: 'none', border: 'none', color: '#CCC', cursor: 'pointer', fontSize: '18px' }}>×</button>
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          )}
-        </div>
-
-        {/* Completed One-Off */}
-        {completedOneOff.length > 0 && (
-          <div>
-            <p style={{ fontSize: '13px', fontWeight: '700', color: '#AAA', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>✓ Completed</p>
-            <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'hidden' }}>
-              {completedOneOff.map((task, i) => (
-                <div key={task.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 20px', borderTop: i > 0 ? '1px solid #F0EDE8' : 'none' }}>
-                  <input
-                    type="checkbox"
-                    checked={task.completed}
-                    onChange={() => toggleOneOffCompletion(task)}
-                    style={{ width: '20px', height: '20px', cursor: 'pointer', flexShrink: 0 }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontSize: '14px', fontWeight: '600', color: '#AAA', margin: 0, textDecoration: 'line-through' }}>{task.title}</p>
-                    <p style={{ fontSize: '11px', color: '#AAA', margin: '4px 0 0 0' }}>{getUserName(task.assigned_to)}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+          )
+        })}
       </div>
     </div>
   )
