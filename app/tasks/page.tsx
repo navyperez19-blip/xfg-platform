@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
-import NavBar from '@/app/components/NavBar'
 
 export default function TasksPage() {
   const router = useRouter()
@@ -141,7 +140,6 @@ export default function TasksPage() {
 
   if (loading) return (
     <div>
-      <NavBar />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
         <p style={{ color: '#7A7A7A', fontSize: '14px' }}>Loading...</p>
       </div>
@@ -157,7 +155,6 @@ export default function TasksPage() {
 
   return (
     <div>
-      <NavBar />
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
           <div>
