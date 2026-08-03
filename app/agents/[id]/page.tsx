@@ -595,41 +595,6 @@ export default function AgentDetailPage() {
               )}
             </div>
 
-            {/* Executive Override */}
-            {['executive', 'superadmin'].includes(currentUser?.role || '') && (
-              <div style={{ ...card, border: '1px solid #E8B8B8' }}>
-                <p style={{ ...sectionTitle, color: '#8B2635' }}>Executive Override</p>
-                <p style={{ color: '#9A9890', fontSize: '13px', marginBottom: '12px' }}>Force move to any stage. Permanently logged.</p>
-                <select id="override-stage" style={{ ...inp, marginBottom: '8px' }}>
-                  <option value="">Select target stage...</option>
-                  {STAGES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
-                </select>
-                <input id="override-reason" type="text" placeholder="Reason for override (required)..." style={{ ...inp, marginBottom: '10px' }} />
-                <button
-                  style={{ width: '100%', background: '#8B2635', border: 'none', color: '#FFFFFF', padding: '10px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}
-                  onClick={async () => {
-                    const stageEl = document.getElementById('override-stage') as HTMLSelectElement
-                    const reasonEl = document.getElementById('override-reason') as HTMLInputElement
-                    const newStage = stageEl.value
-                    const reason = reasonEl.value.trim()
-                    if (!newStage) { alert('Please select a target stage.'); return }
-                    if (!reason) { alert('A reason is required.'); return }
-                    await supabase.from('agents').update({ current_stage: newStage, updated_at: new Date().toISOString() }).eq('id', agent.id)
-                    await supabase.from('overrides').insert({ agent_id: agent.id, performed_by: currentUser.id, override_type: 'stage_skip', previous_value: agent.current_stage, new_value: newStage, reason })
-                    await supabase.from('stage_history').insert({ agent_id: agent.id, from_stage: agent.current_stage, to_stage: newStage, changed_by: currentUser.id, is_override: true, override_reason: reason })
-                    const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
-                    if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'override_logged', title: 'Override applied', message: `${currentUser.full_name} overrode ${agent.full_name} to ${newStage}: ${reason}` })))
-                    setAgent({ ...agent, current_stage: newStage })
-                    stageEl.value = ''
-                    reasonEl.value = ''
-                    alert('Override applied and logged.')
-                  }}
-                >
-                  Apply Override
-                </button>
-              </div>
-            )}
-
             {/* Notes */}
             {currentUser?.role !== 'sales_director' && (
               <div style={card}>
