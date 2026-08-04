@@ -5,6 +5,8 @@ import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
 import { createCalendarEventFromFollowUp } from '@/app/_actions/crm-actions'
+import ConfirmModal from '@/app/components/ConfirmModal'
+import { toast } from 'sonner'
 
 const LEAD_STATUSES = [
   { value: 'new',            label: 'New',            color: '#7A7A7A' },
@@ -38,6 +40,7 @@ export default function LeadDetailPage() {
   const [lead, setLead] = useState<any>(null)
   const [notes, setNotes] = useState<any[]>([])
   const [agentId, setAgentId] = useState<string | null>(null)
+  const [confirmDeleteNoteId, setConfirmDeleteNoteId] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState<any>({})
   const [showAddNote, setShowAddNote] = useState(false)
@@ -419,11 +422,7 @@ export default function LeadDetailPage() {
                           {new Date(note.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </span>
                         <button
-                          onClick={async () => {
-                            if (!confirm('Delete this activity?')) return
-                            await supabase.from('crm_lead_notes').delete().eq('id', note.id)
-                            setNotes(notes.filter(n => n.id !== note.id))
-                          }}
+                          onClick={() => setConfirmDeleteNoteId(note.id)}
                           style={{ background: 'none', border: 'none', color: '#CCC', cursor: 'pointer', fontSize: '14px', padding: 0 }}
                         >
                           ×
@@ -442,7 +441,21 @@ export default function LeadDetailPage() {
             <p style={{ fontSize: '12px', color: '#AAA' }}>Log every call, text, and interaction to track your follow-up history</p>
           </div>
         )}
-      </div>
+      <ConfirmModal
+        isOpen={!!confirmDeleteNoteId}
+        title="Delete Activity"
+        message="Are you sure you want to delete this activity entry?"
+        confirmLabel="Delete"
+        danger={true}
+        onConfirm={async () => {
+          if (!confirmDeleteNoteId) return
+          await supabase.from('crm_lead_notes').delete().eq('id', confirmDeleteNoteId)
+          setNotes(notes.filter(n => n.id !== confirmDeleteNoteId))
+          toast.success('Activity deleted')
+          setConfirmDeleteNoteId(null)
+        }}
+        onCancel={() => setConfirmDeleteNoteId(null)}
+      />
     </div>
   )
 }
