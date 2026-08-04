@@ -70,6 +70,8 @@ export default function AgentDetailPage() {
   const [carrierMix, setCarrierMix] = useState<{ carrier: string; count: number }[]>([])
   const [launchWindow, setLaunchWindow] = useState<any>(null)
   const [downlineAgents, setDownlineAgents] = useState<any[]>([])
+  const [navList, setNavList] = useState<string[]>([])
+  const [navIndex, setNavIndex] = useState<number>(-1)
 
   useEffect(() => {
     const load = async () => {
@@ -173,6 +175,20 @@ export default function AgentDetailPage() {
     load()
   }, [params.id, router])
 
+  useEffect(() => {
+    if (!agent?.id) return
+    try {
+      const stored = sessionStorage.getItem('xfg_agent_nav_list')
+      if (stored) {
+        const list: string[] = JSON.parse(stored)
+        setNavList(list)
+        setNavIndex(list.indexOf(agent.id))
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [agent?.id])
+
   const moveStage = async (direction: 'forward' | 'backward') => {
     if (!agent) return
     setSaving(true)
@@ -267,6 +283,25 @@ export default function AgentDetailPage() {
           <button onClick={() => router.push('/pipeline')} style={{ background: 'transparent', border: 'none', color: '#9A9890', cursor: 'pointer', fontSize: '14px', fontFamily: 'Inter, sans-serif', padding: 0 }}>
             ← Back to Pipeline
           </button>
+          {navIndex >= 0 && navList.length > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '12px', color: '#AAA' }}>{navIndex + 1} of {navList.length}</span>
+              <button
+                onClick={() => navIndex > 0 && router.push(`/agents/${navList[navIndex - 1]}`)}
+                disabled={navIndex <= 0}
+                style={{ padding: '6px 14px', backgroundColor: navIndex <= 0 ? '#F0EDE8' : '#FFFFFF', border: '1px solid #E5E1DA', borderRadius: '8px', cursor: navIndex <= 0 ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '600', color: navIndex <= 0 ? '#CCC' : '#1A1A1A' }}
+              >
+                ← Prev
+              </button>
+              <button
+                onClick={() => navIndex < navList.length - 1 && router.push(`/agents/${navList[navIndex + 1]}`)}
+                disabled={navIndex >= navList.length - 1}
+                style={{ padding: '6px 14px', backgroundColor: navIndex >= navList.length - 1 ? '#F0EDE8' : '#C9A96E', border: 'none', borderRadius: '8px', cursor: navIndex >= navList.length - 1 ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '700', color: navIndex >= navList.length - 1 ? '#CCC' : '#1A1A1A' }}
+              >
+                Next →
+              </button>
+            </div>
+          )}
           {['superadmin', 'executive'].includes(currentUser?.role || '') && (
             <button
               onClick={() => setShowDeleteConfirm1(true)}

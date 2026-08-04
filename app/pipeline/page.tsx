@@ -111,6 +111,12 @@ export default function PipelinePage() {
     return 0
   })
 
+  useEffect(() => {
+    if (sortedAgents && sortedAgents.length > 0) {
+      sessionStorage.setItem('xfg_agent_nav_list', JSON.stringify(sortedAgents.map(a => a.id)))
+    }
+  }, [sortedAgents])
+
   const handleSort = (key: SortKey) => {
     setSortKeys(prev => {
       const existing = prev.find(s => s.key === key)
