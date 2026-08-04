@@ -25,7 +25,7 @@ export default function Notes({ agentId }: Props) {
       }
       const { data } = await supabase
         .from('notes')
-        .select('*, users(full_name)')
+        .select('*, users!notes_author_id_fkey(full_name)')
         .eq('agent_id', agentId)
         .order('created_at', { ascending: false })
       setNotes(data || [])
@@ -42,8 +42,8 @@ export default function Notes({ agentId }: Props) {
     setAdding(true)
     const { data: inserted, error } = await supabase
       .from('notes')
-      .insert({ agent_id: agentId, user_id: currentUser.id, content: newNote.trim() })
-      .select('*, users(full_name)')
+      .insert({ agent_id: agentId, author_id: currentUser.id, content: newNote.trim() })
+      .select('*, users!notes_author_id_fkey(full_name)')
       .single()
     if (error) {
       toast.error(`Failed to add note: ${error.message}`)
