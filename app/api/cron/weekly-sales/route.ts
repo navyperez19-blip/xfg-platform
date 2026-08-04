@@ -114,7 +114,12 @@ export async function GET(request: Request) {
       if (isNaN(amount) || amount <= 0) continue
 
       const displayName = displayNames[rawUsername] || rawUsername
-      const saleDate = new Date(msg.timestamp).toISOString().split('T')[0]
+      const saleDate = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Chicago',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(new Date(msg.timestamp))
 
       records.push({
         discord_message_id: msg.id,
