@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
 import { getCurrentUser } from '../lib/auth'
+import ConfirmModal from '@/app/components/ConfirmModal'
+import { toast } from 'sonner'
 
 const STAGES = [
   { key: 'contacted', label: 'Contacted' },
@@ -29,6 +31,7 @@ export default function PipelinePage() {
   const [selectedAgents, setSelectedAgents] = useState<string[]>([])
   const [deleting, setDeleting] = useState(false)
   const [selectMode, setSelectMode] = useState(false)
+  const [confirmAction, setConfirmAction] = useState<'leadership' | 'topPerformer' | 'delete' | null>(null)
   const [showSmsModal, setShowSmsModal] = useState(false)
   const [smsMessage, setSmsMessage] = useState('')
   const [sending, setSending] = useState(false)
@@ -165,15 +168,7 @@ export default function PipelinePage() {
                 📱 Send Text ({selectedAgents.length})
               </button>
               <button
-                onClick={async () => {
-                  if (!confirm(`Add ${selectedAgents.length} agent(s) to Leadership Team?`)) return
-                  for (const id of selectedAgents) {
-                    await supabase.from('agents').update({ is_leader: true, updated_at: new Date().toISOString() }).eq('id', id)
-                  }
-                  setSelectedAgents([])
-                  setSelectMode(false)
-                  window.location.reload()
-                }}
+                onClick={() => setConfirmAction('leadership')}
                 style={{
                   padding: isMobile ? '0.5rem 0.75rem' : '0.6rem 1.25rem',
                   backgroundColor: '#7C3AED',
@@ -188,15 +183,7 @@ export default function PipelinePage() {
                 ⭐ Add to Leadership ({selectedAgents.length})
               </button>
               <button
-                onClick={async () => {
-                  if (!confirm(`Add ${selectedAgents.length} agent(s) to Top 1% Performers?`)) return
-                  for (const id of selectedAgents) {
-                    await supabase.from('agents').update({ is_top_performer: true, updated_at: new Date().toISOString() }).eq('id', id)
-                  }
-                  setSelectedAgents([])
-                  setSelectMode(false)
-                  window.location.reload()
-                }}
+                onClick={() => setConfirmAction('topPerformer')}
                 style={{
                   padding: isMobile ? '0.5rem 0.75rem' : '0.6rem 1.25rem',
                   backgroundColor: '#F59E0B',
@@ -211,17 +198,7 @@ export default function PipelinePage() {
                 🏆 Add to Top 1% ({selectedAgents.length})
               </button>
               <button
-                onClick={async () => {
-                  if (!confirm(`Delete ${selectedAgents.length} agent(s)? This cannot be undone.`)) return
-                  setDeleting(true)
-                  for (const id of selectedAgents) {
-                    await supabase.from('agents').delete().eq('id', id)
-                  }
-                  setSelectedAgents([])
-                  setSelectMode(false)
-                  setDeleting(false)
-                  window.location.reload()
-                }}
+                onClick={() => setConfirmAction('delete')}
                 disabled={deleting}
                 style={{ padding: isMobile ? '0.5rem 0.75rem' : '0.6rem 1.25rem', backgroundColor: '#C0392B', color: '#FFFFFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: isMobile ? '12px' : '0.875rem', fontWeight: '700' }}
               >
@@ -569,6 +546,62 @@ export default function PipelinePage() {
           </div>
         </div>
       )}
+      <ConfirmModal
+        isOpen={confirmAction === 'leadership'}
+        title="Add to Leadership Team"
+        message={`Add ${selectedAgents.length} agent(s) to the Leadership Team?`}
+        confirmLabel="Add"
+        danger={false}
+        onConfirm={async () => {
+          for (const id of selectedAgents) {
+            await supabase.from('agents').update({ is_leader: true, updated_at: new Date().toISOString() }).eq('id', id)
+          }
+          toast.success(`${selectedAgents.length} agent(s) added to Leadership Team`)
+          setSelectedAgents([])
+          setSelectMode(false)
+          setConfirmAction(null)
+          window.location.reload()
+        }}
+        onCancel={() => setConfirmAction(null)}
+      />
+      <ConfirmModal
+        isOpen={confirmAction === 'topPerformer'}
+        title="Add to Top 1% Performers"
+        message={`Add ${selectedAgents.length} agent(s) to Top 1% Performers?`}
+        confirmLabel="Add"
+        danger={false}
+        onConfirm={async () => {
+          for (const id of selectedAgents) {
+            await supabase.from('agents').update({ is_top_performer: true, updated_at: new Date().toISOString() }).eq('id', id)
+          }
+          toast.success(`${selectedAgents.length} agent(s) added to Top 1%`)
+          setSelectedAgents([])
+          setSelectMode(false)
+          setConfirmAction(null)
+          window.location.reload()
+        }}
+        onCancel={() => setConfirmAction(null)}
+      />
+      <ConfirmModal
+        isOpen={confirmAction === 'delete'}
+        title="Delete Agents"
+        message={`Delete ${selectedAgents.length} agent(s)? This cannot be undone.`}
+        confirmLabel="Delete"
+        danger={true}
+        onConfirm={async () => {
+          setDeleting(true)
+          for (const id of selectedAgents) {
+            await supabase.from('agents').delete().eq('id', id)
+          }
+          toast.success(`${selectedAgents.length} agent(s) deleted`)
+          setSelectedAgents([])
+          setSelectMode(false)
+          setDeleting(false)
+          setConfirmAction(null)
+          window.location.reload()
+        }}
+        onCancel={() => setConfirmAction(null)}
+      />
     </main>
   )
 }

@@ -6,6 +6,8 @@ import { useRouter, useParams } from 'next/navigation'
 import Notes from '../../components/Notes'
 import AgentMessages from '../../components/AgentMessages'
 import { getCurrentUser, canLockAgent } from '../../lib/auth'
+import ConfirmModal from '@/app/components/ConfirmModal'
+import { toast } from 'sonner'
 
 const STAGES = [
   { key: 'contacted', label: 'Contacted' },
@@ -60,6 +62,9 @@ export default function AgentDetailPage() {
   const [savingUpline, setSavingUpline] = useState(false)
   const [isLeader, setIsLeader] = useState(false)
   const [isTopPerformer, setIsTopPerformer] = useState(false)
+  const [showDeleteConfirm1, setShowDeleteConfirm1] = useState(false)
+  const [showDeleteConfirm2, setShowDeleteConfirm2] = useState(false)
+  const [confirmDeleteLogId, setConfirmDeleteLogId] = useState<string | null>(null)
   const [compLevel, setCompLevel] = useState<string | null>(null)
   const [stats, setStats] = useState<any>(null)
   const [carrierMix, setCarrierMix] = useState<{ carrier: string; count: number }[]>([])
@@ -264,20 +269,7 @@ export default function AgentDetailPage() {
           </button>
           {['superadmin', 'executive'].includes(currentUser?.role || '') && (
             <button
-              onClick={async () => {
-                const confirmed = confirm(`Are you sure you want to permanently delete ${agent.full_name}?`)
-                if (!confirmed) return
-                const confirmed2 = confirm(`Final confirmation — delete ${agent.full_name} (${agent.xfg_id})?`)
-                if (!confirmed2) return
-                await supabase.from('agent_checklist_progress').delete().eq('agent_id', agent.id)
-                await supabase.from('notes').delete().eq('agent_id', agent.id)
-                await supabase.from('stage_history').delete().eq('agent_id', agent.id)
-                await supabase.from('overrides').delete().eq('agent_id', agent.id)
-                await supabase.from('notifications').delete().eq('agent_id', agent.id)
-                await supabase.from('agent_messages').delete().eq('agent_id', agent.id)
-                await supabase.from('agents').delete().eq('id', agent.id)
-                router.push('/pipeline')
-              }}
+              onClick={() => setShowDeleteConfirm1(true)}
               style={{ background: '#FFF5F5', border: '1px solid #8B2635', color: '#8B2635', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}
             >
               Delete Agent
@@ -431,11 +423,7 @@ export default function AgentDetailPage() {
                           </p>
                         </div>
                         <button
-                          onClick={async () => {
-                            if (!confirm('Delete this contact log?')) return
-                            await supabase.from('contact_logs').delete().eq('id', log.id)
-                            setContactLogs(prev => prev.filter(l => l.id !== log.id))
-                          }}
+                          onClick={() => setConfirmDeleteLogId(log.id)}
                           style={{ background: 'transparent', border: 'none', color: '#DDD9D2', cursor: 'pointer', fontSize: '14px', padding: '0', flexShrink: 0 }}
                           onMouseEnter={e => (e.currentTarget.style.color = '#8B2635')}
                           onMouseLeave={e => (e.currentTarget.style.color = '#DDD9D2')}
@@ -634,6 +622,49 @@ export default function AgentDetailPage() {
           </div>
         </div>
       </div>
+      <ConfirmModal
+        isOpen={showDeleteConfirm1}
+        title={`Delete ${agent.full_name}?`}
+        message="This will permanently delete this agent and all their associated data. This cannot be undone."
+        confirmLabel="Continue"
+        danger={true}
+        onConfirm={() => { setShowDeleteConfirm1(false); setShowDeleteConfirm2(true) }}
+        onCancel={() => setShowDeleteConfirm1(false)}
+      />
+      <ConfirmModal
+        isOpen={showDeleteConfirm2}
+        title="Final Confirmation"
+        message={`Delete ${agent.full_name} (${agent.xfg_id})? This is your last chance to cancel.`}
+        confirmLabel="Delete Permanently"
+        danger={true}
+        onConfirm={async () => {
+          await supabase.from('agent_checklist_progress').delete().eq('agent_id', agent.id)
+          await supabase.from('notes').delete().eq('agent_id', agent.id)
+          await supabase.from('stage_history').delete().eq('agent_id', agent.id)
+          await supabase.from('overrides').delete().eq('agent_id', agent.id)
+          await supabase.from('notifications').delete().eq('agent_id', agent.id)
+          await supabase.from('agent_messages').delete().eq('agent_id', agent.id)
+          await supabase.from('agents').delete().eq('id', agent.id)
+          toast.success(`${agent.full_name} has been deleted`)
+          router.push('/pipeline')
+        }}
+        onCancel={() => setShowDeleteConfirm2(false)}
+      />
+      <ConfirmModal
+        isOpen={!!confirmDeleteLogId}
+        title="Delete Contact Log"
+        message="Are you sure you want to delete this contact log entry?"
+        confirmLabel="Delete"
+        danger={true}
+        onConfirm={async () => {
+          if (!confirmDeleteLogId) return
+          await supabase.from('contact_logs').delete().eq('id', confirmDeleteLogId)
+          setContactLogs(prev => prev.filter(l => l.id !== confirmDeleteLogId))
+          toast.success('Contact log deleted')
+          setConfirmDeleteLogId(null)
+        }}
+        onCancel={() => setConfirmDeleteLogId(null)}
+      />
     </main>
   )
 }
