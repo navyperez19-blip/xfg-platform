@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { toast } from 'sonner'
 import ConfirmModal from '@/app/components/ConfirmModal'
 
 interface Props {
@@ -33,16 +34,23 @@ export default function Notes({ agentId }: Props) {
   }, [agentId])
 
   const addNote = async () => {
-    if (!newNote.trim() || !currentUser) return
+    if (!newNote.trim()) return
+    if (!currentUser) {
+      toast.error('Unable to identify your account — try refreshing the page')
+      return
+    }
     setAdding(true)
-    const { data: inserted } = await supabase
+    const { data: inserted, error } = await supabase
       .from('notes')
       .insert({ agent_id: agentId, user_id: currentUser.id, content: newNote.trim() })
       .select('*, users(full_name)')
       .single()
-    if (inserted) {
+    if (error) {
+      toast.error(`Failed to add note: ${error.message}`)
+    } else if (inserted) {
       setNotes(prev => [inserted, ...prev])
       setNewNote('')
+      toast.success('Note added')
     }
     setAdding(false)
   }
