@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { getCurrentUser } from '../lib/auth'
 import { useRouter } from 'next/navigation'
+import LeadershipTab from './components/LeadershipTab'
+import TopPerformersTab from './components/TopPerformersTab'
 
 const STAGES = [
   { key: 'contacted', label: 'Contacted' },
@@ -837,98 +839,10 @@ export default function AnalyticsPage() {
         )}
 
         {/* LEADERSHIP TAB */}
-        {activeTab === 'leadership' && (
-          <div>
-            {(() => {
-              const leaders = agents.filter(a => a.is_leader === true)
-              return (
-                <>
-                  <div style={{ marginBottom: '20px' }}>
-                    <p style={{ fontSize: '14px', color: '#7A7A7A', margin: 0 }}>{leaders.length} leaders tagged for tracking</p>
-                  </div>
-                  {leaders.length === 0 ? (
-                    <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '48px 24px', textAlign: 'center' }}>
-                      <p style={{ fontSize: '14px', color: '#AAA' }}>No leaders tagged yet. Toggle &quot;Leadership Team&quot; on an agent&apos;s detail page to add them here.</p>
-                    </div>
-                  ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '16px' }}>
-                      {leaders.map(leader => {
-                        const team = agents.filter(a => a.upline_agent_id === leader.id)
-                        return (
-                          <div key={leader.id} style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '18px 20px' }}>
-                            <a href={`/agents/${leader.id}`} style={{ fontSize: '15px', fontWeight: '700', color: '#1A1A1A', textDecoration: 'none' }}>{leader.full_name}</a>
-                            <p style={{ fontSize: '12px', color: '#7A7A7A', margin: '2px 0 12px 0' }}>{team.length} team member{team.length !== 1 ? 's' : ''}</p>
-                            {team.length > 0 ? (
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                {team.map(member => (
-                                  <a key={member.id} href={`/agents/${member.id}`} style={{ fontSize: '13px', color: '#1A1A1A', textDecoration: 'none', padding: '6px 10px', backgroundColor: '#F9F7F4', borderRadius: '6px' }}>
-                                    {member.full_name}
-                                  </a>
-                                ))}
-                              </div>
-                            ) : (
-                              <p style={{ fontSize: '12px', color: '#CCC', margin: 0 }}>No team members yet</p>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
-                </>
-              )
-            })()}
-          </div>
-        )}
+        {activeTab === 'leadership' && <LeadershipTab agents={agents} />}
 
         {/* TOP PERFORMERS TAB */}
-        {activeTab === 'topPerformers' && (
-          <div>
-            {(() => {
-              const topPerformers = agents.filter(a => a.is_top_performer === true)
-              return (
-                <>
-                  <div style={{ marginBottom: '20px' }}>
-                    <p style={{ fontSize: '14px', color: '#7A7A7A', margin: 0 }}>{topPerformers.length} top performers tagged for tracking</p>
-                  </div>
-                  {topPerformers.length === 0 ? (
-                    <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '48px 24px', textAlign: 'center' }}>
-                      <p style={{ fontSize: '14px', color: '#AAA' }}>No top performers tagged yet. Toggle &quot;Top 1% Performer&quot; on an agent&apos;s detail page to add them here.</p>
-                    </div>
-                  ) : (
-                    <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'hidden' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                          <tr style={{ backgroundColor: '#F9F7F4', borderBottom: '1px solid #E5E1DA' }}>
-                            <th style={{ padding: '10px 14px', textAlign: 'left', fontSize: '11px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase' }}>Agent</th>
-                            <th style={{ padding: '10px 14px', textAlign: 'left', fontSize: '11px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase' }}>Phone</th>
-                            <th style={{ padding: '10px 14px', textAlign: 'left', fontSize: '11px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase' }}>Email</th>
-                            <th style={{ padding: '10px 14px', textAlign: 'center', fontSize: '11px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase' }}>Stage</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {topPerformers.map((agent, i) => (
-                            <tr key={agent.id} style={{ borderBottom: i < topPerformers.length - 1 ? '1px solid #F0EDE8' : 'none' }}>
-                              <td style={{ padding: '12px 14px', fontWeight: '600', fontSize: '13px' }}>
-                                <a href={`/agents/${agent.id}`} style={{ color: '#1A1A1A', textDecoration: 'none', fontWeight: '600' }}>{agent.full_name}</a>
-                              </td>
-                              <td style={{ padding: '12px 14px', fontSize: '13px', color: '#4A4A4A' }}>{agent.phone || '—'}</td>
-                              <td style={{ padding: '12px 14px', fontSize: '13px', color: '#4A4A4A' }}>{agent.email || '—'}</td>
-                              <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                                <span style={{ fontSize: '11px', fontWeight: '600', padding: '3px 10px', borderRadius: '20px', backgroundColor: agent.current_stage === 'active' ? '#D1FAE5' : '#F3F4F6', color: agent.current_stage === 'active' ? '#065F46' : '#374151' }}>
-                                  {agent.current_stage}
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </>
-              )
-            })()}
-          </div>
-        )}
+        {activeTab === 'topPerformers' && <TopPerformersTab agents={agents} />}
 
         {/* SALES TAB */}
         {activeTab === 'sales' && (
