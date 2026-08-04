@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
 import { toast } from 'sonner'
+import ConfirmModal from '@/app/components/ConfirmModal'
 
 export default function TasksPage() {
   const router = useRouter()
@@ -13,6 +14,7 @@ export default function TasksPage() {
   const [completions, setCompletions] = useState<any[]>([])
   const [staffUsers, setStaffUsers] = useState<any[]>([])
   const [showCreateForm, setShowCreateForm] = useState(false)
+  const [confirmArchiveId, setConfirmArchiveId] = useState<string | null>(null)
 
   const [newTask, setNewTask] = useState({
     title: '',
@@ -135,10 +137,10 @@ export default function TasksPage() {
   }
 
   async function archiveTask(taskId: string) {
-    if (!confirm('Remove this task?')) return
     await supabase.from('admin_tasks').update({ is_active: false }).eq('id', taskId)
     toast.success('Task removed')
     setTasks(prev => prev.filter(t => t.id !== taskId))
+    setConfirmArchiveId(null)
   }
 
   if (loading) return (
@@ -260,7 +262,7 @@ export default function TasksPage() {
                         {task.description && <p style={{ fontSize: '11px', color: '#AAA', margin: '3px 0 0 0' }}>{task.description}</p>}
                       </div>
                       {canCreateTasks && (
-                        <button onClick={e => { e.stopPropagation(); archiveTask(task.id) }} style={{ background: 'none', border: 'none', color: '#CCC', cursor: 'pointer', fontSize: '16px', flexShrink: 0, padding: 0 }}>×</button>
+                        <button onClick={e => { e.stopPropagation(); setConfirmArchiveId(task.id) }} style={{ background: 'none', border: 'none', color: '#CCC', cursor: 'pointer', fontSize: '16px', flexShrink: 0, padding: 0 }}>×</button>
                       )}
                     </div>
                   )
@@ -278,7 +280,7 @@ export default function TasksPage() {
                       {task.description && <p style={{ fontSize: '11px', color: '#AAA', margin: '3px 0 0 0' }}>{task.description}</p>}
                     </div>
                     {canCreateTasks && (
-                      <button onClick={e => { e.stopPropagation(); archiveTask(task.id) }} style={{ background: 'none', border: 'none', color: '#CCC', cursor: 'pointer', fontSize: '16px', flexShrink: 0, padding: 0 }}>×</button>
+                      <button onClick={e => { e.stopPropagation(); setConfirmArchiveId(task.id) }} style={{ background: 'none', border: 'none', color: '#CCC', cursor: 'pointer', fontSize: '16px', flexShrink: 0, padding: 0 }}>×</button>
                     )}
                   </div>
                 ))}
@@ -296,6 +298,14 @@ export default function TasksPage() {
           )
         })}
       </div>
+      <ConfirmModal
+        isOpen={!!confirmArchiveId}
+        title="Remove Task"
+        message="Are you sure you want to remove this task?"
+        confirmLabel="Remove"
+        onConfirm={() => confirmArchiveId && archiveTask(confirmArchiveId)}
+        onCancel={() => setConfirmArchiveId(null)}
+      />
     </div>
   )
 }
