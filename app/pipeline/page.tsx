@@ -7,6 +7,8 @@ import { getCurrentUser } from '../lib/auth'
 import ConfirmModal from '@/app/components/ConfirmModal'
 import { toast } from 'sonner'
 
+export const dynamic = 'force-dynamic'
+
 const STAGES = [
   { key: 'contacted', label: 'Contacted' },
   { key: 'licensing', label: 'Licensing' },
