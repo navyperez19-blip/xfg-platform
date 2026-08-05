@@ -457,5 +457,6 @@ export default function LeadDetailPage() {
         onCancel={() => setConfirmDeleteNoteId(null)}
       />
     </div>
+  </div>
   )
 }

@@ -1131,5 +1131,6 @@ export default function ClientDetailPage() {
         onCancel={() => setConfirmDeleteNoteId(null)}
       />
     </div>
+  </div>
   )
 }
