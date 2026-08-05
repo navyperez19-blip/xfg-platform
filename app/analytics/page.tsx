@@ -20,6 +20,7 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'overview' | 'contracting' | 'agentTracker' | 'leadership' | 'topPerformers' | 'sales'>('overview')
   const [salesRecords, setSalesRecords] = useState<any[]>([])
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -53,6 +54,13 @@ export default function AnalyticsPage() {
     load()
   }, [router])
 
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
   // Real-time subscription for contracting tracker
   useEffect(() => {
     const channel = supabase
@@ -71,7 +79,7 @@ export default function AnalyticsPage() {
   if (loading) return <PageSkeleton />
 
   return (
-    <main style={{ minHeight: '100vh', background: '#F5F2ED', padding: '32px 24px' }}>
+    <main style={{ minHeight: '100vh', background: '#F5F2ED', padding: isMobile ? '16px 12px' : '32px 24px' }}>
       <div style={{ margin: '0 auto' }}>
 
         <div style={{ marginBottom: '24px' }}>
@@ -79,9 +87,9 @@ export default function AnalyticsPage() {
           <h1 style={{ color: '#1A1814', fontSize: '28px', fontWeight: '700', letterSpacing: '-0.02em' }}>Analytics</h1>
         </div>
 
-        <div style={{ display: 'flex', borderBottom: '2px solid #E5E1DA', marginBottom: '24px', gap: '4px' }}>
+        <div style={{ display: 'flex', borderBottom: '2px solid #E5E1DA', marginBottom: '24px', gap: '4px', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           {[{ key: 'overview', label: 'Overview' }, { key: 'contracting', label: 'Contracting Tracker' }, { key: 'agentTracker', label: 'Agent Tracker' }, { key: 'leadership', label: 'Leadership' }, { key: 'topPerformers', label: 'Top 1%' }, { key: 'sales', label: 'Sales' }].map(tab => (
-            <button key={tab.key} onClick={() => setActiveTab(tab.key as 'overview' | 'contracting' | 'agentTracker' | 'leadership' | 'topPerformers' | 'sales')} style={{ padding: '12px 24px', border: 'none', backgroundColor: 'transparent', fontSize: '14px', fontWeight: activeTab === tab.key ? '700' : '500', color: activeTab === tab.key ? '#1A1814' : '#7A7A7A', cursor: 'pointer', borderBottom: activeTab === tab.key ? '2px solid #C9A96E' : '2px solid transparent', marginBottom: '-2px', fontFamily: 'inherit' }}>
+            <button key={tab.key} onClick={() => setActiveTab(tab.key as 'overview' | 'contracting' | 'agentTracker' | 'leadership' | 'topPerformers' | 'sales')} style={{ padding: isMobile ? '10px 14px' : '12px 24px', whiteSpace: 'nowrap' as const, border: 'none', backgroundColor: 'transparent', fontSize: '14px', fontWeight: activeTab === tab.key ? '700' : '500', color: activeTab === tab.key ? '#1A1814' : '#7A7A7A', cursor: 'pointer', borderBottom: activeTab === tab.key ? '2px solid #C9A96E' : '2px solid transparent', marginBottom: '-2px', fontFamily: 'inherit' }}>
               {tab.label}
             </button>
           ))}
