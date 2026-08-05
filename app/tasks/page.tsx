@@ -16,6 +16,7 @@ export default function TasksPage() {
   const [staffUsers, setStaffUsers] = useState<any[]>([])
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [confirmArchiveId, setConfirmArchiveId] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
 
   const [newTask, setNewTask] = useState({
     title: '',
@@ -74,6 +75,13 @@ export default function TasksPage() {
     }
     load()
   }, [router])
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   const isCompletedToday = (taskId: string) => {
     return completions.some(c => c.task_id === taskId)
@@ -148,7 +156,7 @@ export default function TasksPage() {
 
   return (
     <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px 24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
+      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: isMobile ? '12px' : '0', marginBottom: '28px' }}>
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1A1A1A', margin: '0 0 4px 0' }}>✅ Admin Tasks</h1>
           <p style={{ fontSize: '14px', color: '#7A7A7A', margin: 0 }}>Daily checklist and assigned tasks for the team</p>
@@ -217,7 +225,7 @@ export default function TasksPage() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${staffUsers.length}, minmax(260px, 1fr))`, gap: '16px', overflowX: 'auto', paddingBottom: '8px' }}>
+      <div style={{ display: isMobile ? 'flex' : 'grid', flexDirection: isMobile ? 'column' : undefined, gridTemplateColumns: isMobile ? undefined : `repeat(${staffUsers.length}, minmax(260px, 1fr))`, gap: '16px', overflowX: isMobile ? 'visible' : 'auto', paddingBottom: '8px' }}>
         {staffUsers.map(user => {
           const userTasks = tasks.filter(t => t.assigned_to === user.id)
           const userDaily = userTasks.filter(t => t.task_type === 'daily')
