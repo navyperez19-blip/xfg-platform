@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { getCurrentUser } from '../lib/auth'
 import ConfirmModal from '@/app/components/ConfirmModal'
 import { toast } from 'sonner'
+import PageSkeleton from '@/app/components/PageSkeleton'
 
 export const dynamic = 'force-dynamic'
 
@@ -139,11 +140,7 @@ export default function PipelinePage() {
 
   const agentsByStage = (stageKey: string) => filteredAgents.filter(a => a.current_stage === stageKey)
 
-  if (loading) return (
-    <main style={{ minHeight: '100vh', background: '#F5F2ED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: '#6B6966' }}>Loading pipeline...</p>
-    </main>
-  )
+  if (loading) return <PageSkeleton />
 
   return (
     <main style={{ minHeight: '100vh', background: '#F5F2ED' }}>

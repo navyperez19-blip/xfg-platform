@@ -7,6 +7,7 @@ import { supabase } from '@/app/lib/supabase'
 import { createCalendarEventFromFollowUp } from '@/app/_actions/crm-actions'
 import ConfirmModal from '@/app/components/ConfirmModal'
 import { toast } from 'sonner'
+import PageSkeleton from '@/app/components/PageSkeleton'
 
 const LEAD_STATUSES = [
   { value: 'new',            label: 'New',            color: '#7A7A7A' },
@@ -145,13 +146,7 @@ export default function LeadDetailPage() {
     router.push(`/crm/clients/${newClient.id}`)
   }
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        <p style={{ color: '#7A7A7A', fontSize: '14px' }}>Loading...</p>
-      </div>
-    )
-  }
+  if (loading) return <PageSkeleton />
 
   const statusInfo = LEAD_STATUSES.find(s => s.value === lead.status)
   const sourceInfo = LEAD_SOURCES.find(s => s.value === lead.lead_source)
