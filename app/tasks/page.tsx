@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
 import { toast } from 'sonner'
 import ConfirmModal from '@/app/components/ConfirmModal'
+import PageSkeleton from '@/app/components/PageSkeleton'
 
 export default function TasksPage() {
   const router = useRouter()
@@ -143,13 +144,7 @@ export default function TasksPage() {
     setConfirmArchiveId(null)
   }
 
-  if (loading) return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        <p style={{ color: '#7A7A7A', fontSize: '14px' }}>Loading...</p>
-      </div>
-    </div>
-  )
+  if (loading) return <PageSkeleton />
 
   return (
     <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px 24px' }}>
