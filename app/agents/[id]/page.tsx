@@ -73,6 +73,7 @@ export default function AgentDetailPage() {
   const [downlineAgents, setDownlineAgents] = useState<any[]>([])
   const [navList, setNavList] = useState<string[]>([])
   const [navIndex, setNavIndex] = useState<number>(-1)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -190,6 +191,13 @@ export default function AgentDetailPage() {
     }
   }, [agent?.id])
 
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
   const moveStage = async (direction: 'forward' | 'backward') => {
     if (!agent) return
     setSaving(true)
@@ -273,10 +281,10 @@ export default function AgentDetailPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#F5F2ED', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 24px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: isMobile ? '16px 12px' : '24px 24px' }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', gap: isMobile ? '10px' : '0', marginBottom: '16px' }}>
           <button onClick={() => router.push('/pipeline')} style={{ background: 'transparent', border: 'none', color: '#9A9890', cursor: 'pointer', fontSize: '14px', fontFamily: 'Inter, sans-serif', padding: 0 }}>
             ← Back to Pipeline
           </button>
@@ -309,7 +317,7 @@ export default function AgentDetailPage() {
           )}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 0.8fr', gap: isMobile ? '16px' : '24px' }}>
           <div>
 
             {/* Agent Identity Card */}
