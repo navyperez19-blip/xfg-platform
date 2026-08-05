@@ -8,6 +8,7 @@ import { POLICY_STATUSES, CARRIERS, PRODUCT_TYPES, HEALTH_STATUSES, US_STATES } 
 import { createCalendarEventFromFollowUp } from '@/app/_actions/crm-actions'
 import ConfirmModal from '@/app/components/ConfirmModal'
 import { toast } from 'sonner'
+import PageSkeleton from '@/app/components/PageSkeleton'
 
 export default function ClientDetailPage() {
   const router = useRouter()
@@ -193,13 +194,7 @@ export default function ClientDetailPage() {
     setConfirmDeletePolicyId(null)
   }
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        <p style={{ color: '#7A7A7A', fontSize: '14px' }}>Loading...</p>
-      </div>
-    )
-  }
+  if (loading) return <PageSkeleton />
 
   const inp: React.CSSProperties = { width: '100%', padding: '9px 12px', fontSize: '13px', color: '#1A1A1A', backgroundColor: '#FAFAF8', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }
   const lbl: React.CSSProperties = { fontSize: '11px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '4px' }

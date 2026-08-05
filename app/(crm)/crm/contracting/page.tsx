@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
+import PageSkeleton from '@/app/components/PageSkeleton'
 
 const CARRIERS = [
   { name: 'Aflac',                  description: 'Supplemental insurance',        surelcLink: null },
@@ -130,13 +131,7 @@ export default function ContractingPage() {
     setSaving(null)
   }
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        <p style={{ color: '#7A7A7A', fontSize: '14px' }}>Loading...</p>
-      </div>
-    )
-  }
+  if (loading) return <PageSkeleton />
 
   const activeCount = CARRIERS.filter(c => carriers[c.name] === 'active').length
   const submittedCount = CARRIERS.filter(c => carriers[c.name] === 'submitted').length

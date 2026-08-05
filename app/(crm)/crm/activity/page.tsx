@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
+import PageSkeleton from '@/app/components/PageSkeleton'
 
 const ACTIVITY_TYPES = [
   { value: 'call',      label: 'Phone Call',   icon: '📞', color: '#2196F3' },
@@ -74,13 +75,7 @@ export default function ActivityPage() {
   const overdueFollowUps = activities.filter(a => a.follow_up_date && a.follow_up_date < today)
   const upcomingFollowUps = activities.filter(a => a.follow_up_date && a.follow_up_date >= today)
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        <p style={{ color: '#7A7A7A', fontSize: '14px' }}>Loading...</p>
-      </div>
-    )
-  }
+  if (loading) return <PageSkeleton />
 
   return (
     <div>

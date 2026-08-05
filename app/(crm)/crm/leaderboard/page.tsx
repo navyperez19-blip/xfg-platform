@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
+import PageSkeleton from '@/app/components/PageSkeleton'
 
 export default function LeaderboardPage() {
   const router = useRouter()
@@ -86,13 +87,7 @@ export default function LeaderboardPage() {
     }
   }, [])
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        <p style={{ color: '#7A7A7A', fontSize: '14px' }}>Loading...</p>
-      </div>
-    )
-  }
+  if (loading) return <PageSkeleton />
 
   const myRank = leaderboard.findIndex(a => a.id === myAgentId) + 1
   const myStats = leaderboard.find(a => a.id === myAgentId)

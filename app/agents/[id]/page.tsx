@@ -8,6 +8,7 @@ import AgentMessages from '../../components/AgentMessages'
 import { getCurrentUser, canLockAgent } from '../../lib/auth'
 import ConfirmModal from '@/app/components/ConfirmModal'
 import { toast } from 'sonner'
+import PageSkeleton from '@/app/components/PageSkeleton'
 
 const STAGES = [
   { key: 'contacted', label: 'Contacted' },
@@ -229,11 +230,7 @@ export default function AgentDetailPage() {
     setAgent({ ...agent, [field]: value })
   }
 
-  if (loading) return (
-    <main style={{ minHeight: '100vh', background: '#F5F2ED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: '#6B6966', fontFamily: 'Inter, sans-serif' }}>Loading agent...</p>
-    </main>
-  )
+  if (loading) return <PageSkeleton />
 
   if (!agent) return (
     <main style={{ minHeight: '100vh', background: '#F5F2ED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

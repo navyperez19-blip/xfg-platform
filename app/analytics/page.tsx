@@ -10,6 +10,7 @@ import SalesTab from './components/SalesTab'
 import AgentTrackerTab from './components/AgentTrackerTab'
 import ContractingTrackerTab from './components/ContractingTrackerTab'
 import OverviewTab from './components/OverviewTab'
+import PageSkeleton from '@/app/components/PageSkeleton'
 
 
 export default function AnalyticsPage() {
@@ -67,11 +68,7 @@ export default function AnalyticsPage() {
     }
   }, [])
 
-  if (loading) return (
-    <main style={{ minHeight: '100vh', background: '#F5F2ED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: '#6B6966', fontFamily: 'Georgia, serif' }}>Loading analytics...</p>
-    </main>
-  )
+  if (loading) return <PageSkeleton />
 
   return (
     <main style={{ minHeight: '100vh', background: '#F5F2ED', padding: '32px 24px' }}>

@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import { getCurrentUser } from '../lib/auth'
 import { useRouter } from 'next/navigation'
 import NotificationBell from '../components/NotificationBell'
+import PageSkeleton from '@/app/components/PageSkeleton'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -33,11 +34,7 @@ export default function DashboardPage() {
     router.push('/login')
   }
 
-  if (!profile) return (
-    <main style={{ minHeight: '100vh', background: '#F5F2ED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: '#6B6966', fontFamily: 'Inter, sans-serif' }}>Loading...</p>
-    </main>
-  )
+  if (!profile) return <PageSkeleton />
 
   return (
     <main style={{ minHeight: '100vh', background: '#F5F2ED' }}>
