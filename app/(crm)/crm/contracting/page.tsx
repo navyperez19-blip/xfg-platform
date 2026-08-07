@@ -207,7 +207,7 @@ export default function ContractingPage() {
             Both <strong>Americo</strong> and <strong>AIG (Core Bridge)</strong> are contracted through the same SureLC link. Once you submit the hierarchy form for either carrier, <strong>Anna</strong> will email your XFG email with the SureLC link to complete your contracting. You will use that same link to contract with both carriers.
           </p>
           <p style={{ fontSize: '13px', color: '#1D4ED8', lineHeight: 1.7, marginTop: '6px' }}>
-            If you have any questions or need assistance, please contact <strong>Nick or Finley</strong>.
+            If you have any questions or need assistance, please contact <strong>Nick</strong>.
           </p>
         </div>
       </div>
@@ -225,7 +225,7 @@ export default function ContractingPage() {
             <p style={{ fontSize: '13px', color: '#92400E', lineHeight: 1.6 }}>• Unless told otherwise, each additional carrier will have its own separate SureLC account</p>
           </div>
           <p style={{ fontSize: '13px', color: '#92400E', lineHeight: 1.7 }}>
-            As you progress through contracting, make sure you are logging into the <strong>correct SureLC account</strong> for the carrier you're working on. If you need help, contact <strong>Nick or Finley</strong>.
+            As you progress through contracting, make sure you are logging into the <strong>correct SureLC account</strong> for the carrier you're working on. If you need help, contact <strong>Nick</strong>.
           </p>
         </div>
       </div>
@@ -452,7 +452,7 @@ export default function ContractingPage() {
           <div>
             <p style={{ fontSize: '13px', fontWeight: '700', color: '#14532D', marginBottom: '4px' }}>Americo Form Submitted — Next Steps</p>
             <p style={{ fontSize: '13px', color: '#166534', lineHeight: 1.7 }}>
-              Your Americo hierarchy form has been received. Keep an eye on your <strong>XFG email inbox</strong> for an email from <strong>Anna</strong> with instructions to begin your SureLC Americo contracting process. If you don't receive it within 24 hours, reach out to Finley or Nick.
+              Your Americo hierarchy form has been received. Keep an eye on your <strong>XFG email inbox</strong> for an email from <strong>Anna</strong> with instructions to begin your SureLC Americo contracting process. If you don't receive it within 24 hours, reach out to Nick.
             </p>
           </div>
         </div>
@@ -465,7 +465,7 @@ export default function ContractingPage() {
           <div>
             <p style={{ fontSize: '13px', fontWeight: '700', color: '#14532D', marginBottom: '4px' }}>AIG (Core Bridge) Form Submitted — Next Steps</p>
             <p style={{ fontSize: '13px', color: '#166534', lineHeight: 1.7 }}>
-              Your AIG hierarchy form has been received. Keep an eye on your <strong>XFG email inbox</strong> for an email from <strong>Anna</strong> with instructions to begin your SureLC AIG contracting process. If you don't receive it within 24 hours, reach out to Finley or Nick.
+              Your AIG hierarchy form has been received. Keep an eye on your <strong>XFG email inbox</strong> for an email from <strong>Anna</strong> with instructions to begin your SureLC AIG contracting process. If you don't receive it within 24 hours, reach out to Nick.
             </p>
           </div>
         </div>

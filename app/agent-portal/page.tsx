@@ -204,7 +204,7 @@ export default function AgentPortalPage() {
               <div style={{ background: '#F5F2ED', border: '1px solid #EBE8E3', borderRadius: '10px', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '2px' }}>Dialer</p>
-                  <p style={{ color: '#6B6966', fontSize: '13px' }}>Once you have your credentials from Finley, log in to your dialer from the bottom of your CRM sidebar</p>
+                  <p style={{ color: '#6B6966', fontSize: '13px' }}>Once you have your credentials from Nick, log in to your dialer from the bottom of your CRM sidebar</p>
                 </div>
               </div>
 
@@ -251,9 +251,6 @@ export default function AgentPortalPage() {
                 <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '6px' }}>Need Support?</p>
                 <p style={{ color: '#6B6966', fontSize: '13px', marginBottom: '12px' }}>Reach out to your contracting team for any questions or assistance.</p>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <a href="tel:8587529085" style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', padding: '10px', borderRadius: '8px', textDecoration: 'none', textAlign: 'center', fontSize: '14px', fontWeight: '600' }}>
-                    📞 Finley
-                  </a>
                   <a href="tel:9858691319" style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', padding: '10px', borderRadius: '8px', textDecoration: 'none', textAlign: 'center', fontSize: '14px', fontWeight: '600' }}>
                     📞 Nick
                   </a>
@@ -399,7 +396,7 @@ export default function AgentPortalPage() {
         {stepKey === 'contracting_info' && (
           <div style={card}>
             <h2 style={{ color: '#1A1814', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>Contracting Information</h2>
-            <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '16px' }}>Please fill in your licensing details below, then reach out to Nick or Finley to get started.</p>
+            <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '16px' }}>Please fill in your licensing details below, then reach out to Nick to get started.</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
                 <label style={lbl}>National Producer Number (NPN) <span style={{ color: '#8B2635' }}>*</span></label>
@@ -435,17 +432,10 @@ export default function AgentPortalPage() {
             <div style={{ backgroundColor: '#FFF8E1', border: '1px solid #F59E0B', borderRadius: '12px', padding: '16px 20px', marginBottom: '20px' }}>
               <p style={{ fontSize: '13px', fontWeight: '700', color: '#92400E', marginBottom: '6px' }}>How Contracting Works</p>
               <p style={{ fontSize: '13px', color: '#92400E', lineHeight: 1.6 }}>
-                Our team will help you get contracted with each carrier one at a time, starting with Ethos. Reach out to Finley or Nick below to get started — they&apos;ll guide you through each step and make sure you&apos;re set up correctly with every carrier.
+                Our team will help you get contracted with each carrier one at a time, starting with Ethos. Reach out to Nick below to get started — he&apos;ll guide you through each step and make sure you&apos;re set up correctly with every carrier.
               </p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
-              <a href="tel:8587529085" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F5EDD9', border: '1px solid #E8C87A', borderRadius: '10px', padding: '16px', textDecoration: 'none' }}>
-                <div>
-                  <p style={{ color: '#1A1814', fontSize: '16px', fontWeight: '700', marginBottom: '2px' }}>Finley</p>
-                  <p style={{ color: '#C9A96E', fontSize: '15px', fontWeight: '600' }}>(858) 752-9085</p>
-                </div>
-                <span style={{ color: '#C9A96E', fontSize: '20px' }}>📞</span>
-              </a>
               <a href="tel:9858691319" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F5EDD9', border: '1px solid #E8C87A', borderRadius: '10px', padding: '16px', textDecoration: 'none' }}>
                 <div>
                   <p style={{ color: '#1A1814', fontSize: '16px', fontWeight: '700', marginBottom: '2px' }}>Nick</p>
@@ -656,13 +646,13 @@ export default function AgentPortalPage() {
               <div style={{ background: '#F5F2ED', border: '1px solid #DDD9D2', borderRadius: '12px', padding: '18px 20px', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
                   <span style={{ fontSize: '20px' }}>📞</span>
-                  <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '700' }}>Dialer Setup — Contact Finley</p>
+                  <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '700' }}>Dialer Setup — Contact Nick</p>
                 </div>
                 <p style={{ color: '#6B6966', fontSize: '13px', lineHeight: 1.6, marginBottom: '14px' }}>
-                  To get your dialer set up, contact Finley directly. He will walk you through the ReadyMode setup process.
+                  To get your dialer set up, contact Nick directly. He will walk you through the ReadyMode setup process.
                 </p>
-                <a href="tel:8587529085" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#C9A96E', color: '#1A1814', padding: '10px 20px', borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: '700' }}>
-                  📱 Call Finley — (858) 752-9085
+                <a href="tel:9858691319" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#C9A96E', color: '#1A1814', padding: '10px 20px', borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: '700' }}>
+                  📱 Call Nick — (985) 869-1319
                 </a>
               </div>
 
