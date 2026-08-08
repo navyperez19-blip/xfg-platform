@@ -10,6 +10,9 @@ export default function DashboardPage() {
   const router = useRouter()
   const [profile, setProfile] = useState<any>(null)
   const [stats, setStats] = useState({ total: 0, pipeline: 0, active: 0 })
+  const [stageStats, setStageStats] = useState({ contacted: 0, licensing: 0, contracting: 0, systemSetup: 0, active: 0 })
+  const [weeklySales, setWeeklySales] = useState<{ totalAP: number; totalSales: number; prevWeekAP: number }>({ totalAP: 0, totalSales: 0, prevWeekAP: 0 })
+  const [teamLeaderboard, setTeamLeaderboard] = useState<any[]>([])
 
   useEffect(() => {
     const load = async () => {
@@ -24,6 +27,76 @@ export default function DashboardPage() {
           active: agents.filter(a => a.current_stage === 'active').length,
         })
       }
+
+      // Stage breakdown
+      const { data: allAgents } = await supabase.from('agents').select('id, full_name, current_stage, upline_agent_id, is_leader')
+      if (allAgents) {
+        setStageStats({
+          contacted: allAgents.filter(a => a.current_stage === 'contacted').length,
+          licensing: allAgents.filter(a => a.current_stage === 'licensing').length,
+          contracting: allAgents.filter(a => a.current_stage === 'contracting').length,
+          systemSetup: allAgents.filter(a => a.current_stage === 'system_setup').length,
+          active: allAgents.filter(a => a.current_stage === 'active').length,
+        })
+
+        // Team leaderboard - leaders with their downline's weekly AP
+        const leaders = allAgents.filter(a => a.is_leader === true)
+        if (leaders.length > 0) {
+          const now = new Date()
+          const weekAgo = new Date(now)
+          weekAgo.setDate(weekAgo.getDate() - 7)
+          const weekAgoStr = weekAgo.toISOString().split('T')[0]
+
+          const { data: salesRecords } = await supabase
+            .from('discord_sales_records')
+            .select('agent_name, amount, sale_date')
+            .gte('sale_date', weekAgoStr)
+
+          const teamsData = leaders.map(leader => {
+            const teamMemberNames = new Set([
+              leader.full_name,
+              ...allAgents.filter(a => a.upline_agent_id === leader.id).map(a => a.full_name)
+            ])
+            const teamSales = (salesRecords || []).filter(r => teamMemberNames.has(r.agent_name))
+            const totalAP = teamSales.reduce((sum, r) => sum + Number(r.amount), 0)
+            return {
+              leaderName: leader.full_name,
+              leaderId: leader.id,
+              memberCount: teamMemberNames.size,
+              totalAP: Math.round(totalAP * 100) / 100,
+            }
+          }).sort((a, b) => b.totalAP - a.totalAP).slice(0, 5)
+
+          setTeamLeaderboard(teamsData)
+        }
+      }
+
+      // Weekly sales totals + previous week comparison
+      const nowForSales = new Date()
+      const weekAgoForSales = new Date(nowForSales)
+      weekAgoForSales.setDate(weekAgoForSales.getDate() - 7)
+      const twoWeeksAgo = new Date(nowForSales)
+      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14)
+
+      const { data: thisWeekSales } = await supabase
+        .from('discord_sales_records')
+        .select('amount')
+        .gte('sale_date', weekAgoForSales.toISOString().split('T')[0])
+
+      const { data: prevWeekSales } = await supabase
+        .from('discord_sales_records')
+        .select('amount')
+        .gte('sale_date', twoWeeksAgo.toISOString().split('T')[0])
+        .lt('sale_date', weekAgoForSales.toISOString().split('T')[0])
+
+      const thisWeekTotal = (thisWeekSales || []).reduce((sum, r) => sum + Number(r.amount), 0)
+      const prevWeekTotal = (prevWeekSales || []).reduce((sum, r) => sum + Number(r.amount), 0)
+
+      setWeeklySales({
+        totalAP: Math.round(thisWeekTotal * 100) / 100,
+        totalSales: (thisWeekSales || []).length,
+        prevWeekAP: Math.round(prevWeekTotal * 100) / 100,
+      })
     }
     load()
   }, [router])
