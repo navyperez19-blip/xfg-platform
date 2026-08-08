@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import ConfirmModal from '@/app/components/ConfirmModal'
 
 interface Props {
   agentId: string
@@ -15,6 +16,7 @@ export default function AgentMessages({ agentId, agentEmail, agentName, isAdminV
   const [newMessage, setNewMessage] = useState('')
   const [sending, setSending] = useState(false)
   const [currentUser, setCurrentUser] = useState<any>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -63,9 +65,9 @@ export default function AgentMessages({ agentId, agentEmail, agentName, isAdminV
   }
 
   const deleteMessage = async (id: string) => {
-    if (!confirm('Delete this message?')) return
     await supabase.from('agent_messages').delete().eq('id', id)
     setMessages(prev => prev.filter(m => m.id !== id))
+    setConfirmDeleteId(null)
   }
 
   return (
@@ -86,7 +88,7 @@ export default function AgentMessages({ agentId, agentEmail, agentName, isAdminV
                       {msg.users?.full_name} · {new Date(msg.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {new Date(msg.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
                     </p>
                     {isAdminView && (
-                      <button onClick={() => deleteMessage(msg.id)} style={{ background: 'transparent', border: 'none', color: isAdmin ? 'rgba(255,255,255,0.6)' : '#DDD9D2', cursor: 'pointer', fontSize: '12px', padding: '0', lineHeight: 1 }}>✕</button>
+                      <button onClick={() => setConfirmDeleteId(msg.id)} style={{ background: 'transparent', border: 'none', color: isAdmin ? 'rgba(255,255,255,0.6)' : '#DDD9D2', cursor: 'pointer', fontSize: '12px', padding: '0', lineHeight: 1 }}>✕</button>
                     )}
                   </div>
                 </div>
@@ -115,6 +117,14 @@ export default function AgentMessages({ agentId, agentEmail, agentName, isAdminV
           </button>
         </div>
       )}
+      <ConfirmModal
+        isOpen={!!confirmDeleteId}
+        title="Delete Message"
+        message="Are you sure you want to delete this message? This cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => confirmDeleteId && deleteMessage(confirmDeleteId)}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   )
 }

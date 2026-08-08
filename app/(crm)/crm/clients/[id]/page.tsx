@@ -6,6 +6,9 @@ import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
 import { POLICY_STATUSES, CARRIERS, PRODUCT_TYPES, HEALTH_STATUSES, US_STATES } from '@/app/crm-constants'
 import { createCalendarEventFromFollowUp } from '@/app/_actions/crm-actions'
+import ConfirmModal from '@/app/components/ConfirmModal'
+import { toast } from 'sonner'
+import PageSkeleton from '@/app/components/PageSkeleton'
 
 export default function ClientDetailPage() {
   const router = useRouter()
@@ -20,6 +23,8 @@ export default function ClientDetailPage() {
   const [agentId, setAgentId] = useState<string | null>(null)
   const [editingClient, setEditingClient] = useState(false)
   const [editingPolicyId, setEditingPolicyId] = useState<string | null>(null)
+  const [confirmDeletePolicyId, setConfirmDeletePolicyId] = useState<string | null>(null)
+  const [confirmDeleteNoteId, setConfirmDeleteNoteId] = useState<string | null>(null)
   const [showAddPolicy, setShowAddPolicy] = useState(false)
   const [showPreFill, setShowPreFill] = useState(false)
   const [preFillForm, setPreFillForm] = useState<any>({})
@@ -182,21 +187,14 @@ export default function ClientDetailPage() {
   }
 
   async function deletePolicy(policyId: string) {
-    if (!confirm('Delete this policy? This cannot be undone.')) return
     const { error } = await supabase.from('crm_policies').delete().eq('id', policyId)
-    if (error) { setError(error.message); return }
+    if (error) { toast.error(error.message); setConfirmDeletePolicyId(null); return }
     setPolicies(policies.filter(p => p.id !== policyId))
-    setSuccess('Policy deleted.')
-    setTimeout(() => setSuccess(''), 3000)
+    toast.success('Policy deleted')
+    setConfirmDeletePolicyId(null)
   }
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        <p style={{ color: '#7A7A7A', fontSize: '14px' }}>Loading...</p>
-      </div>
-    )
-  }
+  if (loading) return <PageSkeleton />
 
   const inp: React.CSSProperties = { width: '100%', padding: '9px 12px', fontSize: '13px', color: '#1A1A1A', backgroundColor: '#FAFAF8', border: '1px solid #E5E1DA', borderRadius: '8px', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }
   const lbl: React.CSSProperties = { fontSize: '11px', fontWeight: '600', color: '#7A7A7A', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '4px' }
@@ -441,7 +439,7 @@ export default function ClientDetailPage() {
                             Edit
                           </button>
                           <button
-                            onClick={() => deletePolicy(policy.id)}
+                            onClick={() => setConfirmDeletePolicyId(policy.id)}
                             style={{ padding: '6px 14px', backgroundColor: '#FFF5F5', color: '#C0392B', border: '1px solid #FECACA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit' }}
                           >
                             Delete
@@ -1079,11 +1077,7 @@ export default function ClientDetailPage() {
                           {new Date(note.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
                         </span>
                         <button
-                          onClick={async () => {
-                            if (!confirm('Delete this activity?')) return
-                            await supabase.from('crm_notes').delete().eq('id', note.id)
-                            setNotes(notes.filter(n => n.id !== note.id))
-                          }}
+                          onClick={() => setConfirmDeleteNoteId(note.id)}
                           style={{ background: 'none', border: 'none', color: '#CCC', cursor: 'pointer', fontSize: '14px', padding: '0', lineHeight: 1 }}
                         >
                           ×
@@ -1107,7 +1101,31 @@ export default function ClientDetailPage() {
             <p style={{ fontSize: '12px', color: '#AAA' }}>Log calls, texts, emails, and follow-ups to track your client interactions</p>
           </div>
         )}
-      </div>
+      <ConfirmModal
+        isOpen={!!confirmDeletePolicyId}
+        title="Delete Policy"
+        message="Are you sure you want to delete this policy? This cannot be undone."
+        confirmLabel="Delete"
+        danger={true}
+        onConfirm={() => confirmDeletePolicyId && deletePolicy(confirmDeletePolicyId)}
+        onCancel={() => setConfirmDeletePolicyId(null)}
+      />
+      <ConfirmModal
+        isOpen={!!confirmDeleteNoteId}
+        title="Delete Activity"
+        message="Are you sure you want to delete this activity entry?"
+        confirmLabel="Delete"
+        danger={true}
+        onConfirm={async () => {
+          if (!confirmDeleteNoteId) return
+          await supabase.from('crm_notes').delete().eq('id', confirmDeleteNoteId)
+          setNotes(notes.filter(n => n.id !== confirmDeleteNoteId))
+          toast.success('Activity deleted')
+          setConfirmDeleteNoteId(null)
+        }}
+        onCancel={() => setConfirmDeleteNoteId(null)}
+      />
     </div>
+  </div>
   )
 }

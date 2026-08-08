@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
             This agent has submitted their Americo Hierarchy & Commission Level + Direct Deposit Authorization Form.
             Please review the submission and unlock their Americo SureLC contracting link in the platform.
           </p>
-          <a href="https://app.xfg.software/crm/admin/agents/${agent.id}"
+          <a href="https://app.xfg.software/agents/${agent.id}"
              style="display: inline-block; background: #C9A96E; color: #1A1814; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px;">
             Review & Unlock →
           </a>

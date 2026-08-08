@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { toast } from 'sonner'
+import ConfirmModal from '@/app/components/ConfirmModal'
 
 interface Props {
   agentId: string
@@ -12,6 +14,7 @@ export default function Notes({ agentId }: Props) {
   const [newNote, setNewNote] = useState('')
   const [adding, setAdding] = useState(false)
   const [currentUser, setCurrentUser] = useState<any>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -22,7 +25,7 @@ export default function Notes({ agentId }: Props) {
       }
       const { data } = await supabase
         .from('notes')
-        .select('*, users(full_name)')
+        .select('*, users!notes_author_id_fkey(full_name)')
         .eq('agent_id', agentId)
         .order('created_at', { ascending: false })
       setNotes(data || [])
@@ -31,24 +34,31 @@ export default function Notes({ agentId }: Props) {
   }, [agentId])
 
   const addNote = async () => {
-    if (!newNote.trim() || !currentUser) return
+    if (!newNote.trim()) return
+    if (!currentUser) {
+      toast.error('Unable to identify your account — try refreshing the page')
+      return
+    }
     setAdding(true)
-    const { data: inserted } = await supabase
+    const { data: inserted, error } = await supabase
       .from('notes')
-      .insert({ agent_id: agentId, user_id: currentUser.id, content: newNote.trim() })
-      .select('*, users(full_name)')
+      .insert({ agent_id: agentId, author_id: currentUser.id, content: newNote.trim() })
+      .select('*, users!notes_author_id_fkey(full_name)')
       .single()
-    if (inserted) {
+    if (error) {
+      toast.error(`Failed to add note: ${error.message}`)
+    } else if (inserted) {
       setNotes(prev => [inserted, ...prev])
       setNewNote('')
+      toast.success('Note added')
     }
     setAdding(false)
   }
 
   const deleteNote = async (id: string) => {
-    if (!confirm('Delete this note?')) return
     await supabase.from('notes').delete().eq('id', id)
     setNotes(prev => prev.filter(n => n.id !== id))
+    setConfirmDeleteId(null)
   }
 
   return (
@@ -80,7 +90,7 @@ export default function Notes({ agentId }: Props) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
                 <p style={{ color: '#1A1814', fontSize: '14px', lineHeight: '1.5', flex: 1 }}>{note.content}</p>
                 <button
-                  onClick={() => deleteNote(note.id)}
+                  onClick={() => setConfirmDeleteId(note.id)}
                   style={{ background: 'transparent', border: 'none', color: '#DDD9D2', cursor: 'pointer', fontSize: '14px', padding: '0', flexShrink: 0, lineHeight: 1 }}
                   onMouseEnter={e => (e.currentTarget.style.color = '#8B2635')}
                   onMouseLeave={e => (e.currentTarget.style.color = '#DDD9D2')}
@@ -95,6 +105,14 @@ export default function Notes({ agentId }: Props) {
           ))}
         </div>
       )}
+      <ConfirmModal
+        isOpen={!!confirmDeleteId}
+        title="Delete Note"
+        message="Are you sure you want to delete this note? This cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => confirmDeleteId && deleteNote(confirmDeleteId)}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   )
 }

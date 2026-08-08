@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import { getCurrentUser } from '../lib/auth'
 import { useRouter } from 'next/navigation'
 import NotificationBell from '../components/NotificationBell'
+import PageSkeleton from '@/app/components/PageSkeleton'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -106,11 +107,7 @@ export default function DashboardPage() {
     router.push('/login')
   }
 
-  if (!profile) return (
-    <main style={{ minHeight: '100vh', background: '#F5F2ED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: '#6B6966', fontFamily: 'Inter, sans-serif' }}>Loading...</p>
-    </main>
-  )
+  if (!profile) return <PageSkeleton />
 
   return (
     <main style={{ minHeight: '100vh', background: '#F5F2ED' }}>
@@ -138,6 +135,9 @@ export default function DashboardPage() {
           )}
           {['executive', 'superadmin'].includes(profile.role) && (
             <button onClick={() => router.push('/analytics')} style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#1A1814', padding: '0.6rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>Analytics</button>
+          )}
+          {['executive', 'superadmin'].includes(profile.role) && (
+            <button onClick={() => router.push('/tasks')} style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#1A1814', padding: '0.6rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>✅ Tasks</button>
           )}
           <button onClick={() => router.push('/search')} style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#1A1814', padding: '0.6rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>Search Agents</button>
         </div>

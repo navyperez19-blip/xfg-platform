@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
+import PageSkeleton from '@/app/components/PageSkeleton'
 
 const US_STATES = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY']
 
@@ -102,13 +103,7 @@ export default function ProfilePage() {
     marginBottom: '4px',
   }
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        <p style={{ color: '#7A7A7A', fontSize: '14px' }}>Loading...</p>
-      </div>
-    )
-  }
+  if (loading) return <PageSkeleton />
 
   return (
     <div style={{ maxWidth: '600px' }}>

@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
 import CRMNav from '@/components/crm/CRMNav'
+import { Toaster } from 'sonner'
+import PageSkeleton from '@/app/components/PageSkeleton'
 
 export default function CRMLayout({
   children,
@@ -50,7 +52,7 @@ export default function CRMLayout({
         .eq('user_id', user.id)
         .single()
 
-      const crmEligibleStages = ['active']
+      const crmEligibleStages = ['active', 'system_setup']
       if (!agentRecord || !crmEligibleStages.includes(agentRecord.current_stage)) {
         router.push('/pipeline')
         return
@@ -89,20 +91,7 @@ export default function CRMLayout({
     checkAuth()
   }, [router])
 
-  if (loading) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        backgroundColor: '#F5F2ED',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'Inter, sans-serif',
-      }}>
-        <p style={{ color: '#7A7A7A', fontSize: '14px' }}>Loading...</p>
-      </div>
-    )
-  }
+  if (loading) return <PageSkeleton />
 
   return (
     <div style={{
@@ -124,6 +113,7 @@ export default function CRMLayout({
       }}>
         {children}
       </main>
+      <Toaster position="bottom-right" richColors closeButton />
     </div>
   )
 }

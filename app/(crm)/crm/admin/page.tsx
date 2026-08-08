@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
 import { useRouter } from 'next/navigation'
+import PageSkeleton from '@/app/components/PageSkeleton'
 
 const PAGE_SIZE = 25
 
@@ -134,13 +135,7 @@ export default function AdminOverviewPage() {
     },
   ]
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        <p style={{ color: '#7A7A7A', fontSize: '14px' }}>Loading...</p>
-      </div>
-    )
-  }
+  if (loading) return <PageSkeleton />
 
   return (
     <div>
@@ -271,7 +266,7 @@ export default function AdminOverviewPage() {
                         </span>
                       </td>
                       <td style={{ padding: '14px 16px' }}>
-                        <Link href={`/crm/admin/agents/${agent.id}`} style={{ fontSize: '12px', color: '#C9A96E', textDecoration: 'none', fontWeight: '600', whiteSpace: 'nowrap' }}>
+                        <Link href={`/agents/${agent.id}`} style={{ fontSize: '12px', color: '#C9A96E', textDecoration: 'none', fontWeight: '600', whiteSpace: 'nowrap' }}>
                           View Details →
                         </Link>
                       </td>

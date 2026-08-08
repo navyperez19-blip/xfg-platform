@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
+import PageSkeleton from '@/app/components/PageSkeleton'
 
 const CARRIERS = [
   { name: 'Aflac',                  description: 'Supplemental insurance',        surelcLink: null },
@@ -29,6 +30,7 @@ export default function ContractingPage() {
   const [carriers, setCarriers] = useState<Record<string, string>>({})
   const [americoFormSubmitted, setAmericoFormSubmitted] = useState<boolean | null>(null)
   const [aigFormSubmitted, setAigFormSubmitted] = useState(false)
+  const [mutualOmahaLinkClicked, setMutualOmahaLinkClicked] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -125,47 +127,11 @@ export default function ContractingPage() {
 
     if (!error) {
       setCarriers(updatedCarriers)
-
-      const hasContractingStarted = Object.values(updatedCarriers).some(s => s === 'submitted' || s === 'active')
-
-      if (hasContractingStarted && agentRecord.current_stage !== 'active') {
-        const { error: stageError } = await supabase
-          .from('agents')
-          .update({ current_stage: 'active', updated_at: new Date().toISOString() })
-          .eq('id', agentRecord.id)
-
-        if (!stageError) {
-          setAgentRecord({ ...agentRecord, current_stage: 'active' })
-
-          const { data: admins } = await supabase
-            .from('users')
-            .select('id')
-            .in('role', ['superadmin', 'executive'])
-
-          if (admins && admins.length > 0) {
-            const notifications = admins.map((admin: any) => ({
-              recipient_id: admin.id,
-              agent_id: agentRecord.id,
-              type: 'agent_activated',
-              title: 'Agent Activated',
-              message: `${agentRecord.full_name} has been automatically activated — they submitted their first carrier contract.`,
-              is_read: false,
-            }))
-            await supabase.from('notifications').insert(notifications)
-          }
-        }
-      }
     }
     setSaving(null)
   }
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        <p style={{ color: '#7A7A7A', fontSize: '14px' }}>Loading...</p>
-      </div>
-    )
-  }
+  if (loading) return <PageSkeleton />
 
   const activeCount = CARRIERS.filter(c => carriers[c.name] === 'active').length
   const submittedCount = CARRIERS.filter(c => carriers[c.name] === 'submitted').length
@@ -180,6 +146,45 @@ export default function ContractingPage() {
         <p style={{ fontSize: '14px', color: '#7A7A7A' }}>
           Track your contracting status with each carrier
         </p>
+      </div>
+
+      {/* Watch Before You Start Videos */}
+      <div style={{ marginBottom: '20px' }}>
+        <div style={{ backgroundColor: '#1A1A1A', borderRadius: '12px', padding: '20px 24px', marginBottom: '16px' }}>
+          <p style={{ fontSize: '16px', fontWeight: '700', color: '#C9A96E', margin: '0 0 6px 0' }}>📹 Watch Before You Start</p>
+          <p style={{ fontSize: '13px', color: '#FFFFFF', margin: '0 0 16px 0', lineHeight: '1.6' }}>
+            Before clicking any SureLC links or submitting anything, please watch both videos below.
+            These will show you exactly how to set up your SureLC account and submit your contracting requests correctly.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+            <div>
+              <p style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Video 1 — SureLC Account Setup</p>
+              <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: '8px', overflow: 'hidden' }}>
+                <iframe
+                  src="https://www.youtube.com/embed/szDXN-7SpoE"
+                  title="SureLC Account Setup"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
+                />
+              </div>
+            </div>
+            <div>
+              <p style={{ fontSize: '12px', fontWeight: '700', color: '#C9A96E', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Video 2 — SureLC Requests Tutorial</p>
+              <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: '8px', overflow: 'hidden' }}>
+                <iframe
+                  src="https://www.youtube.com/embed/_1WDjhanKXU"
+                  title="SureLC Requests Tutorial"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Important Warning Banner */}
@@ -202,7 +207,7 @@ export default function ContractingPage() {
             Both <strong>Americo</strong> and <strong>AIG (Core Bridge)</strong> are contracted through the same SureLC link. Once you submit the hierarchy form for either carrier, <strong>Anna</strong> will email your XFG email with the SureLC link to complete your contracting. You will use that same link to contract with both carriers.
           </p>
           <p style={{ fontSize: '13px', color: '#1D4ED8', lineHeight: 1.7, marginTop: '6px' }}>
-            If you have any questions or need assistance, please contact <strong>Nick or Finley</strong>.
+            If you have any questions or need assistance, please contact <strong>Nick</strong>.
           </p>
         </div>
       </div>
@@ -220,7 +225,7 @@ export default function ContractingPage() {
             <p style={{ fontSize: '13px', color: '#92400E', lineHeight: 1.6 }}>• Unless told otherwise, each additional carrier will have its own separate SureLC account</p>
           </div>
           <p style={{ fontSize: '13px', color: '#92400E', lineHeight: 1.7 }}>
-            As you progress through contracting, make sure you are logging into the <strong>correct SureLC account</strong> for the carrier you're working on. If you need help, contact <strong>Nick or Finley</strong>.
+            As you progress through contracting, make sure you are logging into the <strong>correct SureLC account</strong> for the carrier you're working on. If you need help, contact <strong>Nick</strong>.
           </p>
         </div>
       </div>
@@ -307,14 +312,34 @@ export default function ContractingPage() {
 
                     {/* Mutual of Omaha - direct SureLC link, no unlock needed */}
                     {isMutualOmaha && (
-                      <a
-                        href="https://surelc.surancebay.com/sbweb/login.jsp?branch=Ascent%20Insurance&branchEditable=off&branchRequired=on&branchVisible=on&gaId=1279&gaName=Supreme%20Life%20Brokerage"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ display: 'inline-block', padding: '6px 14px', backgroundColor: '#E8F5E9', color: '#1B5E20', border: '1px solid #A5D6A7', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', textDecoration: 'none', whiteSpace: 'nowrap' }}
-                      >
-                        Start Mutual of Omaha Contracting on SureLC →
-                      </a>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <a
+                          href="https://surelc.surancebay.com/sbweb/login.jsp?branch=Ascent%20Insurance&branchEditable=off&branchRequired=on&branchVisible=on&gaId=1279&gaName=Supreme%20Life%20Brokerage"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={async () => {
+                          setMutualOmahaLinkClicked(true)
+                          if (currentStatus === 'none') {
+                            await updateCarrierStatus('Mutual of Omaha', 'submitted')
+                          }
+                        }}
+                          style={{ display: 'inline-block', padding: '10px 16px', backgroundColor: '#22C55E', color: '#FFFFFF', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', textAlign: 'center' }}
+                        >
+                          Start Mutual of Omaha Contracting on SureLC →
+                        </a>
+
+                        {mutualOmahaLinkClicked && currentStatus === 'none' && (
+                          <button
+                            onClick={async () => {
+                              await updateCarrierStatus('Mutual of Omaha', 'submitted')
+                              setMutualOmahaLinkClicked(false)
+                            }}
+                            style={{ padding: '10px 16px', backgroundColor: '#C9A96E', color: '#1A1A1A', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit', textAlign: 'center' }}
+                          >
+                            ✅ I've Completed SureLC — Mark as Submitted
+                          </button>
+                        )}
+                      </div>
                     )}
                     {isMutualOmaha && (
                       <p style={{ fontSize: '11px', color: '#7A7A7A', marginTop: '4px' }}>This link is for <strong>Mutual of Omaha only</strong> — do not use it for other carriers.</p>
@@ -427,7 +452,7 @@ export default function ContractingPage() {
           <div>
             <p style={{ fontSize: '13px', fontWeight: '700', color: '#14532D', marginBottom: '4px' }}>Americo Form Submitted — Next Steps</p>
             <p style={{ fontSize: '13px', color: '#166534', lineHeight: 1.7 }}>
-              Your Americo hierarchy form has been received. Keep an eye on your <strong>XFG email inbox</strong> for an email from <strong>Anna</strong> with instructions to begin your SureLC Americo contracting process. If you don't receive it within 24 hours, reach out to Finley or Nick.
+              Your Americo hierarchy form has been received. Keep an eye on your <strong>XFG email inbox</strong> for an email from <strong>Anna</strong> with instructions to begin your SureLC Americo contracting process. If you don't receive it within 24 hours, reach out to Nick.
             </p>
           </div>
         </div>
@@ -440,7 +465,7 @@ export default function ContractingPage() {
           <div>
             <p style={{ fontSize: '13px', fontWeight: '700', color: '#14532D', marginBottom: '4px' }}>AIG (Core Bridge) Form Submitted — Next Steps</p>
             <p style={{ fontSize: '13px', color: '#166534', lineHeight: 1.7 }}>
-              Your AIG hierarchy form has been received. Keep an eye on your <strong>XFG email inbox</strong> for an email from <strong>Anna</strong> with instructions to begin your SureLC AIG contracting process. If you don't receive it within 24 hours, reach out to Finley or Nick.
+              Your AIG hierarchy form has been received. Keep an eye on your <strong>XFG email inbox</strong> for an email from <strong>Anna</strong> with instructions to begin your SureLC AIG contracting process. If you don't receive it within 24 hours, reach out to Nick.
             </p>
           </div>
         </div>

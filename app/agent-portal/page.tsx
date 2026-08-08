@@ -5,6 +5,8 @@ import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
 import AgentMessages from '../components/AgentMessages'
 
+export const dynamic = 'force-dynamic'
+
 const LICENSED_STEPS = [
   { key: 'xfg_email', title: 'Create Your XFG Email' },
   { key: 'discord', title: 'Join XFG Discord' },
@@ -153,7 +155,7 @@ export default function AgentPortalPage() {
   const progress = Math.round((currentStep / (totalSteps - 1)) * 100)
   const stepKey = steps[currentStep]?.key
 
-  if (agent.current_stage === 'active') {
+  if (agent.wizard_step === 'done') {
     return (
       <main style={{ minHeight: '100vh', background: '#F5F2ED', padding: '16px' }}>
         <div style={{ maxWidth: '600px', margin: '0 auto', paddingTop: '40px' }}>
@@ -202,7 +204,7 @@ export default function AgentPortalPage() {
               <div style={{ background: '#F5F2ED', border: '1px solid #EBE8E3', borderRadius: '10px', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '2px' }}>Dialer</p>
-                  <p style={{ color: '#6B6966', fontSize: '13px' }}>Once you have your credentials from Finley, log in to your dialer from the bottom of your CRM sidebar</p>
+                  <p style={{ color: '#6B6966', fontSize: '13px' }}>Once you have your credentials from Nick, log in to your dialer from the bottom of your CRM sidebar</p>
                 </div>
               </div>
 
@@ -213,11 +215,34 @@ export default function AgentPortalPage() {
                 <a href="/crm" style={{ display: 'block', background: '#C9A96E', color: '#1A1814', padding: '14px', borderRadius: '10px', textDecoration: 'none', fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>
                   Enter Production CRM →
                 </a>
-                <div style={{ background: '#242220', border: '1px solid #2E2C29', borderRadius: '10px', padding: '14px 16px', textAlign: 'left' }}>
-                  <p style={{ color: '#C9A96E', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>💡 Important Reminder</p>
-                  <p style={{ color: '#9A9890', fontSize: '13px', lineHeight: 1.7 }}>
-                    Once you're in your CRM, go to <strong style={{ color: '#F5F2ED' }}>My Contracting</strong> to complete your carrier contracting. You should have already submitted <strong style={{ color: '#F5F2ED' }}>Ethos</strong> with Finley or Nick — your next step is <strong style={{ color: '#F5F2ED' }}>Americo</strong>. Once you have your dialer credentials from Finley, you can log in directly from the <strong style={{ color: '#F5F2ED' }}>Open Dialer</strong> button at the bottom of your CRM sidebar.
+                <div style={{ background: '#242220', border: '1px solid #2E2C29', borderRadius: '10px', padding: '16px 18px', textAlign: 'left' }}>
+                  <p style={{ color: '#C9A96E', fontSize: '13px', fontWeight: '700', marginBottom: '4px' }}>🚀 New Agent Support Schedule</p>
+                  <p style={{ color: '#9A9890', fontSize: '12px', marginBottom: '12px' }}>
+                    All meeting times are listed in <strong style={{ color: '#F59E0B' }}>PST</strong>.
                   </p>
+
+                  <p style={{ color: '#9A9890', fontSize: '12px', marginBottom: '4px' }}>📅 Monday &amp; Friday</p>
+                  <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '2px' }}>📄 <strong>9:00 AM</strong> — Contracting With Carriers</p>
+                  <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '2px' }}>☎️ <strong>9:30 AM</strong> — Dialer &amp; Lead Setup</p>
+                  <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '12px' }}>📚 <strong>10:00 AM</strong> — Script, Product, E-App Training</p>
+
+                  <div style={{ backgroundColor: '#3A2E1A', border: '1px solid #C9A96E', borderRadius: '8px', padding: '10px 14px', marginBottom: '14px' }}>
+                    <p style={{ color: '#F5D9A0', fontSize: '12px', lineHeight: 1.6, margin: 0 }}>
+                      💡 Make sure to be there Monday and Friday so you can get your dialer set up and finish the rest of your contracting.
+                    </p>
+                  </div>
+
+                  <div style={{ borderTop: '1px solid #2E2C29', paddingTop: '12px' }}>
+                    <a
+                      href="https://us06web.zoom.us/j/6769900353?pwd=Y5Rs7E1Hj6KBgMkgP8m9VeL806AF7X.1"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ display: 'inline-block', padding: '8px 16px', backgroundColor: '#C9A96E', color: '#1A1A1A', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', marginBottom: '8px' }}
+                    >
+                      Join Zoom Meeting →
+                    </a>
+                    <p style={{ color: '#9A9890', fontSize: '11px' }}>Meeting ID: 676 990 0353 · Passcode: XFG2026</p>
+                  </div>
                 </div>
               </div>
 
@@ -226,9 +251,6 @@ export default function AgentPortalPage() {
                 <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '600', marginBottom: '6px' }}>Need Support?</p>
                 <p style={{ color: '#6B6966', fontSize: '13px', marginBottom: '12px' }}>Reach out to your contracting team for any questions or assistance.</p>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <a href="tel:8587529085" style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', padding: '10px', borderRadius: '8px', textDecoration: 'none', textAlign: 'center', fontSize: '14px', fontWeight: '600' }}>
-                    📞 Finley
-                  </a>
                   <a href="tel:9858691319" style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', padding: '10px', borderRadius: '8px', textDecoration: 'none', textAlign: 'center', fontSize: '14px', fontWeight: '600' }}>
                     📞 Nick
                   </a>
@@ -374,7 +396,7 @@ export default function AgentPortalPage() {
         {stepKey === 'contracting_info' && (
           <div style={card}>
             <h2 style={{ color: '#1A1814', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>Contracting Information</h2>
-            <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '16px' }}>Please fill in your licensing details below, then reach out to Nick or Finley to get started.</p>
+            <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '16px' }}>Please fill in your licensing details below, then reach out to Nick to get started.</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
                 <label style={lbl}>National Producer Number (NPN) <span style={{ color: '#8B2635' }}>*</span></label>
@@ -385,28 +407,11 @@ export default function AgentPortalPage() {
                 <input type="text" value={formData.states_licensed} onChange={(e) => setFormData({ ...formData, states_licensed: e.target.value })} placeholder="e.g. LA, TX, FL, GA" style={inp} />
               </div>
             </div>
-              <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', padding: '16px', marginTop: '8px' }}>
-                <p style={{ color: '#1E40AF', fontSize: '13px', fontWeight: '700', marginBottom: '8px' }}>📋 Complete Your Contracting in the CRM</p>
-                <p style={{ color: '#1D4ED8', fontSize: '13px', lineHeight: 1.7, marginBottom: '12px' }}>
-                  Once you reach your CRM, head to the <strong>My Contracting</strong> section to submit your carrier contracts. Your contracting team will guide you through the rest of the process from there.
+              <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '12px', padding: '16px 20px', marginTop: '16px' }}>
+                <p style={{ fontSize: '13px', fontWeight: '700', color: '#1E40AF', marginBottom: '6px' }}>What happens next?</p>
+                <p style={{ fontSize: '13px', color: '#1E40AF', lineHeight: 1.6 }}>
+                  Once you submit your NPN and licensed states, our team will reach out to walk you through getting contracted with our carriers. You&apos;ll find everything you need in the My Contracting section of your CRM once you&apos;re set up.
                 </p>
-                <div style={{ background: '#DBEAFE', borderRadius: '8px', padding: '12px 14px' }}>
-                  <p style={{ color: '#1E40AF', fontSize: '12px', fontWeight: '700', marginBottom: '8px' }}>📌 Your Contracting Order:</p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#1E40AF', color: '#FFF', fontSize: '11px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>1</span>
-                      <p style={{ color: '#1E40AF', fontSize: '12px', lineHeight: 1.5 }}><strong>Ethos</strong> — Will be submitted for you by your contracting team</p>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#1E40AF', color: '#FFF', fontSize: '11px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>2</span>
-                      <p style={{ color: '#1E40AF', fontSize: '12px', lineHeight: 1.5 }}><strong>Americo & AIG (Core Bridge)</strong> — Complete in My Contracting section of your CRM</p>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#1E40AF', color: '#FFF', fontSize: '11px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>3</span>
-                      <p style={{ color: '#1E40AF', fontSize: '12px', lineHeight: 1.5 }}><strong>Mutual of Omaha</strong> — Request access in My Contracting section of your CRM</p>
-                    </div>
-                  </div>
-                </div>
               </div>
             <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
               {currentStep > 0 && (
@@ -424,14 +429,13 @@ export default function AgentPortalPage() {
           <div style={card}>
             <h2 style={{ color: '#1A1814', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>Contact the XFG Team</h2>
             <p style={{ color: '#6B6966', fontSize: '15px', marginBottom: '20px' }}>Your information has been submitted. Please reach out to one of our contracting team members to complete the process.</p>
+            <div style={{ backgroundColor: '#FFF8E1', border: '1px solid #F59E0B', borderRadius: '12px', padding: '16px 20px', marginBottom: '20px' }}>
+              <p style={{ fontSize: '13px', fontWeight: '700', color: '#92400E', marginBottom: '6px' }}>How Contracting Works</p>
+              <p style={{ fontSize: '13px', color: '#92400E', lineHeight: 1.6 }}>
+                Our team will help you get contracted with each carrier one at a time, starting with Ethos. Reach out to Nick below to get started — he&apos;ll guide you through each step and make sure you&apos;re set up correctly with every carrier.
+              </p>
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
-              <a href="tel:8587529085" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F5EDD9', border: '1px solid #E8C87A', borderRadius: '10px', padding: '16px', textDecoration: 'none' }}>
-                <div>
-                  <p style={{ color: '#1A1814', fontSize: '16px', fontWeight: '700', marginBottom: '2px' }}>Finley</p>
-                  <p style={{ color: '#C9A96E', fontSize: '15px', fontWeight: '600' }}>(858) 752-9085</p>
-                </div>
-                <span style={{ color: '#C9A96E', fontSize: '20px' }}>📞</span>
-              </a>
               <a href="tel:9858691319" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F5EDD9', border: '1px solid #E8C87A', borderRadius: '10px', padding: '16px', textDecoration: 'none' }}>
                 <div>
                   <p style={{ color: '#1A1814', fontSize: '16px', fontWeight: '700', marginBottom: '2px' }}>Nick</p>
@@ -642,25 +646,39 @@ export default function AgentPortalPage() {
               <div style={{ background: '#F5F2ED', border: '1px solid #DDD9D2', borderRadius: '12px', padding: '18px 20px', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
                   <span style={{ fontSize: '20px' }}>📞</span>
-                  <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '700' }}>Dialer Setup — Contact Finley</p>
+                  <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '700' }}>Dialer Setup — Contact Nick</p>
                 </div>
                 <p style={{ color: '#6B6966', fontSize: '13px', lineHeight: 1.6, marginBottom: '14px' }}>
-                  To get your dialer set up, contact Finley directly. He will walk you through the ReadyMode setup process.
+                  To get your dialer set up, contact Nick directly. He will walk you through the ReadyMode setup process.
                 </p>
-                <a href="tel:8587529085" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#C9A96E', color: '#1A1814', padding: '10px 20px', borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: '700' }}>
-                  📱 Call Finley — (858) 752-9085
+                <a href="tel:9858691319" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#C9A96E', color: '#1A1814', padding: '10px 20px', borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: '700' }}>
+                  📱 Call Nick — (985) 869-1319
                 </a>
               </div>
 
-              {/* CRM Contracting Note */}
-              <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '12px', padding: '18px 20px', marginBottom: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '20px' }}>💡</span>
-                  <p style={{ color: '#1E40AF', fontSize: '15px', fontWeight: '700' }}>Your Carrier Contracting</p>
-                </div>
-                <p style={{ color: '#1E40AF', fontSize: '13px', lineHeight: 1.7 }}>
-                  Once you&apos;ve spoken with Finley about your dialer setup, head to the <strong>My Contracting</strong> section in your CRM to complete your carrier contracting. You should have already submitted <strong>Ethos</strong> with Finley or Nick — your next step is <strong>Americo</strong>.
+              {/* Meeting Schedule Card */}
+              <div style={{ backgroundColor: '#1A1A1A', borderRadius: '12px', padding: '20px 24px', marginTop: '16px' }}>
+                <p style={{ fontSize: '15px', fontWeight: '700', color: '#C9A96E', marginBottom: '10px' }}>🚀 Finish Your Contracting — Join Us Live</p>
+                <p style={{ fontSize: '13px', color: '#FFFFFF', lineHeight: 1.6, marginBottom: '10px' }}>
+                  To finish setting up the rest of your carrier contracting, dialer, and leads, join us for New Agent Support on <strong>Monday or Friday</strong>.
                 </p>
+                <p style={{ fontSize: '12px', color: '#F59E0B', fontWeight: '700', marginBottom: '14px' }}>
+                  ⏰ Please pay close attention to your time zone — all meeting times below are listed in Pacific Standard Time (PST).
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '14px' }}>
+                  <p style={{ fontSize: '13px', color: '#FFFFFF', margin: 0 }}>📄 <strong>9:00 AM</strong> — Contracting With Carriers</p>
+                  <p style={{ fontSize: '13px', color: '#FFFFFF', margin: 0 }}>☎️ <strong>9:30 AM</strong> — Dialer &amp; Lead Setup</p>
+                  <p style={{ fontSize: '13px', color: '#FFFFFF', margin: 0 }}>📚 <strong>10:00 AM</strong> — Script, Product, E-App Training</p>
+                </div>
+                <a
+                  href="https://us06web.zoom.us/j/6769900353?pwd=Y5Rs7E1Hj6KBgMkgP8m9VeL806AF7X.1"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ display: 'inline-block', padding: '10px 18px', backgroundColor: '#C9A96E', color: '#1A1A1A', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700' }}
+                >
+                  Join Zoom Meeting →
+                </a>
+                <p style={{ fontSize: '11px', color: '#AAA', marginTop: '10px' }}>Meeting ID: 676 990 0353 · Passcode: XFG2026</p>
               </div>
 
             </div>
@@ -675,14 +693,18 @@ export default function AgentPortalPage() {
                   setSaving(true)
                   const now = new Date().toISOString()
                   await supabase.from('agents').update({
-                    current_stage: 'active',
                     wizard_step: 'done',
                     updated_at: now
                   }).eq('id', agent.id)
-                  await supabase.from('stage_history').insert({ agent_id: agent.id, from_stage: agent.current_stage, to_stage: 'active', changed_by: agent.user_id })
                   const { data: admins } = await supabase.from('users').select('id').in('role', ['superadmin', 'executive'])
-                  if (admins) await supabase.from('notifications').insert(admins.map(a => ({ recipient_id: a.id, agent_id: agent.id, type: 'activation', title: 'Agent is now Active!', message: `${agent.full_name} has completed system setup and is now an active XFG agent` })))
-                  setAgent({ ...agent, current_stage: 'active', wizard_step: 'done' })
+                  if (admins) await supabase.from('notifications').insert(admins.map(a => ({
+                    recipient_id: a.id,
+                    agent_id: agent.id,
+                    type: 'setup_complete',
+                    title: 'Agent Completed System Setup',
+                    message: `${agent.full_name} has completed system setup and now has CRM access. They'll move to Active once a carrier and dialer are marked active.`
+                  })))
+                  setAgent({ ...agent, wizard_step: 'done' })
                   setSaving(false)
                   window.scrollTo(0, 0)
                 }} disabled={saving} style={{ flex: 1, background: '#C9A96E', color: '#FFFFFF', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import NavBar from './components/NavBar'
+import { Toaster } from 'sonner'
 
 export const metadata: Metadata = {
   title: 'XFG Platform',
@@ -26,6 +27,7 @@ export default function RootLayout({
       <body style={{ margin: 0, padding: 0, fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif', background: '#F5F2ED' }}>
         <NavBar />
         {children}
+        <Toaster position="bottom-right" richColors closeButton />
       </body>
     </html>
   )

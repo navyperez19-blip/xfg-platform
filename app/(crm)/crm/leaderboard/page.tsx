@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
+import PageSkeleton from '@/app/components/PageSkeleton'
 
 export default function LeaderboardPage() {
   const router = useRouter()
@@ -86,13 +87,7 @@ export default function LeaderboardPage() {
     }
   }, [])
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        <p style={{ color: '#7A7A7A', fontSize: '14px' }}>Loading...</p>
-      </div>
-    )
-  }
+  if (loading) return <PageSkeleton />
 
   const myRank = leaderboard.findIndex(a => a.id === myAgentId) + 1
   const myStats = leaderboard.find(a => a.id === myAgentId)
@@ -100,6 +95,7 @@ export default function LeaderboardPage() {
 
   return (
     <div>
+
       {/* Header */}
       <div style={{ marginBottom: '28px' }}>
         <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1A1A1A', letterSpacing: '-0.02em', marginBottom: '4px' }}>
@@ -139,6 +135,69 @@ export default function LeaderboardPage() {
         </div>
       )}
 
+      {/* All-Time Leaders */}
+      <div style={{ backgroundColor: '#1A1A1A', borderRadius: '16px', overflow: 'hidden', marginBottom: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid #2D2D2D' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#C9A96E', margin: '0 0 2px 0' }}>⭐ All-Time Leaders</h2>
+          <p style={{ fontSize: '12px', color: '#7A7A7A', margin: 0 }}>Total AP written since joining XFG</p>
+        </div>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ backgroundColor: '#111111' }}>
+              <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '600', color: '#555', textTransform: 'uppercase', letterSpacing: '0.05em', width: '60px' }}>Rank</th>
+              <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '600', color: '#555', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Agent</th>
+              <th style={{ padding: '10px 16px', textAlign: 'right', fontSize: '11px', fontWeight: '600', color: '#555', textTransform: 'uppercase', letterSpacing: '0.05em' }}>All-Time AP</th>
+              <th style={{ padding: '10px 16px', textAlign: 'center', fontSize: '11px', fontWeight: '600', color: '#555', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Policies</th>
+              {isAdmin && <th style={{ padding: '10px 16px', width: '80px' }}></th>}
+            </tr>
+          </thead>
+          <tbody>
+            {[...leaderboard].sort((a, b) => b.alltimePremium - a.alltimePremium).filter(a => a.alltimePremium > 0).slice(0, 10).map((agent, index) => {
+              const isMe = agent.id === myAgentId
+              const topAlltime = [...leaderboard].sort((a, b) => b.alltimePremium - a.alltimePremium)[0]?.alltimePremium ?? 0
+              const progress = topAlltime > 0 ? (agent.alltimePremium / topAlltime) * 100 : 0
+              const rank = index + 1
+              return (
+                <tr key={agent.id} style={{ backgroundColor: isMe ? '#2A2500' : 'transparent', borderTop: '1px solid #2D2D2D' }}>
+                  <td style={{ padding: '14px 16px' }}>
+                    {rank === 1 ? <span style={{ fontSize: '22px' }}>🥇</span> : rank === 2 ? <span style={{ fontSize: '22px' }}>🥈</span> : rank === 3 ? <span style={{ fontSize: '22px' }}>🥉</span> : (
+                      <div style={{ width: '26px', height: '26px', borderRadius: '50%', backgroundColor: '#2D2D2D', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', color: '#555' }}>{rank}</div>
+                    )}
+                  </td>
+                  <td style={{ padding: '14px 16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '50%', backgroundColor: '#2D2D2D', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', color: '#C9A96E', flexShrink: 0 }}>
+                        {agent.full_name?.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '14px', fontWeight: '600', color: '#FFFFFF' }}>{agent.full_name}</span>
+                          {isMe && <span style={{ fontSize: '10px', fontWeight: '700', backgroundColor: '#C9A96E', color: '#1A1A1A', padding: '1px 6px', borderRadius: '10px' }}>YOU</span>}
+                        </div>
+                        <div style={{ height: '4px', backgroundColor: '#2D2D2D', borderRadius: '2px', overflow: 'hidden', marginTop: '4px', width: '80px' }}>
+                          <div style={{ height: '100%', width: `${progress}%`, backgroundColor: rank === 1 ? '#FFD700' : rank === 2 ? '#C0C0C0' : rank === 3 ? '#CD7F32' : '#C9A96E', borderRadius: '2px' }} />
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ padding: '14px 16px', textAlign: 'right' }}>
+                    <span style={{ fontSize: '16px', fontWeight: '800', color: '#C9A96E' }}>${agent.alltimePremium.toLocaleString()}</span>
+                  </td>
+                  <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                    <span style={{ fontSize: '14px', fontWeight: '600', color: '#7A7A7A' }}>{agent.totalPolicies}</span>
+                  </td>
+                  {isAdmin && (
+                    <td style={{ padding: '14px 16px', textAlign: 'right' }}>
+                      <a href={`/agents/${agent.id}`} style={{ fontSize: '12px', color: '#C9A96E', fontWeight: '600', textDecoration: 'none' }}>View →</a>
+                    </td>
+                  )}
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+
       {/* Leaderboard Table */}
       <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', overflow: 'hidden' }}>
         <div style={{ padding: '18px 24px', borderBottom: '1px solid #E5E1DA', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -163,7 +222,7 @@ export default function LeaderboardPage() {
             {leaderboard.map((agent, i) => {
               const isMe = agent.id === myAgentId
               const barWidth = topPremium > 0 ? Math.round((agent.mtdPremium / topPremium) * 100) : 0
-              const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : null
+              const rank = i + 1
 
               return (
                 <tr
@@ -175,12 +234,8 @@ export default function LeaderboardPage() {
                 >
                   <td style={{ padding: '14px 16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      {medal ? (
-                        <span style={{ fontSize: '20px' }}>{medal}</span>
-                      ) : (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '26px', height: '26px', borderRadius: '50%', fontSize: '12px', fontWeight: '700', backgroundColor: '#F0EDE8', color: '#7A7A7A' }}>
-                          {i + 1}
-                        </span>
+                      {rank === 1 && agent.mtdPremium > 0 ? <span style={{ fontSize: '20px' }}>🥇</span> : rank === 2 && agent.mtdPremium > 0 ? <span style={{ fontSize: '20px' }}>🥈</span> : rank === 3 && agent.mtdPremium > 0 ? <span style={{ fontSize: '20px' }}>🥉</span> : (
+                        <div style={{ width: '26px', height: '26px', borderRadius: '50%', backgroundColor: '#F0EDE8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', color: '#7A7A7A' }}>{rank}</div>
                       )}
                     </div>
                   </td>
@@ -226,7 +281,7 @@ export default function LeaderboardPage() {
                   </td>
                   {isAdmin && (
                     <td style={{ padding: '14px 16px' }}>
-                      <Link href={`/crm/admin/agents/${agent.id}`} style={{ fontSize: '12px', color: '#C9A96E', textDecoration: 'none', fontWeight: '600', whiteSpace: 'nowrap' }}>
+                      <Link href={`/agents/${agent.id}`} style={{ fontSize: '12px', color: '#C9A96E', textDecoration: 'none', fontWeight: '600', whiteSpace: 'nowrap' }}>
                         View →
                       </Link>
                     </td>
