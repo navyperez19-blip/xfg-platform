@@ -142,40 +142,106 @@ export default function DashboardPage() {
           <button onClick={() => router.push('/search')} style={{ background: '#FFFFFF', border: '1px solid #DDD9D2', color: '#1A1814', padding: '0.6rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>Search Agents</button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
-          <div style={{ background: '#FFFFFF', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-            <p style={{ color: '#6B6966', fontSize: '0.8rem', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>Total Agents</p>
-            <p style={{ color: '#C9A96E', fontSize: '2.5rem', fontWeight: '700', lineHeight: 1 }}>{stats.total}</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+          <div>
+            <p style={{ fontSize: '11px', fontWeight: '700', color: '#C9A96E', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px 0' }}>XFG · Team Overview</p>
+            <p style={{ fontSize: '20px', fontWeight: '700', color: '#1A1A1A', margin: 0 }}>Agency Performance</p>
           </div>
-          <div style={{ background: '#FFFFFF', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-            <p style={{ color: '#6B6966', fontSize: '0.8rem', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>In Pipeline</p>
-            <p style={{ color: '#1A1814', fontSize: '2.5rem', fontWeight: '700', lineHeight: 1 }}>{stats.pipeline}</p>
-          </div>
-          <div style={{ background: '#FFFFFF', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-            <p style={{ color: '#6B6966', fontSize: '0.8rem', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>Active Agents</p>
-            <p style={{ color: '#2D6A4F', fontSize: '2.5rem', fontWeight: '700', lineHeight: 1 }}>{stats.active}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#1A1A1A', padding: '5px 12px', borderRadius: '20px' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#4ADE80' }} />
+            <span style={{ fontSize: '11px', fontWeight: '700', color: '#C9A96E', letterSpacing: '0.04em' }}>LIVE</span>
           </div>
         </div>
 
-        <div style={{ background: '#FFFFFF', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-          <p style={{ color: '#C9A96E', fontSize: '0.75rem', fontWeight: '600', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1rem' }}>Your Access Level</p>
-          {profile.role === 'finley' && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Create and manage agents</p>
-              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Track licensing progress</p>
-              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Schedule onboarding calls</p>
-              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Move agents through licensing</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
+          <div onClick={() => router.push('/pipeline')} style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', padding: '14px 16px', cursor: 'pointer' }}>
+            <p style={{ fontSize: '12px', color: '#8A8780', margin: '0 0 6px 0' }}>Active Agents</p>
+            <p style={{ fontSize: '24px', fontWeight: '700', color: '#1A1A1A', margin: '0 0 8px 0' }}>{stats.active}</p>
+            <div style={{ height: '4px', backgroundColor: '#F0EDE5', borderRadius: '2px', overflow: 'hidden' }}>
+              <div style={{ width: `${stats.total > 0 ? Math.min(100, (stats.active / stats.total) * 100) : 0}%`, height: '100%', backgroundColor: '#C9A96E' }} />
             </div>
-          )}
-          {['executive', 'superadmin'].includes(profile.role) && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Full access to all stages</p>
-              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Override any stage with audit log</p>
-              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Assign agent models</p>
-              <p style={{ color: '#1A1814', fontSize: '0.9rem' }}>✓ Executive analytics and reporting</p>
+          </div>
+          <div onClick={() => router.push('/analytics')} style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', padding: '14px 16px', cursor: 'pointer' }}>
+            <p style={{ fontSize: '12px', color: '#8A8780', margin: '0 0 6px 0' }}>Weekly AP</p>
+            <p style={{ fontSize: '24px', fontWeight: '700', color: '#1A1A1A', margin: '0 0 8px 0' }}>${weeklySales.totalAP.toLocaleString()}</p>
+            <div style={{ height: '4px', backgroundColor: '#F0EDE5', borderRadius: '2px', overflow: 'hidden' }}>
+              <div style={{ width: `${weeklySales.prevWeekAP > 0 ? Math.min(100, (weeklySales.totalAP / (weeklySales.prevWeekAP * 1.5)) * 100) : 50}%`, height: '100%', backgroundColor: weeklySales.totalAP >= weeklySales.prevWeekAP ? '#4ADE80' : '#E67E5A' }} />
             </div>
-          )}
+          </div>
+          <div onClick={() => router.push('/analytics')} style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', padding: '14px 16px', cursor: 'pointer' }}>
+            <p style={{ fontSize: '12px', color: '#8A8780', margin: '0 0 6px 0' }}>Policies Sold</p>
+            <p style={{ fontSize: '24px', fontWeight: '700', color: '#1A1A1A', margin: '0 0 8px 0' }}>{weeklySales.totalSales}</p>
+            <div style={{ height: '4px', backgroundColor: '#F0EDE5', borderRadius: '2px', overflow: 'hidden' }}>
+              <div style={{ width: '55%', height: '100%', backgroundColor: '#C9A96E' }} />
+            </div>
+          </div>
+          <div onClick={() => router.push('/pipeline')} style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', padding: '14px 16px', cursor: 'pointer' }}>
+            <p style={{ fontSize: '12px', color: '#8A8780', margin: '0 0 6px 0' }}>In Pipeline</p>
+            <p style={{ fontSize: '24px', fontWeight: '700', color: '#1A1A1A', margin: '0 0 8px 0' }}>{stats.pipeline}</p>
+            <div style={{ height: '4px', backgroundColor: '#F0EDE5', borderRadius: '2px', overflow: 'hidden' }}>
+              <div style={{ width: `${stats.total > 0 ? Math.min(100, (stats.pipeline / stats.total) * 100) : 0}%`, height: '100%', backgroundColor: '#4ADE80' }} />
+            </div>
+          </div>
         </div>
+
+        <p style={{ fontSize: '12px', fontWeight: '700', color: '#8A8780', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 10px 0' }}>Pipeline Flow</p>
+        <div onClick={() => router.push('/pipeline')} style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '26px', cursor: 'pointer' }}>
+          {[
+            { label: 'Contacted', count: stageStats.contacted, color: '#E6D5B0' },
+            { label: 'Licensing', count: stageStats.licensing, color: '#DCC28C' },
+            { label: 'Contracting', count: stageStats.contracting, color: '#C9A96E' },
+            { label: 'System Setup', count: stageStats.systemSetup, color: '#B8935A' },
+            { label: 'Active', count: stageStats.active, color: '#4ADE80' },
+          ].map(stage => {
+            const max = Math.max(stageStats.contacted, stageStats.licensing, stageStats.contracting, stageStats.systemSetup, stageStats.active, 1)
+            return (
+              <div key={stage.label} style={{ display: 'grid', gridTemplateColumns: '110px 1fr 36px', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '12px', color: '#52514E' }}>{stage.label}</span>
+                <div style={{ height: '10px', backgroundColor: '#F0EDE5', borderRadius: '5px', overflow: 'hidden' }}>
+                  <div style={{ width: `${(stage.count / max) * 100}%`, height: '100%', backgroundColor: stage.color, borderRadius: '5px' }} />
+                </div>
+                <span style={{ fontSize: '12px', color: '#1A1A1A', textAlign: 'right' as const }}>{stage.count}</span>
+              </div>
+            )
+          })}
+        </div>
+
+        {teamLeaderboard.length > 0 && (
+          <>
+            <p style={{ fontSize: '12px', fontWeight: '700', color: '#8A8780', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 10px 0' }}>Team Production This Week</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {teamLeaderboard.map((team, i) => {
+                const initials = team.leaderName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+                return (
+                  <div
+                    key={team.leaderId}
+                    onClick={() => router.push(`/agents/${team.leaderId}`)}
+                    style={{
+                      backgroundColor: i === 0 ? '#1A1A1A' : '#FFFFFF',
+                      borderRadius: '12px',
+                      padding: '12px 16px',
+                      display: 'grid',
+                      gridTemplateColumns: '20px 34px 1fr 80px',
+                      alignItems: 'center',
+                      gap: '12px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <span style={{ fontSize: '12px', fontWeight: '700', color: i === 0 ? '#C9A96E' : '#8A8780' }}>{i + 1}</span>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: i === 0 ? '#C9A96E' : '#F0EDE5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700', color: i === 0 ? '#1A1A1A' : '#52514E' }}>
+                      {initials}
+                    </div>
+                    <div>
+                      <p style={{ fontSize: '13px', fontWeight: '700', color: i === 0 ? '#FFFFFF' : '#1A1A1A', margin: 0 }}>{team.leaderName}'s Team</p>
+                      <p style={{ fontSize: '10px', color: '#8A8780', margin: '1px 0 0 0' }}>{team.memberCount} agent{team.memberCount !== 1 ? 's' : ''}</p>
+                    </div>
+                    <p style={{ fontSize: '14px', fontWeight: '700', color: i === 0 ? '#FFFFFF' : '#1A1A1A', margin: 0, textAlign: 'right' as const }}>${team.totalAP.toLocaleString()}</p>
+                  </div>
+                )
+              })}
+            </div>
+          </>
+        )}
       </div>
     </main>
   )
