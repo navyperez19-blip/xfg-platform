@@ -72,21 +72,29 @@ export default function DashboardPage() {
               memberCount: teamMemberNames.size,
               totalAP: Math.round(totalAP * 100) / 100,
             }
-          }).sort((a, b) => b.totalAP - a.totalAP).slice(0, 5)
+          })
 
           const unassignedSales = (salesRecords || []).filter(r => !allTeamMemberNames.has(r.agent_name))
-          const unassignedTotal = unassignedSales.reduce((sum, r) => sum + Number(r.amount), 0)
+          const unassignedByAgent: Record<string, number> = {}
+          unassignedSales.forEach(r => {
+            unassignedByAgent[r.agent_name] = (unassignedByAgent[r.agent_name] || 0) + Number(r.amount)
+          })
 
-          if (unassignedTotal > 0) {
+          const unassignedAgentRecords = allAgents.filter(a => Object.keys(unassignedByAgent).includes(a.full_name))
+
+          Object.entries(unassignedByAgent).forEach(([agentName, total]) => {
+            const matchingAgent = unassignedAgentRecords.find(a => a.full_name === agentName)
             teamsData.push({
-              leaderName: 'Unassigned',
-              leaderId: 'unassigned',
-              memberCount: new Set(unassignedSales.map(r => r.agent_name)).size,
-              totalAP: Math.round(unassignedTotal * 100) / 100,
+              leaderName: agentName,
+              leaderId: matchingAgent ? matchingAgent.id : 'unassigned',
+              memberCount: 1,
+              totalAP: Math.round(total * 100) / 100,
             })
-          }
+          })
 
-          setTeamLeaderboard(teamsData)
+          const sortedTeamsData = teamsData.sort((a, b) => b.totalAP - a.totalAP).slice(0, 5)
+
+          setTeamLeaderboard(sortedTeamsData)
         }
       }
 
