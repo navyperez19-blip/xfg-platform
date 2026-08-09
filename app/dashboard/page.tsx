@@ -15,11 +15,7 @@ export default function DashboardPage() {
   const [weeklySales, setWeeklySales] = useState<{ totalAP: number; totalSales: number; prevWeekAP: number }>({ totalAP: 0, totalSales: 0, prevWeekAP: 0 })
   const [teamLeaderboard, setTeamLeaderboard] = useState<any[]>([])
 
-  useEffect(() => {
-    const load = async () => {
-      const user = await getCurrentUser()
-      if (!user) { router.push('/login'); return }
-      setProfile(user)
+  const fetchDashboardData = async () => {
       const { data: agents } = await supabase.from('agents').select('current_stage')
       if (agents) {
         setStats({
@@ -124,8 +120,19 @@ export default function DashboardPage() {
         totalSales: (thisWeekSales || []).length,
         prevWeekAP: Math.round(prevWeekTotal * 100) / 100,
       })
+  }
+
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>
+    const init = async () => {
+      const user = await getCurrentUser()
+      if (!user) { router.push('/login'); return }
+      setProfile(user)
+      fetchDashboardData()
+      interval = setInterval(fetchDashboardData, 60000)
     }
-    load()
+    init()
+    return () => clearInterval(interval)
   }, [router])
 
   const handleLogout = async () => {
