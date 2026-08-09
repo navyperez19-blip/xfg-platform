@@ -53,6 +53,12 @@ export default function DashboardPage() {
             .select('agent_name, amount, sale_date')
             .gte('sale_date', weekAgoStr)
 
+          const allTeamMemberNames = new Set<string>()
+          leaders.forEach(leader => {
+            allTeamMemberNames.add(leader.full_name)
+            allAgents.filter(a => a.upline_agent_id === leader.id).forEach(a => allTeamMemberNames.add(a.full_name))
+          })
+
           const teamsData = leaders.map(leader => {
             const teamMemberNames = new Set([
               leader.full_name,
@@ -67,6 +73,18 @@ export default function DashboardPage() {
               totalAP: Math.round(totalAP * 100) / 100,
             }
           }).sort((a, b) => b.totalAP - a.totalAP).slice(0, 5)
+
+          const unassignedSales = (salesRecords || []).filter(r => !allTeamMemberNames.has(r.agent_name))
+          const unassignedTotal = unassignedSales.reduce((sum, r) => sum + Number(r.amount), 0)
+
+          if (unassignedTotal > 0) {
+            teamsData.push({
+              leaderName: 'Unassigned',
+              leaderId: 'unassigned',
+              memberCount: new Set(unassignedSales.map(r => r.agent_name)).size,
+              totalAP: Math.round(unassignedTotal * 100) / 100,
+            })
+          }
 
           setTeamLeaderboard(teamsData)
         }
@@ -215,7 +233,7 @@ export default function DashboardPage() {
                 return (
                   <div
                     key={team.leaderId}
-                    onClick={() => router.push(`/agents/${team.leaderId}`)}
+                    onClick={() => team.leaderId !== 'unassigned' && router.push(`/agents/${team.leaderId}`)}
                     style={{
                       backgroundColor: i === 0 ? '#1A1A1A' : '#FFFFFF',
                       borderRadius: '12px',
