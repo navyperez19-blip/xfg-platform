@@ -32,6 +32,7 @@ export default function CRMNav({
     { href: '/crm/alerts', label: 'Policy Alerts', icon: <AlertTriangle size={16} /> },
     { href: '/crm/contracting', label: 'My Contracting', icon: <FileCheck size={16} /> },
     { href: '/crm/profile', label: 'My Profile', icon: <User size={16} /> },
+    ...(agent.agent_model === 'superadmin' ? [{ href: '/crm/recruiting', label: 'Recruiting', icon: <UserPlus size={16} /> }] : []),
     ...(isAdmin ? [{ href: '/crm/admin', label: 'All Agents', icon: <Shield size={16} /> }] : []),
   ]
 
