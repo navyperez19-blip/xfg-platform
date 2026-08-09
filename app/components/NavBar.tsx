@@ -32,6 +32,7 @@ export default function NavBar() {
     { label: 'Search', path: '/search' },
     ...((['executive', 'superadmin'].includes(profile.role)) ? [{ label: 'Analytics', path: '/analytics' }] : []),
     ...((['finley', 'executive', 'superadmin'].includes(profile.role)) ? [{ label: '+ New Agent', path: '/agents/new' }] : []),
+    ...(profile.role === 'superadmin' ? [{ label: 'Recruiting', path: '/crm/recruiting' }] : []),
   ]
 
   return (
