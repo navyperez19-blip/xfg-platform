@@ -10,6 +10,10 @@ function normalizeCarrier(carrier: string): string {
   return carrier
 }
 
+const EXCLUDED_MESSAGE_IDS = new Set([
+  '1535416317077749790', // Finley Jarvis $7,200 Ethos - deal did not go through
+])
+
 const MANUAL_NAME_OVERRIDES: Record<string, string> = {
   'brandon_goff': 'Brandon Goff',
   'jslzr.': 'Jesus Salazar',
@@ -95,6 +99,7 @@ export async function GET(request: Request) {
       const rawUsername = msg.author.username as string
 
       if (rawUsername.toLowerCase() === 'mikeibraimi') continue
+      if (EXCLUDED_MESSAGE_IDS.has(msg.id)) continue
 
       // Skip replies (celebratory/hype responses), only process original top-level posts
       if (msg.message_reference) continue
