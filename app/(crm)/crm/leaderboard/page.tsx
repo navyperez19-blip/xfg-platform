@@ -188,7 +188,7 @@ export default function LeaderboardPage() {
                   </td>
                   {isAdmin && (
                     <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                      <a href={`/agents/${agent.id}`} style={{ fontSize: '12px', color: '#C9A96E', fontWeight: '600', textDecoration: 'none' }}>View →</a>
+                      <a href={`/crm/admin/agents/${agent.id}`} style={{ fontSize: '12px', color: '#C9A96E', fontWeight: '600', textDecoration: 'none' }}>View →</a>
                     </td>
                   )}
                 </tr>
@@ -281,7 +281,7 @@ export default function LeaderboardPage() {
                   </td>
                   {isAdmin && (
                     <td style={{ padding: '14px 16px' }}>
-                      <Link href={`/agents/${agent.id}`} style={{ fontSize: '12px', color: '#C9A96E', textDecoration: 'none', fontWeight: '600', whiteSpace: 'nowrap' }}>
+                      <Link href={`/crm/admin/agents/${agent.id}`} style={{ fontSize: '12px', color: '#C9A96E', textDecoration: 'none', fontWeight: '600', whiteSpace: 'nowrap' }}>
                         View →
                       </Link>
                     </td>

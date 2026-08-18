@@ -266,7 +266,7 @@ export default function AdminOverviewPage() {
                         </span>
                       </td>
                       <td style={{ padding: '14px 16px' }}>
-                        <Link href={`/agents/${agent.id}`} style={{ fontSize: '12px', color: '#C9A96E', textDecoration: 'none', fontWeight: '600', whiteSpace: 'nowrap' }}>
+                        <Link href={`/crm/admin/agents/${agent.id}`} style={{ fontSize: '12px', color: '#C9A96E', textDecoration: 'none', fontWeight: '600', whiteSpace: 'nowrap' }}>
                           View Details →
                         </Link>
                       </td>

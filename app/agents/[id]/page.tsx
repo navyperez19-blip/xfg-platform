@@ -307,14 +307,22 @@ export default function AgentDetailPage() {
               </button>
             </div>
           )}
-          {['superadmin', 'executive'].includes(currentUser?.role || '') && (
-            <button
-              onClick={() => setShowDeleteConfirm1(true)}
-              style={{ background: '#FFF5F5', border: '1px solid #8B2635', color: '#8B2635', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <a
+              href={`/crm/admin/agents/${agent?.id}`}
+              style={{ padding: '8px 16px', backgroundColor: '#F0EDE8', color: '#1A1A1A', border: '1px solid #E5E1DA', borderRadius: '8px', fontSize: '13px', fontWeight: '700', textDecoration: 'none', whiteSpace: 'nowrap' as const }}
             >
-              Delete Agent
-            </button>
-          )}
+              View Full CRM →
+            </a>
+            {['superadmin', 'executive'].includes(currentUser?.role || '') && (
+              <button
+                onClick={() => setShowDeleteConfirm1(true)}
+                style={{ background: '#FFF5F5', border: '1px solid #8B2635', color: '#8B2635', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}
+              >
+                Delete Agent
+              </button>
+            )}
+          </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 0.8fr', gap: isMobile ? '16px' : '24px' }}>
