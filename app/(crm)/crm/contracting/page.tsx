@@ -28,8 +28,6 @@ export default function ContractingPage() {
   const [saving, setSaving] = useState<string | null>(null)
   const [agentRecord, setAgentRecord] = useState<any>(null)
   const [carriers, setCarriers] = useState<Record<string, string>>({})
-  const [americoFormSubmitted, setAmericoFormSubmitted] = useState<boolean | null>(null)
-  const [aigFormSubmitted, setAigFormSubmitted] = useState(false)
   const [mutualOmahaLinkClicked, setMutualOmahaLinkClicked] = useState(false)
 
   useEffect(() => {
@@ -55,8 +53,6 @@ export default function ContractingPage() {
       }
       setAgentRecord(agent)
       setCarriers(agent.carriers ?? {})
-      setAmericoFormSubmitted(agent.americo_form_submitted ?? false)
-      setAigFormSubmitted((agent as any).aig_form_submitted ?? false)
       setLoading(false)
     }
     load()
@@ -74,8 +70,6 @@ export default function ContractingPage() {
         (payload) => {
           const updated = payload.new as any
           setCarriers(updated.carriers ?? {})
-          setAmericoFormSubmitted(updated.americo_form_submitted ?? false)
-          setAigFormSubmitted(updated.aig_form_submitted ?? false)
           setAgentRecord((prev: any) => ({ ...prev, ...updated }))
         }
       )
@@ -105,8 +99,6 @@ export default function ContractingPage() {
           .single()
         if (agent) {
           setCarriers(agent.carriers ?? {})
-          setAmericoFormSubmitted(agent.americo_form_submitted ?? false)
-          setAigFormSubmitted((agent as any).aig_form_submitted ?? false)
         }
       })
       .subscribe()
@@ -198,19 +190,6 @@ export default function ContractingPage() {
         </div>
       </div>
 
-      {/* Americo + AIG SureLC Info Banner */}
-      <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', padding: '16px 18px', marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-        <span style={{ fontSize: '18px', flexShrink: 0 }}>ℹ️</span>
-        <div>
-          <p style={{ fontSize: '13px', fontWeight: '700', color: '#1E40AF', marginBottom: '6px' }}>Americo & AIG (Core Bridge) — SureLC Contracting Info</p>
-          <p style={{ fontSize: '13px', color: '#1D4ED8', lineHeight: 1.7 }}>
-            Both <strong>Americo</strong> and <strong>AIG (Core Bridge)</strong> are contracted through the same SureLC link. Once you submit the hierarchy form for either carrier, <strong>Anna</strong> will email your XFG email with the SureLC link to complete your contracting. You will use that same link to contract with both carriers.
-          </p>
-          <p style={{ fontSize: '13px', color: '#1D4ED8', lineHeight: 1.7, marginTop: '6px' }}>
-            If you have any questions or need assistance, please contact <strong>Nick</strong>.
-          </p>
-        </div>
-      </div>
 
       {/* SureLC Multiple Accounts Banner */}
       <div style={{ backgroundColor: '#FFFBF0', border: '1px solid #F5D78E', borderRadius: '10px', padding: '16px 18px', marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
@@ -249,8 +228,6 @@ export default function ContractingPage() {
         {CARRIERS.map(carrier => {
           const currentStatus = carriers[carrier.name] || 'none'
           const config = STATUS_CONFIG[currentStatus as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.none
-          const isAmerico = carrier.name === 'Americo'
-          const isAIG = carrier.name === 'AIG (Core Bridge)'
           const isMutualOmaha = carrier.name === 'Mutual of Omaha'
 
           return (
@@ -272,44 +249,6 @@ export default function ContractingPage() {
                   </span>
 
                   <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                    {/* Americo special flow */}
-                    {isAmerico && americoFormSubmitted === false && (
-                      <a
-                        href="https://form.jotform.com/261608640967062"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={async () => {
-                          if (!agentRecord) return
-                          await supabase.from('agents').update({
-                            americo_form_submitted: true,
-                            americo_form_submitted_at: new Date().toISOString(),
-                            aig_form_submitted: true,
-                            aig_form_submitted_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString(),
-                          }).eq('id', agentRecord.id)
-                          setAmericoFormSubmitted(true)
-                          await updateCarrierStatus('Americo', 'submitted')
-                          await updateCarrierStatus('AIG (Core Bridge)', 'submitted')
-                        }}
-                        style={{ display: 'inline-block', padding: '6px 14px', backgroundColor: '#EDE9FE', color: '#5B21B6', border: '1px solid #C4B5FD', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', textDecoration: 'none', whiteSpace: 'nowrap' }}
-                      >
-                        Complete Americo Form →
-                      </a>
-                    )}
-
-                    {isAmerico && americoFormSubmitted === true && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#E8F5E9', border: '1px solid #A5D6A7', borderRadius: '6px' }}>
-                        <span style={{ fontSize: '12px', color: '#1B5E20', fontWeight: '600' }}>✓ Form Submitted</span>
-                      </div>
-                    )}
-
-                    {/* AIG - no separate form needed, covered by Americo form */}
-                    {isAIG && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '6px' }}>
-                        <span style={{ fontSize: '12px', color: '#1E40AF', fontWeight: '600' }}>ℹ️ Submit the Americo form above — it covers AIG contracting too</span>
-                      </div>
-                    )}
-
                     {/* Mutual of Omaha - direct SureLC link, no unlock needed */}
                     {isMutualOmaha && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -345,34 +284,6 @@ export default function ContractingPage() {
                       <p style={{ fontSize: '11px', color: '#7A7A7A', marginTop: '4px' }}>This link is for <strong>Mutual of Omaha only</strong> — do not use it for other carriers.</p>
                     )}
 
-                    {/* Americo reset */}
-                    {isAmerico && (americoFormSubmitted || currentStatus !== 'none') && (
-                      <button
-                        onClick={async () => {
-                          setSaving('Americo')
-                          const updatedCarriers = { ...carriers, Americo: 'none' }
-                          await supabase
-                            .from('agents')
-                            .update({
-                              carriers: updatedCarriers,
-                              americo_form_submitted: false,
-                              americo_form_submitted_at: null,
-                              americo_surelc_unlocked: false,
-                              americo_surelc_unlocked_at: null,
-                              updated_at: new Date().toISOString(),
-                            })
-                            .eq('id', agentRecord.id)
-                          setCarriers(updatedCarriers)
-                          setAmericoFormSubmitted(false)
-                          setSaving(null)
-                        }}
-                        disabled={saving === 'Americo'}
-                        style={{ padding: '6px 12px', backgroundColor: '#FFFFFF', color: '#AAA', border: '1px solid #E5E1DA', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}
-                      >
-                        Reset
-                      </button>
-                    )}
-
                     {/* Mutual of Omaha reset */}
                     {isMutualOmaha && currentStatus !== 'none' && (
                       <button
@@ -401,7 +312,7 @@ export default function ContractingPage() {
                     )}
 
                     {/* Standard carrier status buttons */}
-                    {!isAmerico && !isMutualOmaha && !isAIG && currentStatus === 'none' && (
+                    {!isMutualOmaha && currentStatus === 'none' && (
                       <button
                         onClick={() => updateCarrierStatus(carrier.name, 'submitted')}
                         disabled={saving === carrier.name}
@@ -410,7 +321,7 @@ export default function ContractingPage() {
                         Mark Submitted
                       </button>
                     )}
-                    {!isAmerico && !isMutualOmaha && !isAIG && currentStatus === 'submitted' && (
+                    {!isMutualOmaha && currentStatus === 'submitted' && (
                       <>
                         <button
                           onClick={() => updateCarrierStatus(carrier.name, 'active')}
@@ -428,7 +339,7 @@ export default function ContractingPage() {
                         </button>
                       </>
                     )}
-                    {!isAmerico && !isMutualOmaha && !isAIG && currentStatus === 'active' && (
+                    {!isMutualOmaha && currentStatus === 'active' && (
                       <button
                         onClick={() => updateCarrierStatus(carrier.name, 'none')}
                         disabled={saving === carrier.name}
@@ -445,31 +356,6 @@ export default function ContractingPage() {
         })}
       </div>
 
-      {/* Americo Next Steps Banner */}
-      {americoFormSubmitted && (
-        <div style={{ backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '10px', padding: '16px 18px', marginTop: '16px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-          <span style={{ fontSize: '20px', flexShrink: 0 }}>📧</span>
-          <div>
-            <p style={{ fontSize: '13px', fontWeight: '700', color: '#14532D', marginBottom: '4px' }}>Americo Form Submitted — Next Steps</p>
-            <p style={{ fontSize: '13px', color: '#166534', lineHeight: 1.7 }}>
-              Your Americo hierarchy form has been received. Keep an eye on your <strong>XFG email inbox</strong> for an email from <strong>Anna</strong> with instructions to begin your SureLC Americo contracting process. If you don't receive it within 24 hours, reach out to Nick.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* AIG Next Steps Banner */}
-      {aigFormSubmitted && (
-        <div style={{ backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '10px', padding: '16px 18px', marginTop: '16px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-          <span style={{ fontSize: '20px', flexShrink: 0 }}>📧</span>
-          <div>
-            <p style={{ fontSize: '13px', fontWeight: '700', color: '#14532D', marginBottom: '4px' }}>AIG (Core Bridge) Form Submitted — Next Steps</p>
-            <p style={{ fontSize: '13px', color: '#166534', lineHeight: 1.7 }}>
-              Your AIG hierarchy form has been received. Keep an eye on your <strong>XFG email inbox</strong> for an email from <strong>Anna</strong> with instructions to begin your SureLC AIG contracting process. If you don't receive it within 24 hours, reach out to Nick.
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* Progress bar */}
       <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E1DA', padding: '20px', marginTop: '20px' }}>
