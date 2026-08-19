@@ -216,21 +216,10 @@ export default function AgentPortalPage() {
                   Enter Production CRM →
                 </a>
                 <div style={{ background: '#242220', border: '1px solid #2E2C29', borderRadius: '10px', padding: '16px 18px', textAlign: 'left' }}>
-                  <p style={{ color: '#C9A96E', fontSize: '13px', fontWeight: '700', marginBottom: '4px' }}>🚀 New Agent Support Schedule</p>
+                  <p style={{ color: '#C9A96E', fontSize: '13px', fontWeight: '700', marginBottom: '4px' }}>🚀 Morning Meeting / Trainings</p>
                   <p style={{ color: '#9A9890', fontSize: '12px', marginBottom: '12px' }}>
-                    All meeting times are listed in <strong style={{ color: '#F59E0B' }}>PST</strong>.
+                    Join us every morning at <strong style={{ color: '#F59E0B' }}>8:30 AM CST</strong> for our Morning Meeting / Trainings — covering contracting, dialer and lead setup, scripts, and product training.
                   </p>
-
-                  <p style={{ color: '#9A9890', fontSize: '12px', marginBottom: '4px' }}>📅 Monday &amp; Friday</p>
-                  <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '2px' }}>📄 <strong>9:00 AM</strong> — Contracting With Carriers</p>
-                  <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '2px' }}>☎️ <strong>9:30 AM</strong> — Dialer &amp; Lead Setup</p>
-                  <p style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '12px' }}>📚 <strong>10:00 AM</strong> — Script, Product, E-App Training</p>
-
-                  <div style={{ backgroundColor: '#3A2E1A', border: '1px solid #C9A96E', borderRadius: '8px', padding: '10px 14px', marginBottom: '14px' }}>
-                    <p style={{ color: '#F5D9A0', fontSize: '12px', lineHeight: 1.6, margin: 0 }}>
-                      💡 Make sure to be there Monday and Friday so you can get your dialer set up and finish the rest of your contracting.
-                    </p>
-                  </div>
 
                   <div style={{ borderTop: '1px solid #2E2C29', paddingTop: '12px' }}>
                     <a
@@ -646,30 +635,19 @@ export default function AgentPortalPage() {
               <div style={{ background: '#F5F2ED', border: '1px solid #DDD9D2', borderRadius: '12px', padding: '18px 20px', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
                   <span style={{ fontSize: '20px' }}>📞</span>
-                  <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '700' }}>Dialer Setup — Contact Nick</p>
+                  <p style={{ color: '#1A1814', fontSize: '15px', fontWeight: '700' }}>Dialer Setup</p>
                 </div>
-                <p style={{ color: '#6B6966', fontSize: '13px', lineHeight: 1.6, marginBottom: '14px' }}>
-                  To get your dialer set up, contact Nick directly. He will walk you through the ReadyMode setup process.
+                <p style={{ color: '#6B6966', fontSize: '13px', lineHeight: 1.6 }}>
+                  The team will be in contact about getting your dialer set up — including access to free leads and the ability to generate your own exclusive leads to yourself via text, and more.
                 </p>
-                <a href="tel:9858691319" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#C9A96E', color: '#1A1814', padding: '10px 20px', borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: '700' }}>
-                  📱 Call Nick — (985) 869-1319
-                </a>
               </div>
 
-              {/* Meeting Schedule Card */}
+              {/* Morning Meeting Card */}
               <div style={{ backgroundColor: '#1A1A1A', borderRadius: '12px', padding: '20px 24px', marginTop: '16px' }}>
-                <p style={{ fontSize: '15px', fontWeight: '700', color: '#C9A96E', marginBottom: '10px' }}>🚀 Finish Your Contracting — Join Us Live</p>
+                <p style={{ fontSize: '15px', fontWeight: '700', color: '#C9A96E', marginBottom: '10px' }}>🚀 Morning Meeting / Trainings</p>
                 <p style={{ fontSize: '13px', color: '#FFFFFF', lineHeight: 1.6, marginBottom: '10px' }}>
-                  To finish setting up the rest of your carrier contracting, dialer, and leads, join us for New Agent Support on <strong>Monday or Friday</strong>.
+                  Join us every morning at <strong>8:30 AM CST</strong> for our Morning Meeting / Trainings — covering contracting, dialer and lead setup, scripts, and product training.
                 </p>
-                <p style={{ fontSize: '12px', color: '#F59E0B', fontWeight: '700', marginBottom: '14px' }}>
-                  ⏰ Please pay close attention to your time zone — all meeting times below are listed in Pacific Standard Time (PST).
-                </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '14px' }}>
-                  <p style={{ fontSize: '13px', color: '#FFFFFF', margin: 0 }}>📄 <strong>9:00 AM</strong> — Contracting With Carriers</p>
-                  <p style={{ fontSize: '13px', color: '#FFFFFF', margin: 0 }}>☎️ <strong>9:30 AM</strong> — Dialer &amp; Lead Setup</p>
-                  <p style={{ fontSize: '13px', color: '#FFFFFF', margin: 0 }}>📚 <strong>10:00 AM</strong> — Script, Product, E-App Training</p>
-                </div>
                 <a
                   href="https://us06web.zoom.us/j/6769900353?pwd=Y5Rs7E1Hj6KBgMkgP8m9VeL806AF7X.1"
                   target="_blank"
